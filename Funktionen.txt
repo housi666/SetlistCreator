@@ -1,0 +1,30 @@
+SetlistCreator · v0.2.0 · Build 2 · 17.11.2026 · Phase Pre-Alpha
+
+Stand: 17.11.2026 (v0.2.0) · Umgesetzt: [x] · Geplant: [ ]
+
+SONGBIBLIOTHEK
+[x] Song anlegen (Titel, Interpret, Tonart, Tempo, Dauer mm:ss, Notizen)
+[x] Song bearbeiten
+[x] Song löschen (entfernt ihn auch aus allen Setlisten)
+[ ] Songs suchen und filtern
+
+SETLISTBIBLIOTHEK
+[x] Setlist anlegen (Name, Datum)
+[x] Songs einer Setlist zuordnen
+[x] Reihenfolge ändern (↑ ↓)
+[x] Songs aus Setlist entfernen
+[x] Setlist löschen
+[x] Gesamtdauer anzeigen
+[ ] Setlist duplizieren (Alpha)
+[ ] Setlist exportieren (Format gemäss F4, Alpha)
+
+KONTO
+[ ] Login mit eigener E-Mail (getrennt von StageMate, gemäss F2)
+[ ] Eigene Bibliothek je Login (Alpha)
+[ ] Setlisten teilen (nur falls F5 mit Ja beantwortet)
+
+OBERFLÄCHE
+[x] Hell- und Dunkelmodus (folgt dem Systemmodus)
+[x] Mobile Ansicht (einspaltig bei schmaler Breite)
+[ ] Schrift Inter einbinden (aktuell Systemschrift als Ersatz)
+[ ] Akzentfarbe festlegen (F7; aktuell Platzhalter #7c9cff)

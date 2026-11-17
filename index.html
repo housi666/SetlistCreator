@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SetlistCreator · v0.2.0</title>
+<style>
+:root{--bg:#fafafb;--card:#ffffff;--text:#1b1c22;--muted:#6b6e7b;--line:#e4e4ea;--accent:#7c9cff;--danger:#d64545;--radius:12px}
+@media (prefers-color-scheme: dark){:root{--bg:#15161c;--card:#1e2028;--text:#eeeef2;--muted:#9a9db0;--line:#33353f;--accent:#9fb6ff}}
+*{box-sizing:border-box}
+body{margin:0;font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif;background:var(--bg);color:var(--text);font-weight:400}
+header{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;padding:14px 20px;border-bottom:1px solid var(--line)}
+h1{font-size:18px;margin:0;font-weight:700}
+h2{font-size:16px;margin:0 0 10px;font-weight:600}
+nav{display:flex;gap:6px}
+main{padding:20px;max-width:900px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:14px;margin-bottom:12px}
+input,select,textarea{font:inherit;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--text);width:100%;min-width:0}
+textarea{min-height:60px;resize:vertical}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.grid2 .full{grid-column:1 / -1}
+@media (max-width:560px){.grid2{grid-template-columns:1fr}}
+button{font:inherit;cursor:pointer;border-radius:8px;padding:7px 12px;border:1px solid var(--line);background:none;color:var(--text)}
+button.primary{background:var(--accent);color:#111;border-color:var(--accent);font-weight:600}
+button.tab{border:0;color:var(--muted)}
+button.tab.active{color:var(--accent);font-weight:600}
+button.danger{color:var(--danger)}
+button.sel{border-color:var(--accent);color:var(--accent)}
+.muted{color:var(--muted);font-size:13px}
+.song-meta{color:var(--muted);font-size:13px;margin-top:2px}
+ol{padding-left:0;list-style:none;margin:0}
+ol li{padding:8px 0;border-bottom:1px solid var(--line)}
+ol li:last-child{border-bottom:0}
+footer{padding:14px 20px;color:var(--muted);font-size:12px;text-align:center}
+</style>
+</head>
+<body>
+<header>
+  <h1>SetlistCreator</h1>
+  <nav>
+    <button class="tab active" data-view="songs">Songs</button>
+    <button class="tab" data-view="setlists">Setlisten</button>
+  </nav>
+</header>
+<main id="app"></main>
+<footer>SetlistCreator v0.2.0 · Build 2 · 17.11.2026 · Pre-Alpha · Daten lokal im Browser gespeichert (Login folgt nach Klärung F2)</footer>
+
+<script>
+const KEY = 'setlistcreator.v1';
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+
+function load(){
+  try {
+    const d = JSON.parse(localStorage.getItem(KEY));
+    if (d && Array.isArray(d.songs) && Array.isArray(d.setlists)) return d;
+  } catch (e) {}
+  return { songs: [], setlists: [] };
+}
+let state = load();
+function save(){ localStorage.setItem(KEY, JSON.stringify(state)); }
+
+let view = 'songs';
+let editSongId = null;
+let activeSetId = null;
+
+function toSeconds(t){
+  const m = /^(\d{1,3}):([0-5]\d)$/.exec(String(t || '').trim());
+  return m ? parseInt(m[1]) * 60 + parseInt(m[2]) : 0;
+}
+function fmt(sec){
+  const m = Math.floor(sec / 60), s = sec % 60;
+  return m + ':' + String(s).padStart(2, '0');
+}
+function totalDuration(ids){
+  const sum = ids.reduce((acc, id) => {
+    const s = state.songs.find(x => x.id === id);
+    return acc + (s ? toSeconds(s.duration) : 0);
+  }, 0);
+  return fmt(sum);
+}
+
+function renderSongs(){
+  const e = editSongId ? state.songs.find(s => s.id === editSongId) : null;
+  const v = e || {};
+  const list = state.songs.length
+    ? state.songs.map(s => `
+      <div class="card row">
+        <div style="flex:1;min-width:160px">
+          <strong>${esc(s.title)}</strong>
+          <div class="song-meta">${esc([s.artist, s.key, s.bpm ? s.bpm + ' BPM' : '', s.duration].filter(Boolean).join(' · ')) || '-'}</div>
+        </div>
+        <button data-edit="${s.id}">Bearbeiten</button>
+        <button class="danger" data-del="${s.id}">Löschen</button>
+      </div>`).join('')
+    : '<p class="muted">Noch keine Songs.</p>';
+  return `
+    <section class="card">
+      <h2>${e ? 'Song bearbeiten' : 'Neuer Song'}</h2>
+      <form id="songForm" class="grid2">
+        <input name="title" placeholder="Titel *" required value="${esc(v.title)}">
+        <input name="artist" placeholder="Interpret" value="${esc(v.artist)}">
+        <input name="key" placeholder="Tonart" value="${esc(v.key)}">
+        <input name="bpm" type="number" min="0" placeholder="Tempo (BPM)" value="${esc(v.bpm)}">
+        <input name="duration" placeholder="Dauer (mm:ss)" pattern="\\d{1,3}:[0-5]\\d" value="${esc(v.duration)}">
+        <div></div>
+        <textarea class="full" name="notes" placeholder="Notizen">${esc(v.notes)}</textarea>
+        <div class="row full">
+          <button class="primary" type="submit">${e ? 'Speichern' : 'Hinzufügen'}</button>
+          ${e ? '<button type="button" id="cancelEdit">Abbrechen</button>' : ''}
+        </div>
+      </form>
+    </section>
+    <h2>Songbibliothek (${state.songs.length})</h2>
+    ${list}`;
+}
+
+function renderSetlists(){
+  const cur = state.setlists.find(s => s.id === activeSetId);
+  const tabs = state.setlists.length
+    ? state.setlists.map(s => `<button class="${s.id === activeSetId ? 'sel' : ''}" data-open="${s.id}">${esc(s.name)}</button>`).join('')
+    : '<span class="muted">Noch keine Setlist.</span>';
+  let html = `
+    <section class="card">
+      <h2>Neue Setlist</h2>
+      <form id="setForm" class="row">
+        <input name="name" placeholder="Name *" required style="flex:2;min-width:180px">
+        <input name="date" type="date" style="flex:1;min-width:140px">
+        <button class="primary" type="submit">Erstellen</button>
+      </form>
+    </section>
+    <div class="row" style="margin-bottom:12px">${tabs}</div>`;
+
+  if (cur) {
+    const items = cur.songIds.map((id, i) => {
+      const s = state.songs.find(x => x.id === id);
+      return `<li class="row">
+        <span style="flex:1;min-width:160px">${i + 1}. ${s ? esc(s.title) : '(gelöschter Song)'}</span>
+        <button data-up="${i}" ${i === 0 ? 'disabled' : ''}>↑</button>
+        <button data-down="${i}" ${i === cur.songIds.length - 1 ? 'disabled' : ''}>↓</button>
+        <button class="danger" data-rm="${i}">Entfernen</button>
+      </li>`;
+    }).join('') || '<li class="muted">Noch keine Songs in dieser Setlist.</li>';
+
+    const available = state.songs.filter(s => !cur.songIds.includes(s.id));
+    html += `
+      <section class="card">
+        <div class="row" style="margin-bottom:10px">
+          <h2 style="flex:1;margin:0">${esc(cur.name)}</h2>
+          <span class="muted">${esc(cur.date || 'ohne Datum')} · Gesamtdauer ${totalDuration(cur.songIds)}</span>
+        </div>
+        <ol>${items}</ol>
+        <div class="row" style="margin-top:12px">
+          <select id="addSong" style="flex:1;min-width:160px">
+            <option value="">Song hinzufügen…</option>
+            ${available.map(s => `<option value="${s.id}">${esc(s.title)}</option>`).join('')}
+          </select>
+          <button class="primary" id="addBtn">Hinzufügen</button>
+        </div>
+        <div class="row" style="margin-top:14px;justify-content:flex-end">
+          <button class="danger" data-delset="${cur.id}">Setlist löschen</button>
+        </div>
+      </section>`;
+  }
+  return html;
+}
+
+function render(){
+  document.querySelectorAll('.tab').forEach(b => b.classList.toggle('active', b.dataset.view === view));
+  $('#app').innerHTML = view === 'songs' ? renderSongs() : renderSetlists();
+}
+
+document.addEventListener('click', e => {
+  const tab = e.target.closest('.tab');
+  if (tab) { view = tab.dataset.view; editSongId = null; render(); return; }
+
+  const b = e.target.closest('button');
+  if (!b) return;
+  if (b.id === 'cancelEdit') { editSongId = null; render(); return; }
+  if (b.id === 'addBtn') {
+    const sel = $('#addSong');
+    const cur = state.setlists.find(s => s.id === activeSetId);
+    if (cur && sel && sel.value) { cur.songIds.push(sel.value); save(); render(); }
+    return;
+  }
+  if (b.dataset.edit) { editSongId = b.dataset.edit; render(); window.scrollTo(0, 0); return; }
+  if (b.dataset.del) {
+    if (!confirm('Song löschen? Er wird auch aus allen Setlisten entfernt.')) return;
+    const id = b.dataset.del;
+    state.songs = state.songs.filter(s => s.id !== id);
+    state.setlists.forEach(s => s.songIds = s.songIds.filter(x => x !== id));
+    if (editSongId === id) editSongId = null;
+    save(); render(); return;
+  }
+  if (b.dataset.open) { activeSetId = b.dataset.open; render(); return; }
+  if (b.dataset.delset) {
+    if (!confirm('Setlist löschen?')) return;
+    state.setlists = state.setlists.filter(s => s.id !== b.dataset.delset);
+    activeSetId = null; save(); render(); return;
+  }
+  const cur = state.setlists.find(s => s.id === activeSetId);
+  if (!cur) return;
+  const move = (i, d) => {
+    const j = i + d;
+    if (j < 0 || j >= cur.songIds.length) return;
+    [cur.songIds[i], cur.songIds[j]] = [cur.songIds[j], cur.songIds[i]];
+    save(); render();
+  };
+  if (b.dataset.up !== undefined) return move(+b.dataset.up, -1);
+  if (b.dataset.down !== undefined) return move(+b.dataset.down, 1);
+  if (b.dataset.rm !== undefined) {
+    cur.songIds.splice(+b.dataset.rm, 1); save(); render(); return;
+  }
+});
+
+document.addEventListener('submit', e => {
+  e.preventDefault();
+  const f = e.target;
+  const d = Object.fromEntries(new FormData(f));
+  if (f.id === 'songForm') {
+    const song = {
+      title: d.title.trim(),
+      artist: (d.artist || '').trim(),
+      key: (d.key || '').trim(),
+      bpm: d.bpm ? parseInt(d.bpm, 10) : '',
+      duration: (d.duration || '').trim(),
+      notes: (d.notes || '').trim()
+    };
+    if (!song.title) return;
+    if (editSongId) {
+      Object.assign(state.songs.find(s => s.id === editSongId), song);
+      editSongId = null;
+    } else {
+      state.songs.push({ id: uid(), ...song });
+    }
+    save(); render();
+  }
+  if (f.id === 'setForm') {
+    if (!d.name.trim()) return;
+    const s = { id: uid(), name: d.name.trim(), date: d.date || '', songIds: [] };
+    state.setlists.push(s);
+    activeSetId = s.id;
+    save(); render();
+  }
+});
+
+render();
+</script>
+</body>
+</html>

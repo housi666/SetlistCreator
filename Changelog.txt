@@ -1,0 +1,17 @@
+SetlistCreator · v0.2.0 · Build 2 · 17.11.2026 · Phase Pre-Alpha
+
+Changelog · SetlistCreator
+Neueste Version zuerst. Zeiten = Schweizer Zeit
+
+** PRE-ALPHA **
+
+v0.2.0 · Build 2 · 17.11.2026 17:20
+- Songbibliothek: Songs anlegen, bearbeiten, löschen (Titel, Interpret, Tonart, Tempo, Dauer, Notizen)
+- Setlistbibliothek: Setlisten anlegen, Songs zuordnen, Reihenfolge ändern, Songs entfernen, Setlisten löschen
+- Gesamtdauer je Setlist
+- Speicherung lokal im Browser (Login folgt nach Klärung F2)
+- Ordnername „SetlistCreator“ statt „Housi-SetlistCreator“ auf Wunsch von Housi (Abweichung vom Regelwerk, Freigabe 17.11.2026)
+
+v0.1.0 · Build 1 · 17.11.2026 17:06
+- Projektgerüst angelegt: Ordner, RoadMap.txt, Funktionen.txt, Changelog.txt
+- Phase 0 (Projektgerüst), Implementierung erst nach Freigabe
