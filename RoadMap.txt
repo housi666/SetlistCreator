@@ -59,7 +59,7 @@ F3  Song-Felder: Vorschlag umgesetzt (Titel, Interpret, Tonart, Tempo, Dauer, No
 F4  Export-Format für Setlisten: Text, PDF, CSV? Offen (Alpha).
 F5  Teilen: Dürfen Logins Setlisten gegenseitig sehen? Offen.
 F6  Ordnername: auf Wunsch „SetlistCreator“ ohne „Housi-“-Präfix. Abweichung vom Regelwerk, begründet mit Wunsch von Housi.
-F7  Akzentfarbe: übernommen von StageMate (#e8a33d) auf Wunsch von Housi, Abweichung vom Regelwerk (dokumentiert). Erledigt.
+F7  Akzentfarbe: übernommen von StageMate (#e8a33d). Regelwerk angepasst: StageMate und SetlistCreator teilen ein Design. Erledigt.
 
 
 ZUKUNFT

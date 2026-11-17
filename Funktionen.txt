@@ -27,4 +27,4 @@ OBERFLÄCHE
 [x] Hell- und Dunkelmodus (folgt dem Systemmodus)
 [x] Mobile Ansicht (einspaltig bei schmaler Breite)
 [ ] Schrift Inter einbinden (aktuell Systemschrift als Ersatz)
-[ ] Akzentfarbe übernommen von StageMate (#e8a33d, Abweichung vom Regelwerk)
+[ ] Akzentfarbe wie StageMate (#e8a33d), gemeinsames Design laut Regelwerk
