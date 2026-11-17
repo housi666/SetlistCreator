@@ -1,4 +1,4 @@
-SetlistCreator · v0.2.0 · Build 2 · 17.11.2026 · Phase Pre-Alpha
+SetlistCreator · v0.2.1 · Build 3 · 17.11.2026 · Phase Pre-Alpha
 
 Legende: [x] erledigt, [ ] offen
 
@@ -59,7 +59,7 @@ F3  Song-Felder: Vorschlag umgesetzt (Titel, Interpret, Tonart, Tempo, Dauer, No
 F4  Export-Format für Setlisten: Text, PDF, CSV? Offen (Alpha).
 F5  Teilen: Dürfen Logins Setlisten gegenseitig sehen? Offen.
 F6  Ordnername: auf Wunsch „SetlistCreator“ ohne „Housi-“-Präfix. Abweichung vom Regelwerk, begründet mit Wunsch von Housi.
-F7  Akzentfarbe: Platzhalter #7c9cff, Entscheidung offen.
+F7  Akzentfarbe: Platzhalter #7c9cff (eigene Farbe, nicht StageMate-Bernstein), Entscheidung offen.
 
 
 ZUKUNFT

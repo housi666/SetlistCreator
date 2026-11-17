@@ -3,30 +3,36 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>SetlistCreator · v0.2.0</title>
+<title>SetlistCreator · v0.2.1</title>
 <style>
-:root{--bg:#fafafb;--card:#ffffff;--text:#1b1c22;--muted:#6b6e7b;--line:#e4e4ea;--accent:#7c9cff;--danger:#d64545;--radius:12px}
-@media (prefers-color-scheme: dark){:root{--bg:#15161c;--card:#1e2028;--text:#eeeef2;--muted:#9a9db0;--line:#33353f;--accent:#9fb6ff}}
+:root{--bg:#f5f5f7;--surface:#ffffff;--surface-2:#fafafb;--panel:#15161c;--panel-hover:#22242d;--panel-text:#c9cbd6;--text:#1b1c22;--muted:#6b6e7b;--line:#e4e4ea;--line-strong:#cfcfd8;--hover:#ebebf0;--accent:#7c9cff;--accent-text:#1b2a55;--danger:#c0392b;--radius:12px}
+@media (prefers-color-scheme: dark){:root{--bg:#0f1014;--surface:#1a1b22;--surface-2:#20222b;--panel:#0b0c10;--panel-hover:#1a1b22;--panel-text:#c9cbd6;--text:#e8e9ee;--muted:#9a9daa;--line:#2c2e38;--line-strong:#3a3d4a;--hover:#262833;--accent:#9fb6ff;--accent-text:#0b1431;--danger:#ff7a6b}}
 *{box-sizing:border-box}
-body{margin:0;font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif;background:var(--bg);color:var(--text);font-weight:400}
-header{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;padding:14px 20px;border-bottom:1px solid var(--line)}
-h1{font-size:18px;margin:0;font-weight:700}
+body{margin:0;font-family:"Inter",system-ui,-apple-system,"Segoe UI",sans-serif;background:var(--bg);color:var(--text);font-weight:400}
+header{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;padding:14px 20px;background:var(--panel);color:var(--panel-text)}
+h1{font-size:18px;margin:0;font-weight:700;color:#e8e9ee}
 h2{font-size:16px;margin:0 0 10px;font-weight:600}
 nav{display:flex;gap:6px}
 main{padding:20px;max-width:900px;margin:0 auto}
-.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:14px;margin-bottom:12px}
-input,select,textarea{font:inherit;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--text);width:100%;min-width:0}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:14px;margin-bottom:12px}
+input,select,textarea{font:inherit;padding:11px 13px;font-size:14px;border:1px solid var(--line);border-radius:9px;background:var(--surface);color:var(--text);width:100%;min-width:0}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--accent)}
 textarea{min-height:60px;resize:vertical}
 .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .grid2 .full{grid-column:1 / -1}
 @media (max-width:560px){.grid2{grid-template-columns:1fr}}
-button{font:inherit;cursor:pointer;border-radius:8px;padding:7px 12px;border:1px solid var(--line);background:none;color:var(--text)}
-button.primary{background:var(--accent);color:#111;border-color:var(--accent);font-weight:600}
-button.tab{border:0;color:var(--muted)}
-button.tab.active{color:var(--accent);font-weight:600}
+button{font:inherit;cursor:pointer;border-radius:999px;padding:7px 14px;font-size:13px;font-weight:500;border:1px solid var(--line-strong);background:var(--surface);color:var(--text)}
+button:hover{background:var(--hover)}
+button:disabled{opacity:.4;cursor:default}
+button.primary{background:var(--accent);color:var(--accent-text);border-color:var(--accent);font-weight:600;border-radius:10px;padding:10px 16px}
+button.tab{border:0;background:none;color:var(--panel-text);border-radius:8px;padding:8px 12px;font-size:14px;font-weight:600}
+button.tab:hover{background:var(--panel-hover)}
+button.tab.active{background:var(--panel-hover);color:var(--accent)}
 button.danger{color:var(--danger)}
 button.sel{border-color:var(--accent);color:var(--accent)}
+nav{display:flex;gap:4px}
+.tab-set{display:flex;background:var(--panel-hover);border-radius:10px;padding:4px}
 .muted{color:var(--muted);font-size:13px}
 .song-meta{color:var(--muted);font-size:13px;margin-top:2px}
 ol{padding-left:0;list-style:none;margin:0}
@@ -38,13 +44,13 @@ footer{padding:14px 20px;color:var(--muted);font-size:12px;text-align:center}
 <body>
 <header>
   <h1>SetlistCreator</h1>
-  <nav>
+  <nav class="tab-set">
     <button class="tab active" data-view="songs">Songs</button>
     <button class="tab" data-view="setlists">Setlisten</button>
   </nav>
 </header>
 <main id="app"></main>
-<footer>SetlistCreator v0.2.0 · Build 2 · 17.11.2026 · Pre-Alpha · Daten lokal im Browser gespeichert (Login folgt nach Klärung F2)</footer>
+<footer>SetlistCreator v0.2.1 · Build 3 · 17.11.2026 · Pre-Alpha · Daten lokal im Browser gespeichert (Login folgt nach Klärung F2)</footer>
 
 <script>
 const KEY = 'setlistcreator.v1';

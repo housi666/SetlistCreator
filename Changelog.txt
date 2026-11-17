@@ -1,9 +1,13 @@
-SetlistCreator · v0.2.0 · Build 2 · 17.11.2026 · Phase Pre-Alpha
+SetlistCreator · v0.2.1 · Build 3 · 17.11.2026 · Phase Pre-Alpha
 
 Changelog · SetlistCreator
 Neueste Version zuerst. Zeiten = Schweizer Zeit
 
 ** PRE-ALPHA **
+
+v0.2.1 · Build 3 · 17.11.2026 18:20
+- Designsprache von StageMate übernommen: Farben, Schrift Inter, Kartenradius, Pill-Buttons, dunkle Kopfleiste
+- Akzentfarbe bleibt eigener Platzhalter (F7), nicht StageMate-Bernstein
 
 v0.2.0 · Build 2 · 17.11.2026 17:20
 - Songbibliothek: Songs anlegen, bearbeiten, löschen (Titel, Interpret, Tonart, Tempo, Dauer, Notizen)
