@@ -55,16 +55,17 @@ Zukunft
 OFFEN
 
 F1  Abgrenzung: Web-App mit Songbibliothek und Setlistbibliothek. Mit der Freigabe als bestätigt angenommen.
-F2  Login: eigenes Firebase-Projekt, getrennt von housi-stagemate, oder anderer Anbieter? Offen, blockiert Login.
-F3  Song-Felder: Vorschlag umgesetzt (Titel, Interpret, Tonart, Tempo, Dauer, Notizen). Bestätigung offen.
-F4  Export-Format für Setlisten: Text, PDF, CSV? Offen (Alpha).
-F5  Teilen: Dürfen Logins Setlisten gegenseitig sehen? Offen.
+F2  Login: eigenes Firebase-Projekt (entschieden 18.11.2026). Offen: Firebase-Konfiguration von Housi.
+F3  Song-Felder (entschieden 18.11.2026): Titel, Interpret, Tonart (optional), BPM (optional), Dauer, Tempowechsel (Text), Notizen. In der Setlist: Titelnummer, Startzeit, Endzeit.
+F4  Export (entschieden 18.11.2026): Text, CSV, PDF (Alpha).
+F5  Teilen: wird in Zukunft definiert (siehe Zukunft).
 F6  Ordnername: auf Wunsch „SetlistCreator“ ohne „Housi-“-Präfix. Abweichung vom Regelwerk, begründet mit Wunsch von Housi.
 F7  Akzentfarbe: übernommen von StageMate (#e8a33d). Regelwerk angepasst: StageMate und SetlistCreator teilen ein Design. Erledigt.
 
 
 ZUKUNFT
 
+- Teilen von Setlisten zwischen Logins (F5, wird definiert)
 - Reaper-.rpp-Import für Songs (analog zu StageMate)
 - App-Icon im Stil des StageMate-Icons
 - Englische Oberfläche
