@@ -1,11 +1,11 @@
-SetlistCreator · v0.2.2 · Build 4 · 17.11.2026 · Phase Pre-Alpha
+SetlistCreator · v0.2.3 · Build 5 · 17.11.2026 · Phase Pre-Alpha
 
 Changelog · SetlistCreator
 Neueste Version zuerst. Zeiten = Schweizer Zeit
 
 ** PRE-ALPHA **
 
-v0.2.2 · Build 4 · 17.11.2026 18:20
+v0.2.3 · Build 5 · 17.11.2026 18:20
 - Designsprache von StageMate übernommen: Farben, Schrift Inter, Kartenradius, Pill-Buttons, dunkle Kopfleiste
 - Akzentfarbe bleibt eigener Platzhalter (F7), nicht StageMate-Bernstein
 
