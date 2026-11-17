@@ -1,4 +1,4 @@
-SetlistCreator · v0.2.1 · Build 3 · 17.11.2026 · Phase Pre-Alpha
+SetlistCreator · v0.2.2 · Build 4 · 17.11.2026 · Phase Pre-Alpha
 
 Stand: 17.11.2026 (v0.2.0) · Umgesetzt: [x] · Geplant: [ ]
 
@@ -27,4 +27,4 @@ OBERFLÄCHE
 [x] Hell- und Dunkelmodus (folgt dem Systemmodus)
 [x] Mobile Ansicht (einspaltig bei schmaler Breite)
 [ ] Schrift Inter einbinden (aktuell Systemschrift als Ersatz)
-[ ] Akzentfarbe festlegen (F7; aktuell Platzhalter #7c9cff)
+[ ] Akzentfarbe übernommen von StageMate (#e8a33d, Abweichung vom Regelwerk)
