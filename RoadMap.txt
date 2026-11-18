@@ -1,4 +1,4 @@
-SetlistCreator · v0.2.3 · Build 5 · 17.11.2026 · Phase Pre-Alpha
+SetlistCreator · v0.3.0 · Build 6 · 18.11.2026 · Phase Alpha
 
 Legende: [x] erledigt, [ ] offen
 
@@ -12,11 +12,11 @@ Pre-Alpha – Songbibliothek und Setlistbibliothek (v0.2.0)
 [x] Songbibliothek: Songs anlegen, bearbeiten, löschen
 [x] Setlistbibliothek: Setlisten anlegen, Songs zuordnen, Reihenfolge ändern
 [x] Button „Aktualisieren“ (neueste Version ohne Zwischenspeicher laden)
-[ ] Eigenes Login, getrennt von StageMate (wartet auf F2)
+[ ] Eigenes Login (Firebase, F2: Konfiguration fehlt noch)
 
 Alpha
-[ ] Setlisten duplizieren
-[ ] Setlist-Export (Format gemäss F4)
+[x] Setlisten duplizieren
+[x] Setlist-Export TXT, CSV, PDF (F4)
 [ ] Eigene Bibliothek je Login (Mehrnutzer)
 
 Beta ab 0.7.0

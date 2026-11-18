@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>SetlistCreator · v0.2.3</title>
+<title>SetlistCreator · v0.3.0</title>
 <style>
 :root{--bg:#f5f5f7;--surface:#ffffff;--surface-2:#fafafb;--panel:#15161c;--panel-hover:#22242d;--panel-text:#c9cbd6;--text:#1b1c22;--muted:#6b6e7b;--line:#e4e4ea;--line-strong:#cfcfd8;--hover:#ebebf0;--accent:#e8a33d;--accent-text:#1b1c22;--danger:#c0392b;--radius:12px}
 @media (prefers-color-scheme: dark){:root{--bg:#0f1014;--surface:#1a1b22;--surface-2:#20222b;--panel:#0b0c10;--panel-hover:#1a1b22;--panel-text:#c9cbd6;--text:#e8e9ee;--muted:#9a9daa;--line:#2c2e38;--line-strong:#3a3d4a;--hover:#262833;--accent:#e8a33d;--accent-text:#1b1c22;--danger:#ff7a6b}}
@@ -12,34 +12,36 @@ body{margin:0;font-family:"Inter",system-ui,-apple-system,"Segoe UI",sans-serif;
 header{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;padding:14px 20px;background:var(--panel);color:var(--panel-text)}
 h1{font-size:18px;margin:0;font-weight:700;color:#e8e9ee}
 h2{font-size:16px;margin:0 0 10px;font-weight:600}
-nav{display:flex;gap:6px}
 main{padding:20px;max-width:900px;margin:0 auto}
 .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:14px;margin-bottom:12px}
 input,select,textarea{font:inherit;padding:11px 13px;font-size:14px;border:1px solid var(--line);border-radius:9px;background:var(--surface);color:var(--text);width:100%;min-width:0}
 input:focus,select:focus,textarea:focus{outline:none;border-color:var(--accent)}
+input[type=time]{width:auto;padding:8px 10px}
 textarea{min-height:60px;resize:vertical}
+details{border:1px solid var(--line);border-radius:9px;padding:8px 12px}
+summary{cursor:pointer;color:var(--muted);font-size:13px;font-weight:600}
 .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .grid2 .full{grid-column:1 / -1}
 @media (max-width:560px){.grid2{grid-template-columns:1fr}}
 button{font:inherit;cursor:pointer;border-radius:999px;padding:7px 14px;font-size:13px;font-weight:500;border:1px solid var(--line-strong);background:var(--surface);color:var(--text)}
 button:hover{background:var(--hover)}
-#reloadBtn{background:none;color:var(--panel-text);border-color:var(--panel-hover);padding:6px 12px;font-size:13px}
-#reloadBtn:hover{background:var(--panel-hover)}
 button:disabled{opacity:.4;cursor:default}
+#reloadBtn{background:none;color:var(--panel-text);border-color:var(--panel-hover);padding:6px 12px}
+#reloadBtn:hover{background:var(--panel-hover)}
 button.primary{background:var(--accent);color:var(--accent-text);border-color:var(--accent);font-weight:600;border-radius:10px;padding:10px 16px}
 button.tab{border:0;background:none;color:var(--panel-text);border-radius:8px;padding:8px 12px;font-size:14px;font-weight:600}
 button.tab:hover{background:var(--panel-hover)}
 button.tab.active{background:var(--panel-hover);color:var(--accent)}
 button.danger{color:var(--danger)}
 button.sel{border-color:var(--accent);color:var(--accent)}
-nav{display:flex;gap:4px}
-.tab-set{display:flex;background:var(--panel-hover);border-radius:10px;padding:4px}
+.tab-set{display:flex;gap:4px;background:var(--panel-hover);border-radius:10px;padding:4px}
 .muted{color:var(--muted);font-size:13px}
 .song-meta{color:var(--muted);font-size:13px;margin-top:2px}
 ol{padding-left:0;list-style:none;margin:0}
-ol li{padding:8px 0;border-bottom:1px solid var(--line)}
+ol li{padding:10px 0;border-bottom:1px solid var(--line)}
 ol li:last-child{border-bottom:0}
+.time-cell{font-size:13px;color:var(--muted);min-width:120px}
 footer{padding:14px 20px;color:var(--muted);font-size:12px;text-align:center}
 </style>
 </head>
@@ -53,7 +55,7 @@ footer{padding:14px 20px;color:var(--muted);font-size:12px;text-align:center}
   </nav></div>
 </header>
 <main id="app"></main>
-<footer>SetlistCreator v0.2.3 · Build 5 · 17.11.2026 · Pre-Alpha · Daten lokal im Browser gespeichert (Login folgt nach Klärung F2)</footer>
+<footer>SetlistCreator v0.3.0 · Build 6 · 18.11.2026 · Alpha · Daten lokal im Browser gespeichert (Login folgt nach Firebase-Konfiguration, F2)</footer>
 
 <script>
 const KEY = 'setlistcreator.v1';
@@ -61,10 +63,20 @@ const $ = s => document.querySelector(s);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
 
+function migrate(d){
+  d.setlists.forEach(s => {
+    if (!Array.isArray(s.entries)) {
+      s.entries = (s.songIds || []).map(id => ({ id, start: '' }));
+      delete s.songIds;
+    }
+    s.entries = s.entries.filter(e => e && e.id);
+  });
+  return d;
+}
 function load(){
   try {
     const d = JSON.parse(localStorage.getItem(KEY));
-    if (d && Array.isArray(d.songs) && Array.isArray(d.setlists)) return d;
+    if (d && Array.isArray(d.songs) && Array.isArray(d.setlists)) return migrate(d);
   } catch (e) {}
   return { songs: [], setlists: [] };
 }
@@ -75,31 +87,56 @@ let view = 'songs';
 let editSongId = null;
 let activeSetId = null;
 
+// ---- Zeit-Helfer ----
 function toSeconds(t){
   const m = /^(\d{1,3}):([0-5]\d)$/.exec(String(t || '').trim());
   return m ? parseInt(m[1]) * 60 + parseInt(m[2]) : 0;
 }
-function fmt(sec){
-  const m = Math.floor(sec / 60), s = sec % 60;
-  return m + ':' + String(s).padStart(2, '0');
+function fmt(sec){ return Math.floor(sec / 60) + ':' + String(sec % 60).padStart(2, '0'); }
+function toMin(t){
+  const m = /^(\d{1,2}):(\d{2})$/.exec(String(t || ''));
+  return m ? (+m[1]) * 60 + (+m[2]) : null;
 }
-function totalDuration(ids){
-  const sum = ids.reduce((acc, id) => {
-    const s = state.songs.find(x => x.id === id);
+function hhmm(n){
+  n = ((n % 1440) + 1440) % 1440;
+  return String(Math.floor(n / 60)).padStart(2, '0') + ':' + String(n % 60).padStart(2, '0');
+}
+function totalOf(set){
+  return fmt(set.entries.reduce((acc, e) => {
+    const s = state.songs.find(x => x.id === e.id);
     return acc + (s ? toSeconds(s.duration) : 0);
-  }, 0);
-  return fmt(sum);
+  }, 0));
+}
+// Startzeit: manuell gesetzt = gilt; leer = automatisch aus Vorgänger (Start + Dauer)
+function schedule(set){
+  let cur = null;
+  return set.entries.map(e => {
+    const song = state.songs.find(s => s.id === e.id) || null;
+    const sm = toMin(e.start);
+    let start = sm === null ? null : sm * 60;
+    let auto = false;
+    if (start === null && cur !== null) { start = cur; auto = true; }
+    let end = null;
+    if (start !== null) {
+      end = start + (song ? toSeconds(song.duration) : 0);
+      cur = end;
+    }
+    const hm = s => hhmm(Math.floor(s / 60));
+    return { entry: e, song, start: start === null ? "" : hm(start), end: end === null ? "" : hm(end), auto };
+  });
 }
 
+// ---- Songs ----
 function renderSongs(){
   const e = editSongId ? state.songs.find(s => s.id === editSongId) : null;
   const v = e || {};
+  const hasExtra = e && (e.key || e.bpm || e.tempo || e.notes);
   const list = state.songs.length
     ? state.songs.map(s => `
       <div class="card row">
         <div style="flex:1;min-width:160px">
           <strong>${esc(s.title)}</strong>
-          <div class="song-meta">${esc([s.artist, s.key, s.bpm ? s.bpm + ' BPM' : '', s.duration].filter(Boolean).join(' · ')) || '-'}</div>
+          <div class="song-meta">${esc([s.artist, s.key, s.bpm ? s.bpm + ' BPM' : '', s.duration].filter(Boolean).join(' · ')) || '–'}</div>
         </div>
         <button data-edit="${s.id}">Bearbeiten</button>
         <button class="danger" data-del="${s.id}">Löschen</button>
@@ -109,13 +146,18 @@ function renderSongs(){
     <section class="card">
       <h2>${e ? 'Song bearbeiten' : 'Neuer Song'}</h2>
       <form id="songForm" class="grid2">
-        <input name="title" placeholder="Titel *" required value="${esc(v.title)}">
+        <input class="full" name="title" placeholder="Titel *" required value="${esc(v.title)}">
         <input name="artist" placeholder="Interpret" value="${esc(v.artist)}">
-        <input name="key" placeholder="Tonart" value="${esc(v.key)}">
-        <input name="bpm" type="number" min="0" placeholder="Tempo (BPM)" value="${esc(v.bpm)}">
         <input name="duration" placeholder="Dauer (mm:ss)" pattern="\\d{1,3}:[0-5]\\d" value="${esc(v.duration)}">
-        <div></div>
-        <textarea class="full" name="notes" placeholder="Notizen">${esc(v.notes)}</textarea>
+        <details class="full" ${hasExtra ? 'open' : ''}>
+          <summary>Weitere Angaben (optional)</summary>
+          <div class="grid2" style="margin-top:10px">
+            <input name="key" placeholder="Tonart" value="${esc(v.key)}">
+            <input name="bpm" type="number" min="0" placeholder="Tempo (BPM)" value="${esc(v.bpm)}">
+            <textarea class="full" name="tempo" placeholder="Tempowechsel, z. B. ab 2:10 auf 140 BPM">${esc(v.tempo)}</textarea>
+            <textarea class="full" name="notes" placeholder="Notizen">${esc(v.notes)}</textarea>
+          </div>
+        </details>
         <div class="row full">
           <button class="primary" type="submit">${e ? 'Speichern' : 'Hinzufügen'}</button>
           ${e ? '<button type="button" id="cancelEdit">Abbrechen</button>' : ''}
@@ -126,6 +168,7 @@ function renderSongs(){
     ${list}`;
 }
 
+// ---- Setlisten ----
 function renderSetlists(){
   const cur = state.setlists.find(s => s.id === activeSetId);
   const tabs = state.setlists.length
@@ -143,22 +186,39 @@ function renderSetlists(){
     <div class="row" style="margin-bottom:12px">${tabs}</div>`;
 
   if (cur) {
-    const items = cur.songIds.map((id, i) => {
-      const s = state.songs.find(x => x.id === id);
+    const rows = schedule(cur);
+    const items = rows.map((r, i) => {
+      const s = r.song;
+      const meta = s ? [s.artist, s.key, s.bpm ? s.bpm + ' BPM' : '', s.duration].filter(Boolean).join(' · ') : '';
       return `<li class="row">
-        <span style="flex:1;min-width:160px">${i + 1}. ${s ? esc(s.title) : '(gelöschter Song)'}</span>
+        <span class="muted" style="width:22px">${i + 1}</span>
+        <div style="flex:1;min-width:150px">
+          <strong>${s ? esc(s.title) : '(gelöschter Song)'}</strong>
+          ${meta ? `<div class="song-meta">${esc(meta)}</div>` : ''}
+          ${s && s.tempo ? `<div class="song-meta">Tempo: ${esc(s.tempo)}</div>` : ''}
+        </div>
+        <div class="row" style="gap:6px">
+          <input type="time" data-start="${i}" value="${esc(r.entry.start)}" title="Startzeit (leer = automatisch)">
+          <span class="time-cell">${r.auto ? 'auto ' : ''}${r.start || '–'} → ${r.end || '–'}</span>
+        </div>
         <button data-up="${i}" ${i === 0 ? 'disabled' : ''}>↑</button>
-        <button data-down="${i}" ${i === cur.songIds.length - 1 ? 'disabled' : ''}>↓</button>
+        <button data-down="${i}" ${i === rows.length - 1 ? 'disabled' : ''}>↓</button>
         <button class="danger" data-rm="${i}">Entfernen</button>
       </li>`;
     }).join('') || '<li class="muted">Noch keine Songs in dieser Setlist.</li>';
 
-    const available = state.songs.filter(s => !cur.songIds.includes(s.id));
+    const available = state.songs.filter(s => !cur.entries.some(e => e.id === s.id));
     html += `
       <section class="card">
         <div class="row" style="margin-bottom:10px">
           <h2 style="flex:1;margin:0">${esc(cur.name)}</h2>
-          <span class="muted">${esc(cur.date || 'ohne Datum')} · Gesamtdauer ${totalDuration(cur.songIds)}</span>
+          <span class="muted">${esc(cur.date || 'ohne Datum')} · Gesamtdauer ${totalOf(cur)}</span>
+        </div>
+        <div class="row" style="margin-bottom:12px">
+          <button data-dup="${cur.id}">Duplizieren</button>
+          <button data-exp="txt">TXT</button>
+          <button data-exp="csv">CSV</button>
+          <button data-exp="pdf">PDF</button>
         </div>
         <ol>${items}</ol>
         <div class="row" style="margin-top:12px">
@@ -168,6 +228,7 @@ function renderSetlists(){
           </select>
           <button class="primary" id="addBtn">Hinzufügen</button>
         </div>
+        <p class="muted" style="margin:10px 0 0">Startzeit leer lassen: sie ergibt sich aus dem Vorgänger. Ein Wert überschreibt die Berechnung ab dieser Stelle.</p>
         <div class="row" style="margin-top:14px;justify-content:flex-end">
           <button class="danger" data-delset="${cur.id}">Setlist löschen</button>
         </div>
@@ -181,18 +242,69 @@ function render(){
   $('#app').innerHTML = view === 'songs' ? renderSongs() : renderSetlists();
 }
 
+// ---- Export ----
+function download(name, text, type){
+  const blob = new Blob([text], { type });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = name;
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+}
+function fileBase(name){
+  return (name || 'setlist').replace(/[^\p{L}\p{N}]+/gu, '_').replace(/^_+|_+$/g, '') || 'setlist';
+}
+function exportRows(set){
+  return schedule(set).map((r, i) => ({
+    nr: i + 1, start: r.start, end: r.end,
+    title: r.song ? r.song.title : '(gelöschter Song)',
+    artist: r.song?.artist || '', key: r.song?.key || '', bpm: r.song?.bpm || '',
+    dur: r.song?.duration || '', tempo: r.song?.tempo || '', notes: r.song?.notes || ''
+  }));
+}
+function exportSet(set, kind){
+  const rows = exportRows(set);
+  const total = totalOf(set);
+  if (kind === 'txt') {
+    const lines = [set.name + (set.date ? ' · ' + set.date : ''), 'Gesamtdauer ' + total, ''];
+    rows.forEach(r => {
+      lines.push(`${r.nr}. ${r.start ? r.start + ' ' : ''}${r.title}${r.artist ? ' – ' + r.artist : ''}${r.key ? ' · ' + r.key : ''}${r.bpm ? ' · ' + r.bpm + ' BPM' : ''}${r.dur ? ' · ' + r.dur : ''}`);
+      if (r.tempo) lines.push('     Tempo: ' + r.tempo);
+    });
+    download(fileBase(set.name) + '.txt', lines.join('\n'), 'text/plain;charset=utf-8');
+  }
+  if (kind === 'csv') {
+    const q = v => '"' + String(v ?? '').replace(/"/g, '""') + '"';
+    const cols = ['Nr', 'Start', 'Ende', 'Titel', 'Interpret', 'Tonart', 'BPM', 'Dauer', 'Tempowechsel', 'Notizen'];
+    const body = rows.map(r => [r.nr, r.start, r.end, r.title, r.artist, r.key, r.bpm, r.dur, r.tempo, r.notes].map(q).join(';'));
+    download(fileBase(set.name) + '.csv', '﻿' + [cols.map(q).join(';'), ...body].join('\r\n'), 'text/csv;charset=utf-8');
+  }
+  if (kind === 'pdf') {
+    const w = window.open('', '_blank');
+    if (!w) { alert('Pop-up blockiert. Bitte für diese Seite erlauben.'); return; }
+    const tr = rows.map(r => `<tr><td>${r.nr}</td><td>${esc(r.start)}</td><td>${esc(r.title)}</td><td>${esc(r.artist)}</td><td>${esc(r.key)}</td><td>${esc(r.bpm)}</td><td>${esc(r.dur)}</td><td>${esc([r.tempo, r.notes].filter(Boolean).join(' · '))}</td></tr>`).join('');
+    w.document.write(`<!DOCTYPE html><html lang="de"><head><meta charset="UTF-8"><title>${esc(set.name)}</title>
+<style>body{font-family:Inter,Arial,sans-serif;margin:24px;color:#1b1c22}h1{font-size:20px;margin:0 0 4px}.meta{color:#6b6e7b;font-size:12px;margin-bottom:14px}table{width:100%;border-collapse:collapse;font-size:12px}th,td{border-bottom:1px solid #e4e4ea;padding:6px 8px;text-align:left;vertical-align:top}th{color:#6b6e7b;font-weight:600}</style>
+</head><body><h1>${esc(set.name)}</h1><div class="meta">${esc(set.date || '')} · Gesamtdauer ${total}</div>
+<table><tr><th>Nr</th><th>Start</th><th>Titel</th><th>Interpret</th><th>Tonart</th><th>BPM</th><th>Dauer</th><th>Tempo / Notizen</th></tr>${tr}</table></body></html>`);
+    w.document.close();
+    setTimeout(() => w.print(), 300);
+  }
+}
+
+// ---- Events ----
 document.addEventListener('click', e => {
   const tab = e.target.closest('.tab');
   if (tab) { view = tab.dataset.view; editSongId = null; render(); return; }
 
   const b = e.target.closest('button');
   if (!b) return;
-  if (b.id === "cancelEdit") { editSongId = null; render(); return; }
-  if (b.id === "reloadBtn") { location.replace(location.pathname + "?v=" + Date.now()); return; }
+  if (b.id === 'cancelEdit') { editSongId = null; render(); return; }
+  if (b.id === 'reloadBtn') { location.replace(location.pathname + '?v=' + Date.now()); return; }
   if (b.id === 'addBtn') {
     const sel = $('#addSong');
     const cur = state.setlists.find(s => s.id === activeSetId);
-    if (cur && sel && sel.value) { cur.songIds.push(sel.value); save(); render(); }
+    if (cur && sel && sel.value) { cur.entries.push({ id: sel.value, start: '' }); save(); render(); }
     return;
   }
   if (b.dataset.edit) { editSongId = b.dataset.edit; render(); window.scrollTo(0, 0); return; }
@@ -200,7 +312,7 @@ document.addEventListener('click', e => {
     if (!confirm('Song löschen? Er wird auch aus allen Setlisten entfernt.')) return;
     const id = b.dataset.del;
     state.songs = state.songs.filter(s => s.id !== id);
-    state.setlists.forEach(s => s.songIds = s.songIds.filter(x => x !== id));
+    state.setlists.forEach(s => s.entries = s.entries.filter(e => e.id !== id));
     if (editSongId === id) editSongId = null;
     save(); render(); return;
   }
@@ -210,19 +322,36 @@ document.addEventListener('click', e => {
     state.setlists = state.setlists.filter(s => s.id !== b.dataset.delset);
     activeSetId = null; save(); render(); return;
   }
+  if (b.dataset.dup) {
+    const src = state.setlists.find(s => s.id === b.dataset.dup);
+    if (!src) return;
+    const copy = { id: uid(), name: src.name + ' (Kopie)', date: src.date, entries: src.entries.map(x => ({ ...x })) };
+    state.setlists.push(copy);
+    activeSetId = copy.id; save(); render(); return;
+  }
   const cur = state.setlists.find(s => s.id === activeSetId);
   if (!cur) return;
+  if (b.dataset.exp) return exportSet(cur, b.dataset.exp);
   const move = (i, d) => {
     const j = i + d;
-    if (j < 0 || j >= cur.songIds.length) return;
-    [cur.songIds[i], cur.songIds[j]] = [cur.songIds[j], cur.songIds[i]];
+    if (j < 0 || j >= cur.entries.length) return;
+    [cur.entries[i], cur.entries[j]] = [cur.entries[j], cur.entries[i]];
     save(); render();
   };
   if (b.dataset.up !== undefined) return move(+b.dataset.up, -1);
   if (b.dataset.down !== undefined) return move(+b.dataset.down, 1);
   if (b.dataset.rm !== undefined) {
-    cur.songIds.splice(+b.dataset.rm, 1); save(); render(); return;
+    cur.entries.splice(+b.dataset.rm, 1); save(); render(); return;
   }
+});
+
+document.addEventListener('change', e => {
+  const t = e.target;
+  if (!t.matches || !t.matches('[data-start]')) return;
+  const cur = state.setlists.find(s => s.id === activeSetId);
+  if (!cur) return;
+  const entry = cur.entries[+t.dataset.start];
+  if (entry) { entry.start = t.value || ''; save(); render(); }
 });
 
 document.addEventListener('submit', e => {
@@ -236,6 +365,7 @@ document.addEventListener('submit', e => {
       key: (d.key || '').trim(),
       bpm: d.bpm ? parseInt(d.bpm, 10) : '',
       duration: (d.duration || '').trim(),
+      tempo: (d.tempo || '').trim(),
       notes: (d.notes || '').trim()
     };
     if (!song.title) return;
@@ -249,7 +379,7 @@ document.addEventListener('submit', e => {
   }
   if (f.id === 'setForm') {
     if (!d.name.trim()) return;
-    const s = { id: uid(), name: d.name.trim(), date: d.date || '', songIds: [] };
+    const s = { id: uid(), name: d.name.trim(), date: d.date || '', entries: [] };
     state.setlists.push(s);
     activeSetId = s.id;
     save(); render();

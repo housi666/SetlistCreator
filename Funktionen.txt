@@ -1,4 +1,4 @@
-SetlistCreator · v0.2.3 · Build 5 · 17.11.2026 · Phase Pre-Alpha
+SetlistCreator · v0.3.0 · Build 6 · 18.11.2026 · Phase Alpha
 
 Stand: 17.11.2026 (v0.2.0) · Umgesetzt: [x] · Geplant: [ ]
 
@@ -15,8 +15,8 @@ SETLISTBIBLIOTHEK
 [x] Songs aus Setlist entfernen
 [x] Setlist löschen
 [x] Gesamtdauer anzeigen
-[ ] Setlist duplizieren (Alpha)
-[ ] Setlist exportieren (Format gemäss F4, Alpha)
+[x] Setlist duplizieren
+[x] Setlist exportieren: TXT, CSV, PDF
 
 KONTO
 [ ] Login mit eigener E-Mail (getrennt von StageMate, gemäss F2)
