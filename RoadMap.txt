@@ -1,4 +1,4 @@
-SetlistCreator · v0.4.0 · Build 9 · 19.11.2026 · Phase Alpha
+SetlistCreator · v0.4.1 · Build 10 · 19.11.2026 · Phase Alpha
 
 Legende: [x] erledigt, [ ] offen
 

@@ -1,11 +1,15 @@
-SetlistCreator · v0.4.0 · Build 9 · 19.11.2026 · Phase Alpha
+SetlistCreator · v0.4.1 · Build 10 · 19.11.2026 · Phase Alpha
 
 Changelog · SetlistCreator
 Neueste Version zuerst. Zeiten = Schweizer Zeit
 
 ** ALPHA **
 
-v0.4.0 · Build 9 · 19.11.2026 01:05
+v0.4.1 · Build 10 · 19.11.2026 01:15
+- Tempo-Feld: Klick öffnet Auswahlrad (20 bis 300 BPM) mit Abbrechen und Anwenden; Eingabe per Tastatur bleibt möglich, auch im Rad
+- Button „Testdaten einfügen“: 10 Testsongs und Setlist „Testsetlist“ mit 45 Minuten Gesamtdauer
+
+v0.4.1 · Build 10 · 19.11.2026 01:05
 - Ansicht in zwei Spalten: Songs links, Setlisten rechts; passt sich der Bildschirmbreite an, untereinander ab ca. 820 px
 - Tabs oben entfernt
 - Dauer per Auswahl Minuten und Sekunden
