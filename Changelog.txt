@@ -5,6 +5,13 @@ Neueste Version zuerst. Zeiten = Schweizer Zeit
 
 ** ALPHA **
 
+v0.3.1 · Build 7 · 19.11.2026 00:40
+- Login mit E-Mail und Passwort über Firebase (Projekt setlistcreator-54d5d, getrennt von StageMate)
+- Songs und Setlisten werden pro Konto in Firestore gespeichert
+- Einmalige Übernahme des lokalen Standes beim ersten Login
+- Button „Abmelden“ und Anzeige des Kontos in der Kopfleiste
+- Regeln in firestore.rules: jeder Nutzer nur eigene Daten
+
 v0.3.0 · Build 6 · 18.11.2026 02:50
 - Songfelder: Titel und Dauer sichtbar, Tonart, BPM, Tempowechsel und Notizen unter „Weitere Angaben“
 - Setlist: Startzeit pro Eintrag, leer = automatisch aus Vorgänger (Startzeit + Dauer); Ende wird angezeigt
