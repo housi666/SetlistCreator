@@ -5,6 +5,10 @@ Neueste Version zuerst. Zeiten = Schweizer Zeit
 
 ** ALPHA **
 
+v0.3.2 · Build 8 · 19.11.2026 00:50
+- Hauptseite erscheint sofort nach Registrierung und Anmeldung, Daten laden im Hintergrund
+- Zeitlimit beim Laden, Status in der Fusszeile (Geladen / Fehler beim Laden oder Speichern)
+
 v0.3.1 · Build 7 · 19.11.2026 00:40
 - Login mit E-Mail und Passwort über Firebase (Projekt setlistcreator-54d5d, getrennt von StageMate)
 - Songs und Setlisten werden pro Konto in Firestore gespeichert

@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>SetlistCreator · v0.3.1</title>
+<title>SetlistCreator · v0.3.2</title>
 <style>
 :root{--bg:#f5f5f7;--surface:#ffffff;--surface-2:#fafafb;--panel:#15161c;--panel-hover:#22242d;--panel-text:#c9cbd6;--text:#1b1c22;--muted:#6b6e7b;--line:#e4e4ea;--line-strong:#cfcfd8;--hover:#ebebf0;--accent:#e8a33d;--accent-text:#1b1c22;--danger:#c0392b;--radius:12px}
 @media (prefers-color-scheme: dark){:root{--bg:#0f1014;--surface:#1a1b22;--surface-2:#20222b;--panel:#0b0c10;--panel-hover:#1a1b22;--panel-text:#c9cbd6;--text:#e8e9ee;--muted:#9a9daa;--line:#2c2e38;--line-strong:#3a3d4a;--hover:#262833;--accent:#e8a33d;--accent-text:#1b1c22;--danger:#ff7a6b}}
@@ -55,7 +55,7 @@ footer{padding:14px 20px;color:var(--muted);font-size:12px;text-align:center}
   </nav></div>
 </header>
 <main id="app"></main>
-<footer>SetlistCreator v0.3.1 · Build 7 · 19.11.2026 · Alpha · Login über Firebase (eigenes Projekt setlistcreator-54d5d), Daten pro Konto</footer>
+<footer>SetlistCreator v0.3.2 · Build 8 · 19.11.2026 · Alpha · Login über Firebase (eigenes Projekt setlistcreator-54d5d), Daten pro Konto · <span id="status"></span></footer>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
@@ -101,12 +101,20 @@ let ready = false;
 let saveTimer = null;
 
 // Daten liegen in Firestore unter users/{uid}. Der alte lokale Stand wird beim ersten Login übernommen.
+function setStatus(text){
+  const el = document.getElementById('status');
+  if (el) el.textContent = text;
+}
+function withTimeout(promise, ms){
+  return Promise.race([promise, new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), ms))]);
+}
 function save(){
   if (!user || !ready) return;
   clearTimeout(saveTimer);
   saveTimer = setTimeout(() => {
     setDoc(doc(db, 'users', user.uid), { songs: state.songs, setlists: state.setlists, updatedAt: new Date().toISOString() })
-      .catch(err => console.error('Speichern fehlgeschlagen', err));
+      .then(() => setStatus('Gespeichert'))
+      .catch(err => { console.error('Speichern fehlgeschlagen', err); setStatus('Speichern fehlgeschlagen – Firestore-Datenbank und Regeln prüfen'); });
   }, 500);
 }
 
@@ -114,17 +122,17 @@ onAuthStateChanged(auth, async u => {
   user = u;
   ready = false;
   activeSetId = null;
-  if (!u) { state = { songs: [], setlists: [] }; render(); return; }
+  state = { songs: [], setlists: [] };
+  render(); // Hauptseite sofort anzeigen
+  if (!u) { setStatus(''); return; }
+  setStatus('Daten werden geladen …');
   try {
-    const snap = await getDoc(doc(db, 'users', u.uid));
-    if (snap.exists()) {
-      state = migrate({ songs: [], setlists: [], ...snap.data() });
-    } else {
-      state = load(); // einmalige Übernahme des lokalen Standes
-    }
+    const snap = await withTimeout(getDoc(doc(db, 'users', u.uid)), 8000);
+    state = snap.exists() ? migrate({ songs: [], setlists: [], ...snap.data() }) : load(); // beim ersten Login lokaler Stand
+    setStatus('Geladen');
   } catch (err) {
     console.error('Laden fehlgeschlagen', err);
-    state = { songs: [], setlists: [] };
+    setStatus('Daten konnten nicht geladen werden – Firestore-Datenbank und Regeln prüfen');
   }
   ready = true;
   render();
@@ -307,7 +315,6 @@ function render(){
   $('#userInfo').textContent = loggedIn ? user.email : '';
   document.querySelector('nav.tab-set').style.display = loggedIn ? '' : 'none';
   if (!loggedIn) { $('#app').innerHTML = renderLogin(); return; }
-  if (!ready) { $('#app').innerHTML = '<p class="muted">Daten werden geladen …</p>'; return; }
   document.querySelectorAll('.tab').forEach(b => b.classList.toggle('active', b.dataset.view === view));
   $('#app').innerHTML = view === 'songs' ? renderSongs() : renderSetlists();
 }
