@@ -1,4 +1,4 @@
-SetlistCreator · v0.3.2 · Build 8 · 19.11.2026 · Phase Alpha
+SetlistCreator · v0.4.0 · Build 9 · 19.11.2026 · Phase Alpha
 
 Stand: 17.11.2026 (v0.2.0) · Umgesetzt: [x] · Geplant: [ ]
 

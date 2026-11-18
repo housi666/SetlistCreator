@@ -5,6 +5,13 @@ Neueste Version zuerst. Zeiten = Schweizer Zeit
 
 ** ALPHA **
 
+v0.4.0 · Build 9 · 19.11.2026 01:05
+- Ansicht in zwei Spalten: Songs links, Setlisten rechts; passt sich der Bildschirmbreite an, untereinander ab ca. 820 px
+- Tabs oben entfernt
+- Dauer per Auswahl Minuten und Sekunden
+- Setlist erstellen nur mit Name, Datum entfernt
+- PDF als A4, wählbar Hochformat oder Querformat
+
 v0.3.2 · Build 8 · 19.11.2026 00:50
 - Hauptseite erscheint sofort nach Registrierung und Anmeldung, Daten laden im Hintergrund
 - Zeitlimit beim Laden, Status in der Fusszeile (Geladen / Fehler beim Laden oder Speichern)
