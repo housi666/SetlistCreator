@@ -66,6 +66,7 @@ F7  Akzentfarbe: übernommen von StageMate (#e8a33d). Regelwerk angepasst: Stage
 ZUKUNFT
 
 - Teilen von Setlisten zwischen Logins (F5, wird definiert)
+- Anmeldefunktion mit dem StageMate-Account (Konflikt mit F2 prüfen, siehe Chat)
 - Reaper-.rpp-Import für Songs (analog zu StageMate)
 - App-Icon im Stil des StageMate-Icons
 - Englische Oberfläche
