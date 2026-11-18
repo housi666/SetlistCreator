@@ -55,7 +55,7 @@ Zukunft
 OFFEN
 
 F1  Abgrenzung: Web-App mit Songbibliothek und Setlistbibliothek. Mit der Freigabe als bestätigt angenommen.
-F2  Login: eigenes Firebase-Projekt (entschieden 18.11.2026). Offen: Firebase-Konfiguration von Housi.
+F2  Login: eigenes Firebase-Projekt jetzt (entschieden 18.11.2026), spätere Zusammenlegung mit dem StageMate-Account (Zeitpunkt offen). Offen: Firebase-Konfiguration von Housi.
 F3  Song-Felder (entschieden 18.11.2026): Titel, Interpret, Tonart (optional), BPM (optional), Dauer, Tempowechsel (Text), Notizen. In der Setlist: Titelnummer, Startzeit, Endzeit.
 F4  Export (entschieden 18.11.2026): Text, CSV, PDF (Alpha).
 F5  Teilen: wird in Zukunft definiert (siehe Zukunft).
@@ -66,7 +66,7 @@ F7  Akzentfarbe: übernommen von StageMate (#e8a33d). Regelwerk angepasst: Stage
 ZUKUNFT
 
 - Teilen von Setlisten zwischen Logins (F5, wird definiert)
-- Anmeldefunktion mit dem StageMate-Account (Konflikt mit F2 prüfen, siehe Chat)
+- Zusammenlegung der Anmeldung mit dem StageMate-Account (zuerst eigenes Login, Zeitpunkt und Phase noch offen)
 - Reaper-.rpp-Import für Songs (analog zu StageMate)
 - App-Icon im Stil des StageMate-Icons
 - Englische Oberfläche
