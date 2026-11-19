@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>SetlistCreator · v0.4.27</title>
+<title>SetlistCreator · v0.4.28</title>
 <link rel="icon" type="image/svg+xml" href="icon.svg">
 <link rel="icon" type="image/png" sizes="32x32" href="icon-32.png">
 <link rel="apple-touch-icon" href="icon-180.png">
@@ -127,7 +127,7 @@ footer{padding:14px 20px;color:var(--muted);font-size:12px;text-align:center}
   <div class="row" style="gap:8px"><span id="userInfo" class="muted" style="color:var(--panel-text)"></span><button id="tipsBtn" type="button" class="hdr-btn">💡 Tipps</button><button id="supportBtn" type="button" class="hdr-btn">💬 Support</button><button id="logoutBtn" type="button" style="display:none">Abmelden</button><button id="reloadBtn" type="button" title="Neueste Version laden (ohne Zwischenspeicher)">Aktualisieren</button></div>
 </header>
 <main id="app"></main>
-<footer>SetlistCreator v0.4.27 · Build 36 · 19.11.2026 · Alpha · Login über Firebase (eigenes Projekt setlistcreator-54d5d), Daten pro Konto · <span id="status"></span><br><button type="button" class="legal-link" data-legal="terms">Nutzungsbedingungen</button> · <button type="button" class="legal-link" data-legal="privacy">Datenschutz</button></footer>
+<footer>SetlistCreator v0.4.28 · Build 37 · 19.11.2026 · Alpha · Login über Firebase (eigenes Projekt setlistcreator-54d5d), Daten pro Konto · <span id="status"></span><br><button type="button" class="legal-link" data-legal="terms">Nutzungsbedingungen</button> · <button type="button" class="legal-link" data-legal="privacy">Datenschutz</button></footer>
 
 <div class="modal-bg hidden" id="tipsModal">
   <div class="modal" role="dialog" aria-modal="true" aria-labelledby="tipsTitle">
@@ -424,12 +424,20 @@ function pdfInner(set, prefs, edit = false){
   const cols = prefs.order.filter(k => prefs.on[k]);
   const th = cols.map(k => `<th class="c-${k}">${PDF_COLS[k]}</th>`).join('');
   const tr = rows.map(r => `<tr>${cols.map(k => `<td class="c-${k}">${esc(r[k])}</td>`).join('')}</tr>`).join('');
-  return `<div class="pdf-content" style="position:relative"><h1>${esc(set.name)}</h1><div class="meta">Gesamtdauer ${totalOf(set)} · ${rows.length} Songs</div><table><thead><tr>${th}</tr></thead><tbody>${tr}</tbody></table>${sumLine(set)}${pdfSvgHtml(prefs, edit)}</div>`;
-}
-function sumLine(set){
   const c = timeCheck(set);
-  if (!c) return '';
-  return `<div style="margin-top:10px;font-weight:700;display:flex;gap:24px"><span>Total ${fmt(c.sum)}</span><span>Endzeit ${hms(c.endS)}</span></div>`;
+  let foot = '', missing = [];
+  if (c) {
+    const cell = k => {
+      if (k === 'start') return `Endzeit ${hms(c.endS)}`;
+      if (k === 'dur') return `Total ${fmt(c.sum)}`;
+      return '';
+    };
+    foot = `<tfoot><tr>${cols.map(k => `<td class="c-${k}" style="font-weight:700;border-top:1pt solid #6b6e7b;border-bottom:0">${cell(k)}</td>`).join('')}</tr></tfoot>`;
+    if (!cols.includes('start')) missing.push(`Endzeit ${hms(c.endS)}`);
+    if (!cols.includes('dur')) missing.push(`Total ${fmt(c.sum)}`);
+  }
+  const extra = missing.length ? `<div style="margin-top:8px;font-weight:700">${missing.join(' · ')}</div>` : '';
+  return `<div class="pdf-content" style="position:relative"><h1>${esc(set.name)}</h1><div class="meta">Gesamtdauer ${totalOf(set)} · ${rows.length} Songs</div><table><thead><tr>${th}</tr></thead><tbody>${tr}</tbody>${foot}</table>${extra}${pdfSvgHtml(prefs, edit)}</div>`;
 }
 // SVG: Skripte und Ereignisattribute entfernen, nur Dateien mit viewBox
 function sanitizeSvg(text){
@@ -478,13 +486,14 @@ th{color:#6b6e7b;font-weight:600;border-bottom:1pt solid #6b6e7b}
 </style></head><body>${pdfInner(set, prefs)}</body></html>`;
 }
 // Vorschau: A4-Blatt, passend eingepasst oder mit eigenem Zoom
+window.addEventListener('resize', () => { if (pdfEditId) applyPdfZoom(); });
 function applyPdfZoom(){
   const frame = document.getElementById('pdfFrame');
   const sheet = document.getElementById('pdfSheet');
   if (!frame || !sheet) return;
   const land = sheet.classList.contains('land');
   const W = (land ? 297 : 210) * 96 / 25.4, H = (land ? 210 : 297) * 96 / 25.4;
-  const availW = frame.parentElement.clientWidth || W;
+  const availW = Math.max(120, (frame.parentElement.clientWidth || W) - 8);
   const fit = Math.min(availW / W, (window.innerHeight * 0.65) / H);
   const z = Math.max(0.25, Math.min(3, pdfZoom === 'fit' ? fit : pdfZoom));
   sheet.style.transform = `scale(${z})`;

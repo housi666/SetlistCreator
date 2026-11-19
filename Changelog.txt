@@ -1,11 +1,14 @@
-SetlistCreator · v0.4.27 · Build 36 · 19.11.2026 · Phase Alpha
+SetlistCreator · v0.4.28 · Build 37 · 19.11.2026 · Phase Alpha
 
 Changelog · SetlistCreator
 Neueste Version zuerst. Zeiten = Schweizer Zeit
 
 ** ALPHA **
 
-v0.4.27 · Build 36 · 19.11.2026 18:55
+v0.4.28 · Build 37 · 19.11.2026 19:30
+- PDF: Endzeit steht unter der Startspalte, Total unter der Dauerspalte
+- PDF-Vorschau wird bei Fenstergrösse neu eingepasst
+
 - Startzeit pro Song mit Auswahl Std : Min : Sek; der erste Song startet bei 00:00:00
 - PDF: Total und Endzeit unter der Liste
 - Roter Hinweis oben, solange Endzeit und Gesamtdauer nicht übereinstimmen

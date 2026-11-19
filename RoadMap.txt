@@ -93,3 +93,4 @@ Klein
 19.11.2026 – v0.4.25 Build 34: SVG im PDF-Vorschau verschieben, in der Grösse ändern und in 30°-Schritten drehen
 19.11.2026 – v0.4.26 Build 35: Desktop-Layout bleibt bei jedem Zoom auf voller Breite zweispaltig
 19.11.2026 – v0.4.27 Build 36: Startzeit mit Std/Min/Sek, Total und Endzeit im PDF, roter Zeithinweis
+19.11.2026 – v0.4.28 Build 37: Endzeit unter Startspalte, Total unter Dauerspalte, Vorschau passt sich der Fenstergrösse an
