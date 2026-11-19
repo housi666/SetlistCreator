@@ -1,9 +1,12 @@
-SetlistCreator · v0.4.4 · Build 13 · 19.11.2026 · Phase Alpha
+SetlistCreator · v0.4.5 · Build 14 · 19.11.2026 · Phase Alpha
 
 Changelog · SetlistCreator
 Neueste Version zuerst. Zeiten = Schweizer Zeit
 
 ** ALPHA **
+
+v0.4.5 · Build 14 · 19.11.2026 09:30
+- Knöpfe oben: Songbibliothek, Song erstellen, Setlistbibliothek, Setlist erstellen; ein-/ausblendbar, aktive Knöpfe hervorgehoben
 
 v0.4.4 · Build 13 · 19.11.2026 08:45
 - App-Icon: StageMate-Icon mit C statt M; Icon-Links, Manifest und Theme-Color wie bei StageMate

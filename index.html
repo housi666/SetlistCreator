@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>SetlistCreator · v0.4.4</title>
+<title>SetlistCreator · v0.4.5</title>
 <link rel="icon" type="image/svg+xml" href="icon.svg">
 <link rel="icon" type="image/png" sizes="32x32" href="icon-32.png">
 <link rel="apple-touch-icon" href="icon-180.png">
@@ -61,6 +61,8 @@ footer{padding:14px 20px;color:var(--muted);font-size:12px;text-align:center}
 .bpm-item{height:40px;line-height:40px;text-align:center;scroll-snap-align:center;font-size:18px;color:var(--muted);font-variant-numeric:tabular-nums}
 .bpm-item.on{color:var(--text);font-weight:700;font-size:22px}
 .bpm-pad{height:80px}
+.toolbar{grid-column:1 / -1;display:flex;flex-wrap:wrap;gap:8px;margin-bottom:-4px}
+.toolbar button.on{background:var(--accent);color:var(--accent-text);border-color:var(--accent);font-weight:600}
 </style>
 </head>
 <body>
@@ -69,7 +71,7 @@ footer{padding:14px 20px;color:var(--muted);font-size:12px;text-align:center}
   <div class="row" style="gap:8px"><span id="userInfo" class="muted" style="color:var(--panel-text)"></span><button id="logoutBtn" type="button" style="display:none">Abmelden</button><button id="reloadBtn" type="button" title="Neueste Version laden (ohne Zwischenspeicher)">Aktualisieren</button></div>
 </header>
 <main id="app"></main>
-<footer>SetlistCreator v0.4.4 · Build 13 · 19.11.2026 · Alpha · Login über Firebase (eigenes Projekt setlistcreator-54d5d), Daten pro Konto · <span id="status"></span></footer>
+<footer>SetlistCreator v0.4.5 · Build 14 · 19.11.2026 · Alpha · Login über Firebase (eigenes Projekt setlistcreator-54d5d), Daten pro Konto · <span id="status"></span></footer>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
@@ -119,6 +121,7 @@ let saveTimer = null;
 let editSongId = null;
 let activeSetId = null;
 let pendingScroll = null;
+let ui = { songs: true, newSong: true, sets: true, newSet: true };
 
 function setStatus(text){
   const el = document.getElementById('status');
@@ -264,7 +267,7 @@ function renderSongs(){
       </div>`;
       }).join('')
     : '<p class="muted">Noch keine Songs.</p>';
-  const newCard = editSongId ? '' : `
+  const newCard = (editSongId || !ui.newSong) ? '' : `
     <section class="card">
       <div class="row" style="margin-bottom:10px">
         <h2 style="flex:1;margin:0">Neuer Song</h2>
@@ -272,9 +275,9 @@ function renderSongs(){
       </div>
       ${songForm({})}
     </section>`;
-  return `${newCard}
+  return `${newCard}${ui.songs ? `
     <h2>Songbibliothek (${state.songs.length})</h2>
-    ${list}`;
+    ${list}` : ''}`;
 }
 
 // ---- Setlisten (rechte Spalte) ----
@@ -340,16 +343,16 @@ function renderSetlists(){
       </div>${open ? setDetail(s) : ''}`;
       }).join('')
     : '<p class="muted">Noch keine Setlist.</p>';
-  return `
+  return `${ui.newSet ? `
     <section class="card">
       <h2>Neue Setlist</h2>
       <form id="setForm" class="row">
         <input name="name" placeholder="Name der Setlist *" required style="flex:1;min-width:180px">
         <button class="primary" type="submit">Erstellen</button>
       </form>
-    </section>
+    </section>` : ''}${ui.sets ? `
     <h2>Setlisten (${state.setlists.length})</h2>
-    ${list}`;
+    ${list}` : ''}`;
 }
 
 function renderLogin(msg = ''){
@@ -368,12 +371,17 @@ function renderLogin(msg = ''){
     </section>`;
 }
 
+function renderToolbar(){
+  const b = (k, label) => `<button type="button" data-ui="${k}" class="${ui[k] ? 'on' : ''}" aria-pressed="${ui[k]}">${label}</button>`;
+  return `<div class="toolbar">${b('songs', 'Songbibliothek')}${b('newSong', 'Song erstellen')}${b('sets', 'Setlistbibliothek')}${b('newSet', 'Setlist erstellen')}</div>`;
+}
+
 function render(){
   const loggedIn = !!user;
   $('#logoutBtn').style.display = loggedIn ? '' : 'none';
   $('#userInfo').textContent = loggedIn ? user.email : '';
   if (!loggedIn) { $('#app').innerHTML = renderLogin(); return; }
-  $('#app').innerHTML = `<div class="col">${renderSongs()}</div><div class="col">${renderSetlists()}</div>`;
+  $('#app').innerHTML = `${renderToolbar()}<div class="col">${renderSongs()}</div><div class="col">${renderSetlists()}</div>`;
   if (pendingScroll) {
     const el = document.querySelector(pendingScroll);
     if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -533,6 +541,10 @@ document.addEventListener('click', e => {
     }
     render();
     return;
+  }
+  if (b.dataset.ui) {
+    ui[b.dataset.ui] = !ui[b.dataset.ui];
+    render(); return;
   }
   if (b.id === 'testBtn') {
     if (!user || !ready) return;
