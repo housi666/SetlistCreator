@@ -70,7 +70,6 @@ ZUKUNFT
 - Vorlagen erstellen, speichern, verwalten und exportieren
 - Anleitung „PDF im Druckmenü speichern“ (How-to, Hinweis in der App)
 - Design überarbeiten
-- Aufbau (Android-Ansicht): Song bearbeiten
 - Zusammenlegung der Anmeldung mit dem StageMate-Account (zuerst eigenes Login, Zeitpunkt und Phase noch offen)
 - Reaper-.rpp-Import für Songs (analog zu StageMate)
 - Englische Oberfläche
@@ -84,3 +83,8 @@ Gross
 Klein
 17.11.2026 – Projektgerüst angelegt (Ordner, RoadMap, Funktionen, Changelog)
 19.11.2026 – v0.4.4 Build 13: App-Icon im StageMate-Stil (M durch C), Manifest und Icon-Links
+19.11.2026 – v0.4.3 Build 12: Song bearbeiten und Setlist öffnen sich an der angeklickten Stelle
+19.11.2026 – v0.4.5 Build 14: Knöpfe zum Ein- und Ausblenden der Bereiche
+19.11.2026 – v0.4.6 Build 15: Startbildschirm nur mit Knöpfen, Suche in Song- und Setlistbibliothek
+19.11.2026 – v0.4.7 Build 16: Knöpfe und Suche nur in der Android-Ansicht, Desktop mit allen Bereichen
+19.11.2026 – v0.4.8 Build 17: Android-Knöpfe in Akzentfarbe
