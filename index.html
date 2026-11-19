@@ -19,7 +19,7 @@ header{display:flex;justify-content:space-between;align-items:center;flex-wrap:w
 h1{font-size:18px;margin:0;font-weight:700;color:#e8e9ee}
 h2{font-size:16px;margin:0 0 10px;font-weight:600}
 main{padding:16px;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px;align-items:start;width:100%}
-@media (max-width:820px){main{grid-template-columns:1fr}}
+@media (max-width:820px){html:not(.desk) main{grid-template-columns:1fr}}
 .col{min-width:0}
 .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:14px;margin-bottom:12px}
 input,select,textarea{font:inherit;padding:10px 12px;font-size:14px;border:1px solid var(--line);border-radius:9px;background:var(--surface);color:var(--text);width:100%;min-width:0}
@@ -31,7 +31,7 @@ summary{cursor:pointer;color:var(--muted);font-size:13px;font-weight:600}
 .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .grid2 .full{grid-column:1 / -1}
-@media (max-width:560px){.grid2{grid-template-columns:1fr}}
+@media (max-width:560px){html:not(.desk) .grid2{grid-template-columns:1fr}}
 .dur{display:flex;gap:6px;align-items:center}
 .dur select{width:auto;flex:1;min-width:70px}
 button{font:inherit;cursor:pointer;border-radius:999px;padding:7px 14px;font-size:13px;font-weight:500;border:1px solid var(--line-strong);background:var(--surface);color:var(--text)}
@@ -90,7 +90,7 @@ footer{padding:14px 20px;color:var(--muted);font-size:12px;text-align:center}
 .legal-body ol li{border:0;padding:0}
 .pdf-modal{width:min(980px,100%);max-height:92vh}
 .pdf-grid{display:grid;grid-template-columns:minmax(0,300px) minmax(0,1fr);gap:16px;align-items:start}
-@media (max-width:760px){.pdf-grid{grid-template-columns:1fr}}
+@media (max-width:760px){html:not(.desk) .pdf-grid{grid-template-columns:1fr}}
 .pdf-frame{position:relative;overflow:hidden;background:#8a8c96;border-radius:6px;margin:0 auto;padding:0}
 .pdf-sheet{position:absolute;left:0;top:0;background:#fff;color:#1b1c22;box-sizing:border-box;padding:14mm;transform-origin:top left;overflow:hidden;box-shadow:0 2px 10px rgba(0,0,0,.35);font-weight:400;font-style:normal;line-height:1.35;letter-spacing:normal;text-align:left;text-transform:none;text-shadow:none}
 .pdf-sheet *{box-sizing:border-box;font:inherit;color:inherit;letter-spacing:normal;text-transform:none}
@@ -126,7 +126,7 @@ footer{padding:14px 20px;color:var(--muted);font-size:12px;text-align:center}
   <div class="row" style="gap:8px"><span id="userInfo" class="muted" style="color:var(--panel-text)"></span><button id="tipsBtn" type="button" class="hdr-btn">💡 Tipps</button><button id="supportBtn" type="button" class="hdr-btn">💬 Support</button><button id="logoutBtn" type="button" style="display:none">Abmelden</button><button id="reloadBtn" type="button" title="Neueste Version laden (ohne Zwischenspeicher)">Aktualisieren</button></div>
 </header>
 <main id="app"></main>
-<footer>SetlistCreator v0.4.25 · Build 34 · 19.11.2026 · Alpha · Login über Firebase (eigenes Projekt setlistcreator-54d5d), Daten pro Konto · <span id="status"></span><br><button type="button" class="legal-link" data-legal="terms">Nutzungsbedingungen</button> · <button type="button" class="legal-link" data-legal="privacy">Datenschutz</button></footer>
+<footer>SetlistCreator v0.4.26 · Build 35 · 19.11.2026 · Alpha · Login über Firebase (eigenes Projekt setlistcreator-54d5d), Daten pro Konto · <span id="status"></span><br><button type="button" class="legal-link" data-legal="terms">Nutzungsbedingungen</button> · <button type="button" class="legal-link" data-legal="privacy">Datenschutz</button></footer>
 
 <div class="modal-bg hidden" id="tipsModal">
   <div class="modal" role="dialog" aria-modal="true" aria-labelledby="tipsTitle">
@@ -221,6 +221,7 @@ let editSongId = null;
 let activeSetId = null;
 let pendingScroll = null;
 const isAndroid = /Android/i.test(navigator.userAgent);
+document.documentElement.classList.toggle('desk', !isAndroid);
 // Android: jede Bibliothek / jeder Ersteller öffnet auf einer eigenen Seite (nur eine gleichzeitig).
 // Desktop: alle Bereiche sichtbar wie bisher.
 let view = null;

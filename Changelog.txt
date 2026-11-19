@@ -1,11 +1,12 @@
-SetlistCreator · v0.4.25 · Build 34 · 19.11.2026 · Phase Alpha
+SetlistCreator · v0.4.26 · Build 35 · 19.11.2026 · Phase Alpha
 
 Changelog · SetlistCreator
 Neueste Version zuerst. Zeiten = Schweizer Zeit
 
 ** ALPHA **
 
-v0.4.25 · Build 34 · 19.11.2026 18:35
+v0.4.26 · Build 35 · 19.11.2026 18:40
+- Desktop-Ansicht nutzt die ganze Bildschirmbreite und bleibt bei jedem Browser-Zoom zweispaltig
 - SVG im PDF-Designer per Ziehen verschieben, an der Ecke in der Grösse ändern
 - Zwei Knöpfe drehen die Grafik in 30°-Schritten (↺ / ↻)
 
