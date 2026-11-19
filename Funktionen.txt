@@ -1,4 +1,4 @@
-SetlistCreator · v0.4.3 · Build 12 · 19.11.2026 · Phase Alpha
+SetlistCreator · v0.4.4 · Build 13 · 19.11.2026 · Phase Alpha
 
 Stand: 17.11.2026 (v0.2.0) · Umgesetzt: [x] · Geplant: [ ]
 
@@ -21,7 +21,7 @@ SETLISTBIBLIOTHEK
 KONTO
 [x] Login mit E-Mail und Passwort (getrennt von StageMate)
 [x] Eigene Bibliothek je Login
-[ ] Setlisten teilen (nur falls F5 mit Ja beantwortet)
+[gestrichen] Setlisten teilen (F5)
 
 OBERFLÄCHE
 [x] Hell- und Dunkelmodus (folgt dem Systemmodus)

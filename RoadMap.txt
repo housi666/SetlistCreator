@@ -1,4 +1,4 @@
-SetlistCreator · v0.4.3 · Build 12 · 19.11.2026 · Phase Alpha
+SetlistCreator · v0.4.4 · Build 13 · 19.11.2026 · Phase Alpha
 
 Legende: [x] erledigt, [ ] offen
 
@@ -58,7 +58,7 @@ F1  Abgrenzung: Web-App mit Songbibliothek und Setlistbibliothek. Mit der Freiga
 F2  Login: eigenes Firebase-Projekt jetzt (entschieden 18.11.2026), spätere Zusammenlegung mit dem StageMate-Account (Zeitpunkt offen). Offen: Firebase-Konfiguration von Housi.
 F3  Song-Felder (entschieden 18.11.2026): Titel, Interpret, Tonart (optional), BPM (optional), Dauer, Tempowechsel (Text), Notizen. In der Setlist: Titelnummer, Startzeit, Endzeit.
 F4  Export (entschieden 18.11.2026): Text, CSV, PDF (Alpha).
-F5  Teilen: wird in Zukunft definiert (siehe Zukunft).
+F5  Teilen: gestrichen (entschieden 19.11.2026). Setlisten werden nicht zwischen Logins geteilt.
 F6  Ordnername: auf Wunsch „SetlistCreator“ ohne „Housi-“-Präfix. Abweichung vom Regelwerk, begründet mit Wunsch von Housi.
 F7  Akzentfarbe: übernommen von StageMate (#e8a33d). Regelwerk angepasst: StageMate und SetlistCreator teilen ein Design. Erledigt.
 
@@ -66,10 +66,11 @@ F7  Akzentfarbe: übernommen von StageMate (#e8a33d). Regelwerk angepasst: Stage
 ZUKUNFT
 
 - PDF-Designer: Vorschauseite, Spalten ein- und ausblenden und verschieben, Schriftgrösse und Schriftart
-- SVG-Import (Logo, Grafik) mit Positionierung und Grössenbestimmung
+- SVG-Import (Logo, Grafik) mit Positionierung und Grössenbestimmung, inklusive Farbwechsel
 - Vorlagen erstellen, speichern, verwalten und exportieren
-- Direkt drucken aus der App (Browser-Druckdialog)
-- Teilen von Setlisten zwischen Logins (F5, wird definiert)
+- Anleitung „PDF im Druckmenü speichern“ (How-to, Hinweis in der App)
+- Design überarbeiten
+- Aufbau (Android-Ansicht): Song bearbeiten
 - Zusammenlegung der Anmeldung mit dem StageMate-Account (zuerst eigenes Login, Zeitpunkt und Phase noch offen)
 - Reaper-.rpp-Import für Songs (analog zu StageMate)
 - App-Icon im Stil des StageMate-Icons
