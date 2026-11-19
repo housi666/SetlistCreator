@@ -453,7 +453,7 @@ function setDetail(cur){
           <button data-dup="${cur.id}">Duplizieren</button>
           <button data-exp="txt">TXT</button>
           <button data-exp="csv">CSV</button>
-          <button data-exp="pdf">PDF exportieren</button>
+          <button data-exp="pdf">PDF in Setlist erstellen</button>
         </div>
         ${pdfDesigner(cur)}
         <ol>${items}</ol>
@@ -649,7 +649,6 @@ function exportSet(set, kind){
     if (!w) { alert('Pop-up blockiert. Bitte für diese Seite erlauben.'); return; }
     w.document.write(pdfDocHtml(set, pdfPrefs()));
     w.document.close();
-    setTimeout(() => w.print(), 300);
   }
 }
 
