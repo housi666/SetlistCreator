@@ -1,4 +1,4 @@
-SetlistCreator · v0.4.1 · Build 10 · 19.11.2026 · Phase Alpha
+SetlistCreator · v0.4.2 · Build 11 · 19.11.2026 · Phase Alpha
 
 Legende: [x] erledigt, [ ] offen
 
@@ -65,6 +65,10 @@ F7  Akzentfarbe: übernommen von StageMate (#e8a33d). Regelwerk angepasst: Stage
 
 ZUKUNFT
 
+- PDF-Designer: Vorschauseite, Spalten ein- und ausblenden und verschieben, Schriftgrösse und Schriftart
+- SVG-Import (Logo, Grafik) mit Positionierung und Grössenbestimmung
+- Vorlagen erstellen, speichern, verwalten und exportieren
+- Direkt drucken aus der App (Browser-Druckdialog)
 - Teilen von Setlisten zwischen Logins (F5, wird definiert)
 - Zusammenlegung der Anmeldung mit dem StageMate-Account (zuerst eigenes Login, Zeitpunkt und Phase noch offen)
 - Reaper-.rpp-Import für Songs (analog zu StageMate)
