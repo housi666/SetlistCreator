@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>SetlistCreator · v0.4.10</title>
+<title>SetlistCreator · v0.4.11</title>
 <link rel="icon" type="image/svg+xml" href="icon.svg">
 <link rel="icon" type="image/png" sizes="32x32" href="icon-32.png">
 <link rel="apple-touch-icon" href="icon-180.png">
@@ -61,6 +61,8 @@ footer{padding:14px 20px;color:var(--muted);font-size:12px;text-align:center}
 .bpm-item{height:40px;line-height:40px;text-align:center;scroll-snap-align:center;font-size:18px;color:var(--muted);font-variant-numeric:tabular-nums}
 .bpm-item.on{color:var(--text);font-weight:700;font-size:22px}
 .bpm-pad{height:80px}
+.topnote{position:fixed;top:0;left:0;right:0;z-index:70;background:#c0392b;color:#fff;text-align:center;padding:10px 16px;font-size:14px;font-weight:600;transform:translateY(-100%);transition:transform .25s ease}
+.topnote.show{transform:translateY(0)}
 .hdr-btn{background:none;color:var(--panel-text);border-color:var(--panel-hover);padding:6px 12px}
 .hdr-btn:hover{background:var(--panel-hover)}
 .legal-link{background:none;border:0;color:var(--muted);padding:0 2px;font-size:12px;text-decoration:underline;border-radius:0}
@@ -104,7 +106,7 @@ footer{padding:14px 20px;color:var(--muted);font-size:12px;text-align:center}
   <div class="row" style="gap:8px"><span id="userInfo" class="muted" style="color:var(--panel-text)"></span><button id="tipsBtn" type="button" class="hdr-btn">💡 Tipps</button><button id="supportBtn" type="button" class="hdr-btn">💬 Support</button><button id="logoutBtn" type="button" style="display:none">Abmelden</button><button id="reloadBtn" type="button" title="Neueste Version laden (ohne Zwischenspeicher)">Aktualisieren</button></div>
 </header>
 <main id="app"></main>
-<footer>SetlistCreator v0.4.10 · Build 19 · 19.11.2026 · Alpha · Login über Firebase (eigenes Projekt setlistcreator-54d5d), Daten pro Konto · <span id="status"></span><br><button type="button" class="legal-link" data-legal="terms">Nutzungsbedingungen</button> · <button type="button" class="legal-link" data-legal="privacy">Datenschutz</button></footer>
+<footer>SetlistCreator v0.4.11 · Build 20 · 19.11.2026 · Alpha · Login über Firebase (eigenes Projekt setlistcreator-54d5d), Daten pro Konto · <span id="status"></span><br><button type="button" class="legal-link" data-legal="terms">Nutzungsbedingungen</button> · <button type="button" class="legal-link" data-legal="privacy">Datenschutz</button></footer>
 
 <div class="modal-bg hidden" id="tipsModal">
   <div class="modal" role="dialog" aria-modal="true" aria-labelledby="tipsTitle">
@@ -736,10 +738,18 @@ function openTips(){
   }).join('');
   openModal('tipsModal');
 }
+let topNoteTimer = null;
+function topNote(text){
+  let n = $('topNote');
+  if (!n) { n = document.createElement('div'); n.id = 'topNote'; n.className = 'topnote'; document.body.appendChild(n); }
+  n.textContent = text;
+  n.classList.add('show');
+  clearTimeout(topNoteTimer);
+  topNoteTimer = setTimeout(() => n.classList.remove('show'), 3000);
+}
 function handleChrome(e){
   const t = e.target;
-  if (t.closest('#tipsBtn')) { openTips(); return true; }
-  if (t.closest('#supportBtn')) { openModal('supportModal'); return true; }
+  if (t.closest('#tipsBtn') || t.closest('#supportBtn')) { topNote('Funktion wird noch implementiert'); return true; }
   const lg = t.closest('[data-legal]');
   if (lg) { renderLegal(lg.dataset.legal); openModal('legalModal'); return true; }
   const lt = t.closest('[data-legal-tab]');

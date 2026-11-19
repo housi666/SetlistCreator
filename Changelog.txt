@@ -1,9 +1,12 @@
-SetlistCreator · v0.4.10 · Build 19 · 19.11.2026 · Phase Alpha
+SetlistCreator · v0.4.11 · Build 20 · 19.11.2026 · Phase Alpha
 
 Changelog · SetlistCreator
 Neueste Version zuerst. Zeiten = Schweizer Zeit
 
 ** ALPHA **
+
+v0.4.11 · Build 20 · 19.11.2026 11:50
+- Tipps und Support zeigen vorerst einen roten Hinweis am oberen Rand: „Funktion wird noch implementiert“
 
 v0.4.10 · Build 19 · 19.11.2026 11:40
 - Knopf „Tipps“ (Android und Desktop) mit Tipps zur Seite und Allgemeines
