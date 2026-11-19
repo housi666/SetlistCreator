@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>SetlistCreator · v0.4.15</title>
+<title>SetlistCreator · v0.4.16</title>
 <link rel="icon" type="image/svg+xml" href="icon.svg">
 <link rel="icon" type="image/png" sizes="32x32" href="icon-32.png">
 <link rel="apple-touch-icon" href="icon-180.png">
@@ -87,6 +87,9 @@ footer{padding:14px 20px;color:var(--muted);font-size:12px;text-align:center}
 .legal-body p,.legal-body li{font-size:13px;line-height:1.5}
 .legal-body ul{padding-left:18px;list-style:disc}
 .legal-body ol li{border:0;padding:0}
+.pdf-modal{width:min(980px,100%);max-height:92vh}
+.pdf-grid{display:grid;grid-template-columns:minmax(0,300px) minmax(0,1fr);gap:16px;align-items:start}
+@media (max-width:760px){.pdf-grid{grid-template-columns:1fr}}
 .legal-ver{color:var(--muted);font-size:12px;margin-top:12px}
 .support-links{display:flex;flex-direction:column;gap:8px;margin:8px 0}
 .support-links a{color:var(--text);text-decoration:none;border:1px solid var(--line);border-radius:10px;padding:10px 12px}
@@ -106,7 +109,7 @@ footer{padding:14px 20px;color:var(--muted);font-size:12px;text-align:center}
   <div class="row" style="gap:8px"><span id="userInfo" class="muted" style="color:var(--panel-text)"></span><button id="tipsBtn" type="button" class="hdr-btn">💡 Tipps</button><button id="supportBtn" type="button" class="hdr-btn">💬 Support</button><button id="logoutBtn" type="button" style="display:none">Abmelden</button><button id="reloadBtn" type="button" title="Neueste Version laden (ohne Zwischenspeicher)">Aktualisieren</button></div>
 </header>
 <main id="app"></main>
-<footer>SetlistCreator v0.4.15 · Build 24 · 19.11.2026 · Alpha · Login über Firebase (eigenes Projekt setlistcreator-54d5d), Daten pro Konto · <span id="status"></span><br><button type="button" class="legal-link" data-legal="terms">Nutzungsbedingungen</button> · <button type="button" class="legal-link" data-legal="privacy">Datenschutz</button></footer>
+<footer>SetlistCreator v0.4.16 · Build 25 · 19.11.2026 · Alpha · Login über Firebase (eigenes Projekt setlistcreator-54d5d), Daten pro Konto · <span id="status"></span><br><button type="button" class="legal-link" data-legal="terms">Nutzungsbedingungen</button> · <button type="button" class="legal-link" data-legal="privacy">Datenschutz</button></footer>
 
 <div class="modal-bg hidden" id="tipsModal">
   <div class="modal" role="dialog" aria-modal="true" aria-labelledby="tipsTitle">
@@ -203,6 +206,7 @@ const isAndroid = /Android/i.test(navigator.userAgent);
 // Desktop: alle Bereiche sichtbar wie bisher.
 let view = null;
 let searchQ = { songs: '', sets: '' };
+let pdfEditId = null;
 const on = k => !isAndroid || view === k;
 
 function setStatus(text){
@@ -394,31 +398,41 @@ th{color:#6b6e7b;font-weight:600;border-bottom:1pt solid #6b6e7b}
 .c-nr,.c-start,.c-end,.c-bpm,.c-dur,.c-key{white-space:nowrap}
 </style></head><body><h1>${esc(set.name)}</h1><div class="meta">Gesamtdauer ${totalOf(set)} · ${rows.length} Songs</div><table><thead><tr>${th}</tr></thead><tbody>${tr}</tbody></table></body></html>`;
 }
-function pdfDesigner(set){
+function pdfEditorHtml(set){
   const p = pdfPrefs();
   const cols = p.order.map((k, i) => `
-      <div class="row" style="gap:6px;padding:4px 0">
-        <label style="flex:1;display:flex;align-items:center;gap:8px;cursor:pointer"><input type="checkbox" data-pdf-on="${k}" ${p.on[k] ? 'checked' : ''} style="width:auto"> ${PDF_COLS[k]}</label>
-        <button type="button" data-pdf-up="${i}" ${i === 0 ? 'disabled' : ''}>↑</button>
-        <button type="button" data-pdf-down="${i}" ${i === p.order.length - 1 ? 'disabled' : ''}>↓</button>
-      </div>`).join('');
+        <div class="row" style="gap:6px;padding:4px 0">
+          <label style="flex:1;display:flex;align-items:center;gap:8px;cursor:pointer"><input type="checkbox" data-pdf-on="${k}" ${p.on[k] ? 'checked' : ''} style="width:auto"> ${PDF_COLS[k]}</label>
+          <button type="button" data-pdf-up="${i}" ${i === 0 ? 'disabled' : ''}>↑</button>
+          <button type="button" data-pdf-down="${i}" ${i === p.order.length - 1 ? 'disabled' : ''}>↓</button>
+        </div>`).join('');
   const fonts = Object.entries(PDF_FONTS).map(([k, v]) => `<option value="${k}" ${p.font === k ? 'selected' : ''}>${v[0]}</option>`).join('');
   return `
-        <details class="pdf-designer" open style="margin-bottom:12px">
-          <summary style="cursor:pointer;font-weight:600">PDF-Designer</summary>
-          <div class="row" style="margin:10px 0">
+  <div class="modal-bg" id="pdfEditor">
+    <div class="modal pdf-modal" role="dialog" aria-modal="true" aria-label="PDF bearbeiten">
+      <div class="modal-head"><h3>PDF bearbeiten · ${esc(set.name)}</h3><button type="button" class="modal-x" data-pdf-close aria-label="Schliessen">×</button></div>
+      <div class="pdf-grid">
+        <div>
+          <div class="row" style="margin-bottom:10px">
             <button type="button" data-pdf-orient="portrait" class="${p.orient === 'portrait' ? 'primary' : ''}">Hochformat</button>
             <button type="button" data-pdf-orient="landscape" class="${p.orient === 'landscape' ? 'primary' : ''}">Querformat</button>
           </div>
-          <div class="grid2">
-            <label class="muted">Schrift<select data-pdf-font>${fonts}</select></label>
-            <label class="muted">Grösse (pt)<input type="number" data-pdf-size min="7" max="14" step="0.5" value="${p.size}"></label>
-          </div>
+          <label class="muted" style="display:block;margin-bottom:8px">Schrift<select data-pdf-font>${fonts}</select></label>
+          <label class="muted" style="display:block;margin-bottom:8px">Grösse (pt)<input type="number" data-pdf-size min="7" max="14" step="0.5" value="${p.size}"></label>
           <p class="muted" style="margin:12px 0 4px">Spalten: Haken = sichtbar, Pfeile = Reihenfolge</p>
           ${cols}
-          <p class="muted" style="margin:12px 0 4px">Vorschau</p>
-          <iframe title="PDF-Vorschau" srcdoc="${esc(pdfDocHtml(set, p))}" style="width:100%;height:${p.orient === 'portrait' ? 420 : 300}px;border:1px solid var(--line);border-radius:8px;background:#fff"></iframe>
-        </details>`;
+        </div>
+        <div>
+          <p class="muted" style="margin:0 0 6px">Vorschau</p>
+          <iframe title="PDF-Vorschau" srcdoc="${esc(pdfDocHtml(set, p))}" style="width:100%;height:60vh;min-height:320px;border:1px solid var(--line);border-radius:8px;background:#fff"></iframe>
+        </div>
+      </div>
+      <div class="row" style="justify-content:flex-end;margin-top:14px">
+        <button type="button" data-pdf-close>Schliessen</button>
+        <button type="button" class="primary" data-exp="pdf">PDF öffnen</button>
+      </div>
+    </div>
+  </div>`;
 }
 function setDetail(cur){
   const rows = schedule(cur);
@@ -453,9 +467,8 @@ function setDetail(cur){
           <button data-dup="${cur.id}">Duplizieren</button>
           <button data-exp="txt">TXT</button>
           <button data-exp="csv">CSV</button>
-          <button data-exp="pdf">PDF in Setlist erstellen</button>
+          <button data-pdf-open="${cur.id}">PDF in Setlist erstellen</button>
         </div>
-        ${pdfDesigner(cur)}
         <ol>${items}</ol>
         <div class="row" style="margin-top:12px">
           <select id="addSong" style="flex:1;min-width:160px">
@@ -532,6 +545,9 @@ function render(){
   $('#userInfo').textContent = loggedIn ? user.email : '';
   if (!loggedIn) { $('#app').innerHTML = renderLogin(); return; }
   $('#app').innerHTML = `${renderToolbar()}<div class="col">${renderSongs()}</div><div class="col">${renderSetlists()}</div>`;
+  const pdfSet = pdfEditId && state.setlists.find(x => x.id === pdfEditId);
+  if (pdfSet) $('#app').insertAdjacentHTML('beforeend', pdfEditorHtml(pdfSet));
+  else pdfEditId = null;
   if (pendingScroll) {
     const el = document.querySelector(pendingScroll);
     if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -784,6 +800,7 @@ function topNote(text){
 }
 function handleChrome(e){
   const t = e.target;
+  if (t.closest('[data-pdf-close]') || t.id === 'pdfEditor') { pdfEditId = null; render(); return true; }
   if (t.closest('#tipsBtn') || t.closest('#supportBtn')) { topNote('Funktion wird noch implementiert'); return true; }
   const lg = t.closest('[data-legal]');
   if (lg) { topNote('Funktion wird noch implementiert'); return true; }
@@ -795,7 +812,7 @@ function handleChrome(e){
   return false;
 }
 document.addEventListener('keydown', e => {
-  if (e.key === 'Escape') document.querySelectorAll('.modal-bg').forEach(m => m.classList.add('hidden'));
+  if (e.key === 'Escape') { document.querySelectorAll('.modal-bg').forEach(m => m.classList.add('hidden')); if (pdfEditId) { pdfEditId = null; render(); } }
 });
 
 // ---- Events ----
@@ -887,6 +904,7 @@ document.addEventListener('click', e => {
     state.setlists.push(copy);
     activeSetId = copy.id; save(); render(); return;
   }
+  if (b.dataset.pdfOpen) { pdfEditId = b.dataset.pdfOpen; render(); return; }
   if (b.dataset.pdfOrient) { pdfPrefs().orient = b.dataset.pdfOrient; save(); render(); return; }
   if (b.dataset.pdfUp !== undefined || b.dataset.pdfDown !== undefined) {
     const p = pdfPrefs();
