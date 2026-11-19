@@ -73,7 +73,6 @@ ZUKUNFT
 - Aufbau (Android-Ansicht): Song bearbeiten
 - Zusammenlegung der Anmeldung mit dem StageMate-Account (zuerst eigenes Login, Zeitpunkt und Phase noch offen)
 - Reaper-.rpp-Import für Songs (analog zu StageMate)
-- App-Icon im Stil des StageMate-Icons
 - Englische Oberfläche
 
 
@@ -84,3 +83,4 @@ Gross
 
 Klein
 17.11.2026 – Projektgerüst angelegt (Ordner, RoadMap, Funktionen, Changelog)
+19.11.2026 – v0.4.4 Build 13: App-Icon im StageMate-Stil (M durch C), Manifest und Icon-Links
