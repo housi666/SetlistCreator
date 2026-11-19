@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>SetlistCreator · v0.4.18</title>
+<title>SetlistCreator · v0.4.19</title>
 <link rel="icon" type="image/svg+xml" href="icon.svg">
 <link rel="icon" type="image/png" sizes="32x32" href="icon-32.png">
 <link rel="apple-touch-icon" href="icon-180.png">
@@ -117,7 +117,7 @@ footer{padding:14px 20px;color:var(--muted);font-size:12px;text-align:center}
   <div class="row" style="gap:8px"><span id="userInfo" class="muted" style="color:var(--panel-text)"></span><button id="tipsBtn" type="button" class="hdr-btn">💡 Tipps</button><button id="supportBtn" type="button" class="hdr-btn">💬 Support</button><button id="logoutBtn" type="button" style="display:none">Abmelden</button><button id="reloadBtn" type="button" title="Neueste Version laden (ohne Zwischenspeicher)">Aktualisieren</button></div>
 </header>
 <main id="app"></main>
-<footer>SetlistCreator v0.4.18 · Build 27 · 19.11.2026 · Alpha · Login über Firebase (eigenes Projekt setlistcreator-54d5d), Daten pro Konto · <span id="status"></span><br><button type="button" class="legal-link" data-legal="terms">Nutzungsbedingungen</button> · <button type="button" class="legal-link" data-legal="privacy">Datenschutz</button></footer>
+<footer>SetlistCreator v0.4.19 · Build 28 · 19.11.2026 · Alpha · Login über Firebase (eigenes Projekt setlistcreator-54d5d), Daten pro Konto · <span id="status"></span><br><button type="button" class="legal-link" data-legal="terms">Nutzungsbedingungen</button> · <button type="button" class="legal-link" data-legal="privacy">Datenschutz</button></footer>
 
 <div class="modal-bg hidden" id="tipsModal">
   <div class="modal" role="dialog" aria-modal="true" aria-labelledby="tipsTitle">
@@ -435,6 +435,57 @@ function applyPdfZoom(){
   const lbl = document.getElementById('zoomLbl');
   if (lbl) lbl.textContent = Math.round(z * 100) + ' %';
 }
+let html2pdfLoad = null;
+function loadHtml2Pdf(){
+  if (window.html2pdf) return Promise.resolve(window.html2pdf);
+  if (!html2pdfLoad) html2pdfLoad = new Promise((res, rej) => {
+    const sc = document.createElement('script');
+    sc.src = 'https://cdn.jsdelivr.net/npm/html2pdf.js@0.10.2/dist/html2pdf.bundle.min.js';
+    sc.onload = () => res(window.html2pdf);
+    sc.onerror = () => { html2pdfLoad = null; rej(new Error('load')); };
+    document.head.appendChild(sc);
+  });
+  return html2pdfLoad;
+}
+// Download: erzeugt eine PDF-Datei aus dem Blatt (Schrift wie in der Vorschau)
+async function downloadPdf(set){
+  topNote('PDF wird erstellt …', 'ok');
+  let wrap = null;
+  try {
+    const h2p = await loadHtml2Pdf();
+    const p = pdfPrefs();
+    const land = p.orient === 'landscape';
+    wrap = document.createElement('div');
+    wrap.style.cssText = 'position:fixed;left:-10000px;top:0;';
+    wrap.innerHTML = `<div class="pdf-sheet" style="position:relative;transform:none;width:${land ? 297 : 210}mm;height:auto;padding:14mm;font-family:${pdfFamily(p)};font-size:${p.size}pt">${pdfInner(set, p)}</div>`;
+    document.body.appendChild(wrap);
+    await h2p().set({
+      margin: 0,
+      filename: fileBase(set.name) + '.pdf',
+      image: { type: 'jpeg', quality: 0.98 },
+      html2canvas: { scale: 2, useCORS: true },
+      jsPDF: { unit: 'mm', format: 'a4', orientation: p.orient }
+    }).from(wrap.firstElementChild).save();
+    topNote('PDF gespeichert', 'ok');
+  } catch (err) {
+    console.error('PDF-Erstellung fehlgeschlagen', err);
+    topNote('PDF konnte nicht erstellt werden – Internetverbindung prüfen');
+  } finally {
+    if (wrap) wrap.remove();
+  }
+}
+// Drucken: öffnet nur den Browser-Druckdialog für das Blatt
+function printPdf(set){
+  const f = document.createElement('iframe');
+  f.style.cssText = 'position:fixed;right:0;bottom:0;width:0;height:0;border:0;';
+  f.onload = () => {
+    try { f.contentWindow.focus(); f.contentWindow.print(); }
+    catch (err) { topNote('Drucken ist hier nicht möglich'); }
+    setTimeout(() => f.remove(), 1500);
+  };
+  f.srcdoc = pdfDocHtml(set, pdfPrefs());
+  document.body.appendChild(f);
+}
 function ensurePdfFontFace(p){
   let st = document.getElementById('pdfFontFace');
   if (!st) { st = document.createElement('style'); st.id = 'pdfFontFace'; document.head.appendChild(st); }
@@ -487,7 +538,8 @@ function pdfEditorHtml(set){
       </div>
       <div class="row" style="justify-content:flex-end;margin-top:14px">
         <button type="button" data-pdf-close>Zurück zur Setlist</button>
-        <button type="button" class="primary" data-exp="pdf">PDF öffnen</button>
+        <button type="button" class="primary" data-pdf-download="1">PDF Download als Datei</button>
+        <button type="button" data-pdf-print="1">PDF Drucken</button>
       </div>
   </section>`;
 }
@@ -852,10 +904,12 @@ function openTips(){
   openModal('tipsModal');
 }
 let topNoteTimer = null;
-function topNote(text){
+function topNote(text, tone = 'red'){
   let n = $('topNote');
   if (!n) { n = document.createElement('div'); n.id = 'topNote'; n.className = 'topnote'; document.body.appendChild(n); }
   n.textContent = text;
+  n.style.background = tone === 'ok' ? 'var(--accent)' : '#c0392b';
+  n.style.color = tone === 'ok' ? 'var(--accent-text)' : '#fff';
   n.classList.add('show');
   clearTimeout(topNoteTimer);
   topNoteTimer = setTimeout(() => n.classList.remove('show'), 3000);
@@ -975,6 +1029,11 @@ document.addEventListener('click', e => {
     applyPdfZoom(); return;
   }
   if (b.dataset.pdfOpen) { pdfEditId = b.dataset.pdfOpen; render(); return; }
+  if (b.dataset.pdfDownload || b.dataset.pdfPrint) {
+    const set = state.setlists.find(x => x.id === pdfEditId);
+    if (set) { if (b.dataset.pdfDownload) downloadPdf(set); else printPdf(set); }
+    return;
+  }
   if (b.dataset.pdfOrient) { pdfPrefs().orient = b.dataset.pdfOrient; save(); render(); return; }
   if (b.dataset.pdfUp !== undefined || b.dataset.pdfDown !== undefined) {
     const p = pdfPrefs();

@@ -1,9 +1,12 @@
-SetlistCreator · v0.4.18 · Build 27 · 19.11.2026 · Phase Alpha
+SetlistCreator · v0.4.19 · Build 28 · 19.11.2026 · Phase Alpha
 
 Changelog · SetlistCreator
 Neueste Version zuerst. Zeiten = Schweizer Zeit
 
 ** ALPHA **
+
+v0.4.19 · Build 28 · 19.11.2026 13:05
+- „PDF öffnen“ entfernt; stattdessen „PDF Download als Datei“ (PDF-Datei speichern) und „PDF Drucken“ (Browser-Druckdialog)
 
 v0.4.18 · Build 27 · 19.11.2026 13:00
 - PDF-Vorschau zeigt das ganze A4-Blatt in der Erstansicht; eigene Zoom-Funktion (−, +, Einpassen)
