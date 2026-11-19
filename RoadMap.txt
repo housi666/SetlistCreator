@@ -65,7 +65,6 @@ F7  Akzentfarbe: übernommen von StageMate (#e8a33d). Regelwerk angepasst: Stage
 
 ZUKUNFT
 
-- SVG-Import (Logo, Grafik) mit Positionierung und Grössenbestimmung, inklusive Farbwechsel
 - Vorlagen erstellen, speichern, verwalten und exportieren
 - Anleitung „PDF im Druckmenü speichern“ (How-to, Hinweis in der App)
 - Design überarbeiten
@@ -90,3 +89,4 @@ Klein
 19.11.2026 – v0.4.9 Build 18: Android-Bereiche als eigene Seiten mit Zurück, Knöpfe volle Breite
 19.11.2026 – v0.4.10 Build 19: Tipps, Support, Nutzungsbedingungen und Datenschutz (Entwurf, Prüfung ausstehend)
 19.11.2026 – v0.4.13 Build 22: PDF-Designer mit Vorschau, Spalten ein-, ausblenden und verschieben, Schrift, Grösse und Ausrichtung
+19.11.2026 – v0.4.23 Build 32: SVG-Import im PDF-Designer mit Positionierung, Grösse und Farbwechsel
