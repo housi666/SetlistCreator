@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>SetlistCreator · v0.4.12</title>
+<title>SetlistCreator · v0.4.13</title>
 <link rel="icon" type="image/svg+xml" href="icon.svg">
 <link rel="icon" type="image/png" sizes="32x32" href="icon-32.png">
 <link rel="apple-touch-icon" href="icon-180.png">
@@ -106,7 +106,7 @@ footer{padding:14px 20px;color:var(--muted);font-size:12px;text-align:center}
   <div class="row" style="gap:8px"><span id="userInfo" class="muted" style="color:var(--panel-text)"></span><button id="tipsBtn" type="button" class="hdr-btn">💡 Tipps</button><button id="supportBtn" type="button" class="hdr-btn">💬 Support</button><button id="logoutBtn" type="button" style="display:none">Abmelden</button><button id="reloadBtn" type="button" title="Neueste Version laden (ohne Zwischenspeicher)">Aktualisieren</button></div>
 </header>
 <main id="app"></main>
-<footer>SetlistCreator v0.4.12 · Build 21 · 19.11.2026 · Alpha · Login über Firebase (eigenes Projekt setlistcreator-54d5d), Daten pro Konto · <span id="status"></span><br><button type="button" class="legal-link" data-legal="terms">Nutzungsbedingungen</button> · <button type="button" class="legal-link" data-legal="privacy">Datenschutz</button></footer>
+<footer>SetlistCreator v0.4.13 · Build 22 · 19.11.2026 · Alpha · Login über Firebase (eigenes Projekt setlistcreator-54d5d), Daten pro Konto · <span id="status"></span><br><button type="button" class="legal-link" data-legal="terms">Nutzungsbedingungen</button> · <button type="button" class="legal-link" data-legal="privacy">Datenschutz</button></footer>
 
 <div class="modal-bg hidden" id="tipsModal">
   <div class="modal" role="dialog" aria-modal="true" aria-labelledby="tipsTitle">
@@ -160,7 +160,20 @@ const $ = s => document.querySelector(s);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
 
+const PDF_COLS = { nr: 'Nr', start: 'Start', end: 'Ende', title: 'Titel', artist: 'Interpret', key: 'Tonart', bpm: 'BPM', dur: 'Dauer', tempo: 'Tempowechsel', notes: 'Notizen' };
+const PDF_FONTS = { arial: ['Arial', 'Arial, Helvetica, sans-serif'], georgia: ['Georgia', 'Georgia, serif'], verdana: ['Verdana', 'Verdana, sans-serif'], courier: ['Courier New', '"Courier New", Courier, monospace'] };
+function defaultPdf(){
+  return { order: Object.keys(PDF_COLS), on: Object.fromEntries(Object.keys(PDF_COLS).map(k => [k, true])), font: 'arial', size: 10, orient: 'portrait' };
+}
+function pdfPrefs(){
+  if (!state.pdf) state.pdf = defaultPdf();
+  const d = defaultPdf();
+  state.pdf.order = [...state.pdf.order.filter(k => PDF_COLS[k]), ...d.order.filter(k => !state.pdf.order.includes(k))];
+  Object.keys(PDF_COLS).forEach(k => { if (typeof state.pdf.on[k] !== 'boolean') state.pdf.on[k] = true; });
+  return state.pdf;
+}
 function migrate(d){
+  if (!d.pdf) d.pdf = defaultPdf();
   d.setlists.forEach(s => {
     if (!Array.isArray(s.entries)) {
       s.entries = (s.songIds || []).map(id => ({ id, start: '' }));
@@ -175,10 +188,10 @@ function load(){
     const d = JSON.parse(localStorage.getItem(KEY));
     if (d && Array.isArray(d.songs) && Array.isArray(d.setlists)) return migrate(d);
   } catch (e) {}
-  return { songs: [], setlists: [] };
+  return { songs: [], setlists: [], pdf: defaultPdf() };
 }
 
-let state = { songs: [], setlists: [] };
+let state = { songs: [], setlists: [], pdf: null };
 let user = null;
 let ready = false;
 let saveTimer = null;
@@ -203,7 +216,7 @@ function save(){
   if (!user || !ready) return;
   clearTimeout(saveTimer);
   saveTimer = setTimeout(() => {
-    setDoc(doc(db, 'users', user.uid), { songs: state.songs, setlists: state.setlists, updatedAt: new Date().toISOString() })
+    setDoc(doc(db, 'users', user.uid), { songs: state.songs, setlists: state.setlists, pdf: pdfPrefs(), updatedAt: new Date().toISOString() })
       .then(() => setStatus('Gespeichert'))
       .catch(err => { console.error('Speichern fehlgeschlagen', err); setStatus('Speichern fehlgeschlagen – Firestore-Datenbank und Regeln prüfen'); });
   }, 500);
@@ -214,7 +227,7 @@ onAuthStateChanged(auth, async u => {
   ready = false;
   activeSetId = null;
   editSongId = null;
-  state = { songs: [], setlists: [] };
+  state = { songs: [], setlists: [], pdf: null };
   render();
   if (!u) { setStatus(''); return; }
   setStatus('Daten werden geladen …');
@@ -363,6 +376,49 @@ function renderSongs(){
 
 // ---- Setlisten (rechte Spalte) ----
 // Eine Setlist klappt unter ihrer Karte auf, nicht unten in der Spalte.
+function pdfDocHtml(set, prefs){
+  const rows = exportRows(set);
+  const cols = prefs.order.filter(k => prefs.on[k]);
+  const fam = PDF_FONTS[prefs.font][1];
+  const th = cols.map(k => `<th class="c-${k}">${PDF_COLS[k]}</th>`).join('');
+  const tr = rows.map(r => `<tr>${cols.map(k => `<td class="c-${k}">${esc(r[k])}</td>`).join('')}</tr>`).join('');
+  return `<!DOCTYPE html><html lang="de"><head><meta charset="UTF-8"><title>${esc(set.name)}</title><style>
+@page{size:A4 ${prefs.orient};margin:14mm}
+body{font-family:${fam};color:#1b1c22;font-size:${prefs.size}pt;margin:0}
+h1{font-size:1.8em;margin:0 0 1.5mm}
+.meta{color:#6b6e7b;font-size:.9em;margin-bottom:5mm}
+table{width:100%;border-collapse:collapse}
+th,td{border-bottom:0.5pt solid #cfcfd8;padding:2mm 1.5mm;text-align:left;vertical-align:top}
+th{color:#6b6e7b;font-weight:600;border-bottom:1pt solid #6b6e7b}
+.c-nr,.c-start,.c-end,.c-bpm,.c-dur,.c-key{white-space:nowrap}
+</style></head><body><h1>${esc(set.name)}</h1><div class="meta">Gesamtdauer ${totalOf(set)} · ${rows.length} Songs</div><table><thead><tr>${th}</tr></thead><tbody>${tr}</tbody></table></body></html>`;
+}
+function pdfDesigner(set){
+  const p = pdfPrefs();
+  const cols = p.order.map((k, i) => `
+      <div class="row" style="gap:6px;padding:4px 0">
+        <label style="flex:1;display:flex;align-items:center;gap:8px;cursor:pointer"><input type="checkbox" data-pdf-on="${k}" ${p.on[k] ? 'checked' : ''} style="width:auto"> ${PDF_COLS[k]}</label>
+        <button type="button" data-pdf-up="${i}" ${i === 0 ? 'disabled' : ''}>↑</button>
+        <button type="button" data-pdf-down="${i}" ${i === p.order.length - 1 ? 'disabled' : ''}>↓</button>
+      </div>`).join('');
+  const fonts = Object.entries(PDF_FONTS).map(([k, v]) => `<option value="${k}" ${p.font === k ? 'selected' : ''}>${v[0]}</option>`).join('');
+  return `
+        <details class="pdf-designer" open style="margin-bottom:12px">
+          <summary style="cursor:pointer;font-weight:600">PDF-Designer</summary>
+          <div class="row" style="margin:10px 0">
+            <button type="button" data-pdf-orient="portrait" class="${p.orient === 'portrait' ? 'primary' : ''}">Hochformat</button>
+            <button type="button" data-pdf-orient="landscape" class="${p.orient === 'landscape' ? 'primary' : ''}">Querformat</button>
+          </div>
+          <div class="grid2">
+            <label class="muted">Schrift<select data-pdf-font>${fonts}</select></label>
+            <label class="muted">Grösse (pt)<input type="number" data-pdf-size min="7" max="14" step="0.5" value="${p.size}"></label>
+          </div>
+          <p class="muted" style="margin:12px 0 4px">Spalten: Haken = sichtbar, Pfeile = Reihenfolge</p>
+          ${cols}
+          <p class="muted" style="margin:12px 0 4px">Vorschau</p>
+          <iframe title="PDF-Vorschau" srcdoc="${esc(pdfDocHtml(set, p))}" style="width:100%;height:${p.orient === 'portrait' ? 420 : 300}px;border:1px solid var(--line);border-radius:8px;background:#fff"></iframe>
+        </details>`;
+}
 function setDetail(cur){
   const rows = schedule(cur);
   const items = rows.map((r, i) => {
@@ -396,9 +452,9 @@ function setDetail(cur){
           <button data-dup="${cur.id}">Duplizieren</button>
           <button data-exp="txt">TXT</button>
           <button data-exp="csv">CSV</button>
-          <button data-exp="pdf-portrait">PDF Hochformat</button>
-          <button data-exp="pdf-landscape">PDF Querformat</button>
+          <button data-exp="pdf">PDF exportieren</button>
         </div>
+        ${pdfDesigner(cur)}
         <ol>${items}</ol>
         <div class="row" style="margin-top:12px">
           <select id="addSong" style="flex:1;min-width:160px">
@@ -587,31 +643,10 @@ function exportSet(set, kind){
     const body = rows.map(r => [r.nr, r.start, r.end, r.title, r.artist, r.key, r.bpm, r.dur, r.tempo, r.notes].map(q).join(';'));
     download(fileBase(set.name) + '.csv', '﻿' + [cols.map(q).join(';'), ...body].join('\r\n'), 'text/csv;charset=utf-8');
   }
-  if (kind === 'pdf-portrait' || kind === 'pdf-landscape') {
-    const orient = kind === 'pdf-landscape' ? 'landscape' : 'portrait';
+  if (kind === 'pdf') {
     const w = window.open('', '_blank');
     if (!w) { alert('Pop-up blockiert. Bitte für diese Seite erlauben.'); return; }
-    const tr = rows.map(r => `<tr>
-      <td class="nr">${r.nr}</td><td class="start">${esc(r.start)}</td><td>${esc(r.title)}</td>
-      <td>${esc(r.artist)}</td><td>${esc(r.key)}</td><td class="bpm">${esc(r.bpm)}</td><td class="dur">${esc(r.dur)}</td>
-      <td>${esc([r.tempo, r.notes].filter(Boolean).join(' · '))}</td></tr>`).join('');
-    w.document.write(`<!DOCTYPE html><html lang="de"><head><meta charset="UTF-8"><title>${esc(set.name)}</title>
-<style>
-@page{size:A4 ${orient};margin:14mm}
-body{font-family:Inter,Arial,sans-serif;color:#1b1c22;font-size:10.5pt;margin:0}
-h1{font-size:18pt;margin:0 0 1.5mm}
-.meta{color:#6b6e7b;font-size:9.5pt;margin-bottom:5mm}
-table{width:100%;border-collapse:collapse;font-size:9.5pt}
-th,td{border-bottom:0.5pt solid #cfcfd8;padding:2mm 1.5mm;text-align:left;vertical-align:top}
-th{color:#6b6e7b;font-weight:600;border-bottom:1pt solid #6b6e7b}
-td.nr,th.nr{width:9mm}
-td.start,th.start{width:16mm;white-space:nowrap}
-td.bpm,th.bpm{width:12mm}
-td.dur,th.dur{width:14mm;white-space:nowrap}
-</style></head><body>
-<h1>${esc(set.name)}</h1><div class="meta">Gesamtdauer ${total} · ${rows.length} Songs</div>
-<table><thead><tr><th class="nr">Nr</th><th class="start">Start</th><th>Titel</th><th>Interpret</th><th>Tonart</th><th class="bpm">BPM</th><th class="dur">Dauer</th><th>Tempo / Notizen</th></tr></thead><tbody>${tr}</tbody></table>
-</body></html>`);
+    w.document.write(pdfDocHtml(set, pdfPrefs()));
     w.document.close();
     setTimeout(() => w.print(), 300);
   }
@@ -852,6 +887,14 @@ document.addEventListener('click', e => {
     state.setlists.push(copy);
     activeSetId = copy.id; save(); render(); return;
   }
+  if (b.dataset.pdfOrient) { pdfPrefs().orient = b.dataset.pdfOrient; save(); render(); return; }
+  if (b.dataset.pdfUp !== undefined || b.dataset.pdfDown !== undefined) {
+    const p = pdfPrefs();
+    const i = b.dataset.pdfUp !== undefined ? +b.dataset.pdfUp : +b.dataset.pdfDown;
+    const j = b.dataset.pdfUp !== undefined ? i - 1 : i + 1;
+    if (j >= 0 && j < p.order.length) { [p.order[i], p.order[j]] = [p.order[j], p.order[i]]; save(); render(); }
+    return;
+  }
   const cur = state.setlists.find(s => s.id === activeSetId);
   if (!cur) return;
   if (b.dataset.exp) return exportSet(cur, b.dataset.exp);
@@ -878,6 +921,14 @@ document.addEventListener('input', e => {
 
 document.addEventListener('change', e => {
   const t = e.target;
+  if (t.matches && (t.matches('[data-pdf-on]') || t.matches('[data-pdf-font]') || t.matches('[data-pdf-size]'))) {
+    if (!user || !ready) return;
+    const p = pdfPrefs();
+    if (t.matches('[data-pdf-on]')) p.on[t.dataset.pdfOn] = t.checked;
+    else if (t.matches('[data-pdf-font]')) p.font = t.value;
+    else p.size = Math.min(14, Math.max(7, parseFloat(t.value) || 10));
+    save(); render(); return;
+  }
   if (!t.matches || !t.matches('[data-start]')) return;
   const cur = state.setlists.find(s => s.id === activeSetId);
   if (!cur) return;

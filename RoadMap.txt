@@ -1,4 +1,4 @@
-SetlistCreator · v0.4.12 · Build 21 · 19.11.2026 · Phase Alpha
+SetlistCreator · v0.4.13 · Build 22 · 19.11.2026 · Phase Alpha
 
 Legende: [x] erledigt, [ ] offen
 
@@ -65,7 +65,6 @@ F7  Akzentfarbe: übernommen von StageMate (#e8a33d). Regelwerk angepasst: Stage
 
 ZUKUNFT
 
-- PDF-Designer: Vorschauseite, Spalten ein- und ausblenden und verschieben, Schriftgrösse und Schriftart
 - SVG-Import (Logo, Grafik) mit Positionierung und Grössenbestimmung, inklusive Farbwechsel
 - Vorlagen erstellen, speichern, verwalten und exportieren
 - Anleitung „PDF im Druckmenü speichern“ (How-to, Hinweis in der App)
@@ -90,3 +89,4 @@ Klein
 19.11.2026 – v0.4.8 Build 17: Android-Knöpfe in Akzentfarbe
 19.11.2026 – v0.4.9 Build 18: Android-Bereiche als eigene Seiten mit Zurück, Knöpfe volle Breite
 19.11.2026 – v0.4.10 Build 19: Tipps, Support, Nutzungsbedingungen und Datenschutz (Entwurf, Prüfung ausstehend)
+19.11.2026 – v0.4.13 Build 22: PDF-Designer mit Vorschau, Spalten ein-, ausblenden und verschieben, Schrift, Grösse und Ausrichtung

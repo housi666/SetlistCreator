@@ -1,9 +1,14 @@
-SetlistCreator · v0.4.12 · Build 21 · 19.11.2026 · Phase Alpha
+SetlistCreator · v0.4.13 · Build 22 · 19.11.2026 · Phase Alpha
 
 Changelog · SetlistCreator
 Neueste Version zuerst. Zeiten = Schweizer Zeit
 
 ** ALPHA **
+
+v0.4.13 · Build 22 · 19.11.2026 12:30
+- PDF-Designer je Setlist: Vorschau, Spalten ein- und ausblenden und verschieben, Schrift, Grösse (7 bis 14 pt), Hoch- oder Querformat
+- Einstellungen werden im Konto gespeichert
+- Export „PDF exportieren“ verwendet die Einstellungen aus dem Designer
 
 v0.4.12 · Build 21 · 19.11.2026 11:55
 - Nutzungsbedingungen und Datenschutz zeigen vorerst den roten Hinweis „Funktion wird noch implementiert“
