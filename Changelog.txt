@@ -1,9 +1,12 @@
-SetlistCreator · v0.4.16 · Build 25 · 19.11.2026 · Phase Alpha
+SetlistCreator · v0.4.17 · Build 26 · 19.11.2026 · Phase Alpha
 
 Changelog · SetlistCreator
 Neueste Version zuerst. Zeiten = Schweizer Zeit
 
 ** ALPHA **
+
+v0.4.17 · Build 26 · 19.11.2026 12:55
+- PDF-Designer öffnet auf einer eigenen Seite mit „Zurück“ statt als Fenster über der Ansicht
 
 v0.4.16 · Build 25 · 19.11.2026 12:50
 - „PDF in Setlist erstellen“ öffnet ein Bearbeitungsfenster mit Einstellungen und grosser Vorschau

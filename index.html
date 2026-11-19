@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>SetlistCreator · v0.4.16</title>
+<title>SetlistCreator · v0.4.17</title>
 <link rel="icon" type="image/svg+xml" href="icon.svg">
 <link rel="icon" type="image/png" sizes="32x32" href="icon-32.png">
 <link rel="apple-touch-icon" href="icon-180.png">
@@ -109,7 +109,7 @@ footer{padding:14px 20px;color:var(--muted);font-size:12px;text-align:center}
   <div class="row" style="gap:8px"><span id="userInfo" class="muted" style="color:var(--panel-text)"></span><button id="tipsBtn" type="button" class="hdr-btn">💡 Tipps</button><button id="supportBtn" type="button" class="hdr-btn">💬 Support</button><button id="logoutBtn" type="button" style="display:none">Abmelden</button><button id="reloadBtn" type="button" title="Neueste Version laden (ohne Zwischenspeicher)">Aktualisieren</button></div>
 </header>
 <main id="app"></main>
-<footer>SetlistCreator v0.4.16 · Build 25 · 19.11.2026 · Alpha · Login über Firebase (eigenes Projekt setlistcreator-54d5d), Daten pro Konto · <span id="status"></span><br><button type="button" class="legal-link" data-legal="terms">Nutzungsbedingungen</button> · <button type="button" class="legal-link" data-legal="privacy">Datenschutz</button></footer>
+<footer>SetlistCreator v0.4.17 · Build 26 · 19.11.2026 · Alpha · Login über Firebase (eigenes Projekt setlistcreator-54d5d), Daten pro Konto · <span id="status"></span><br><button type="button" class="legal-link" data-legal="terms">Nutzungsbedingungen</button> · <button type="button" class="legal-link" data-legal="privacy">Datenschutz</button></footer>
 
 <div class="modal-bg hidden" id="tipsModal">
   <div class="modal" role="dialog" aria-modal="true" aria-labelledby="tipsTitle">
@@ -408,9 +408,11 @@ function pdfEditorHtml(set){
         </div>`).join('');
   const fonts = Object.entries(PDF_FONTS).map(([k, v]) => `<option value="${k}" ${p.font === k ? 'selected' : ''}>${v[0]}</option>`).join('');
   return `
-  <div class="modal-bg" id="pdfEditor">
-    <div class="modal pdf-modal" role="dialog" aria-modal="true" aria-label="PDF bearbeiten">
-      <div class="modal-head"><h3>PDF bearbeiten · ${esc(set.name)}</h3><button type="button" class="modal-x" data-pdf-close aria-label="Schliessen">×</button></div>
+  <section class="card" id="pdfPage">
+      <div class="row" style="margin-bottom:12px">
+        <button type="button" id="backBtn" data-pdf-close class="on" style="opacity:1">← Zurück</button>
+        <h2 style="flex:1;margin:0">PDF-Designer · ${esc(set.name)}</h2>
+      </div>
       <div class="pdf-grid">
         <div>
           <div class="row" style="margin-bottom:10px">
@@ -428,11 +430,10 @@ function pdfEditorHtml(set){
         </div>
       </div>
       <div class="row" style="justify-content:flex-end;margin-top:14px">
-        <button type="button" data-pdf-close>Schliessen</button>
+        <button type="button" data-pdf-close>Zurück zur Setlist</button>
         <button type="button" class="primary" data-exp="pdf">PDF öffnen</button>
       </div>
-    </div>
-  </div>`;
+  </section>`;
 }
 function setDetail(cur){
   const rows = schedule(cur);
@@ -544,10 +545,14 @@ function render(){
   $('#logoutBtn').style.display = loggedIn ? '' : 'none';
   $('#userInfo').textContent = loggedIn ? user.email : '';
   if (!loggedIn) { $('#app').innerHTML = renderLogin(); return; }
-  $('#app').innerHTML = `${renderToolbar()}<div class="col">${renderSongs()}</div><div class="col">${renderSetlists()}</div>`;
   const pdfSet = pdfEditId && state.setlists.find(x => x.id === pdfEditId);
-  if (pdfSet) $('#app').insertAdjacentHTML('beforeend', pdfEditorHtml(pdfSet));
-  else pdfEditId = null;
+  if (pdfSet) {
+    $('#app').innerHTML = pdfEditorHtml(pdfSet);
+    window.scrollTo(0, 0);
+    return;
+  }
+  pdfEditId = null;
+  $('#app').innerHTML = `${renderToolbar()}<div class="col">${renderSongs()}</div><div class="col">${renderSetlists()}</div>`;
   if (pendingScroll) {
     const el = document.querySelector(pendingScroll);
     if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -800,7 +805,7 @@ function topNote(text){
 }
 function handleChrome(e){
   const t = e.target;
-  if (t.closest('[data-pdf-close]') || t.id === 'pdfEditor') { pdfEditId = null; render(); return true; }
+  if (t.closest('[data-pdf-close]')) { pdfEditId = null; render(); return true; }
   if (t.closest('#tipsBtn') || t.closest('#supportBtn')) { topNote('Funktion wird noch implementiert'); return true; }
   const lg = t.closest('[data-legal]');
   if (lg) { topNote('Funktion wird noch implementiert'); return true; }
