@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>SetlistCreator · v0.4.7</title>
+<title>SetlistCreator · v0.4.8</title>
 <link rel="icon" type="image/svg+xml" href="icon.svg">
 <link rel="icon" type="image/png" sizes="32x32" href="icon-32.png">
 <link rel="apple-touch-icon" href="icon-180.png">
@@ -62,7 +62,8 @@ footer{padding:14px 20px;color:var(--muted);font-size:12px;text-align:center}
 .bpm-item.on{color:var(--text);font-weight:700;font-size:22px}
 .bpm-pad{height:80px}
 .toolbar{grid-column:1 / -1;display:flex;flex-wrap:wrap;gap:8px;margin-bottom:-4px}
-.toolbar button.on{background:var(--accent);color:var(--accent-text);border-color:var(--accent);font-weight:600}
+.toolbar button{background:var(--accent);color:var(--accent-text);border-color:var(--accent);font-weight:600;opacity:.55}
+.toolbar button.on{opacity:1}
 </style>
 </head>
 <body>
@@ -71,7 +72,7 @@ footer{padding:14px 20px;color:var(--muted);font-size:12px;text-align:center}
   <div class="row" style="gap:8px"><span id="userInfo" class="muted" style="color:var(--panel-text)"></span><button id="logoutBtn" type="button" style="display:none">Abmelden</button><button id="reloadBtn" type="button" title="Neueste Version laden (ohne Zwischenspeicher)">Aktualisieren</button></div>
 </header>
 <main id="app"></main>
-<footer>SetlistCreator v0.4.7 · Build 16 · 19.11.2026 · Alpha · Login über Firebase (eigenes Projekt setlistcreator-54d5d), Daten pro Konto · <span id="status"></span></footer>
+<footer>SetlistCreator v0.4.8 · Build 17 · 19.11.2026 · Alpha · Login über Firebase (eigenes Projekt setlistcreator-54d5d), Daten pro Konto · <span id="status"></span></footer>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";

@@ -1,9 +1,12 @@
-SetlistCreator · v0.4.7 · Build 16 · 19.11.2026 · Phase Alpha
+SetlistCreator · v0.4.8 · Build 17 · 19.11.2026 · Phase Alpha
 
 Changelog · SetlistCreator
 Neueste Version zuerst. Zeiten = Schweizer Zeit
 
 ** ALPHA **
+
+v0.4.8 · Build 17 · 19.11.2026 09:40
+- Knöpfe in der Android-Ansicht in Akzentfarbe (Gelb); aktiver Bereich voll sichtbar, inaktiver gedämpft
 
 v0.4.7 · Build 16 · 19.11.2026 09:35
 - Knöpfe und Suche nur in der Android-Ansicht; Desktop bleibt wie bisher mit allen Bereichen sichtbar
