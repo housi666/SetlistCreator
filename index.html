@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>SetlistCreator · v0.4.17</title>
+<title>SetlistCreator · v0.4.18</title>
 <link rel="icon" type="image/svg+xml" href="icon.svg">
 <link rel="icon" type="image/png" sizes="32x32" href="icon-32.png">
 <link rel="apple-touch-icon" href="icon-180.png">
@@ -90,6 +90,14 @@ footer{padding:14px 20px;color:var(--muted);font-size:12px;text-align:center}
 .pdf-modal{width:min(980px,100%);max-height:92vh}
 .pdf-grid{display:grid;grid-template-columns:minmax(0,300px) minmax(0,1fr);gap:16px;align-items:start}
 @media (max-width:760px){.pdf-grid{grid-template-columns:1fr}}
+.pdf-frame{position:relative;overflow:hidden;background:#e8e8ee;border-radius:8px;margin:0 auto}
+.pdf-sheet{position:absolute;left:0;top:0;background:#fff;color:#1b1c22;box-sizing:border-box;padding:14mm;transform-origin:top left;overflow:hidden}
+.pdf-sheet h1{font-size:1.8em;margin:0 0 1.5mm}
+.pdf-sheet .meta{color:#6b6e7b;font-size:.9em;margin-bottom:5mm}
+.pdf-sheet table{width:100%;border-collapse:collapse}
+.pdf-sheet th,.pdf-sheet td{border-bottom:0.5pt solid #cfcfd8;padding:2mm 1.5mm;text-align:left;vertical-align:top}
+.pdf-sheet th{color:#6b6e7b;font-weight:600;border-bottom:1pt solid #6b6e7b}
+.pdf-sheet .c-nr,.pdf-sheet .c-start,.pdf-sheet .c-end,.pdf-sheet .c-bpm,.pdf-sheet .c-dur,.pdf-sheet .c-key{white-space:nowrap}
 .legal-ver{color:var(--muted);font-size:12px;margin-top:12px}
 .support-links{display:flex;flex-direction:column;gap:8px;margin:8px 0}
 .support-links a{color:var(--text);text-decoration:none;border:1px solid var(--line);border-radius:10px;padding:10px 12px}
@@ -109,7 +117,7 @@ footer{padding:14px 20px;color:var(--muted);font-size:12px;text-align:center}
   <div class="row" style="gap:8px"><span id="userInfo" class="muted" style="color:var(--panel-text)"></span><button id="tipsBtn" type="button" class="hdr-btn">💡 Tipps</button><button id="supportBtn" type="button" class="hdr-btn">💬 Support</button><button id="logoutBtn" type="button" style="display:none">Abmelden</button><button id="reloadBtn" type="button" title="Neueste Version laden (ohne Zwischenspeicher)">Aktualisieren</button></div>
 </header>
 <main id="app"></main>
-<footer>SetlistCreator v0.4.17 · Build 26 · 19.11.2026 · Alpha · Login über Firebase (eigenes Projekt setlistcreator-54d5d), Daten pro Konto · <span id="status"></span><br><button type="button" class="legal-link" data-legal="terms">Nutzungsbedingungen</button> · <button type="button" class="legal-link" data-legal="privacy">Datenschutz</button></footer>
+<footer>SetlistCreator v0.4.18 · Build 27 · 19.11.2026 · Alpha · Login über Firebase (eigenes Projekt setlistcreator-54d5d), Daten pro Konto · <span id="status"></span><br><button type="button" class="legal-link" data-legal="terms">Nutzungsbedingungen</button> · <button type="button" class="legal-link" data-legal="privacy">Datenschutz</button></footer>
 
 <div class="modal-bg hidden" id="tipsModal">
   <div class="modal" role="dialog" aria-modal="true" aria-labelledby="tipsTitle">
@@ -164,7 +172,8 @@ const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt
 const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
 
 const PDF_COLS = { nr: 'Nr', start: 'Start', end: 'Ende', title: 'Titel', artist: 'Interpret', key: 'Tonart', bpm: 'BPM', dur: 'Dauer', tempo: 'Tempowechsel', notes: 'Notizen' };
-const PDF_FONTS = { arial: ['Arial', 'Arial, Helvetica, sans-serif'], georgia: ['Georgia', 'Georgia, serif'], verdana: ['Verdana', 'Verdana, sans-serif'], courier: ['Courier New', '"Courier New", Courier, monospace'] };
+const PDF_FONTS = { arial: ['Arial', 'Arial, Helvetica, sans-serif'], georgia: ['Georgia', 'Georgia, serif'], verdana: ['Verdana', 'Verdana, sans-serif'], courier: ['Courier New', '"Courier New", Courier, monospace'], impact: ['Impact', 'Impact, "Arial Narrow Bold", sans-serif'] };
+let pdfZoom = 'fit';
 function defaultPdf(){
   return { order: Object.keys(PDF_COLS), on: Object.fromEntries(Object.keys(PDF_COLS).map(k => [k, true])), font: 'arial', size: 10, orient: 'portrait' };
 }
@@ -173,6 +182,7 @@ function pdfPrefs(){
   const d = defaultPdf();
   state.pdf.order = [...state.pdf.order.filter(k => PDF_COLS[k]), ...d.order.filter(k => !state.pdf.order.includes(k))];
   Object.keys(PDF_COLS).forEach(k => { if (typeof state.pdf.on[k] !== 'boolean') state.pdf.on[k] = true; });
+  if (!PDF_FONTS[state.pdf.font] && !(state.pdf.font === 'custom' && state.pdf.custom)) state.pdf.font = 'arial';
   return state.pdf;
 }
 function migrate(d){
@@ -381,32 +391,67 @@ function renderSongs(){
 
 // ---- Setlisten (rechte Spalte) ----
 // Eine Setlist klappt unter ihrer Karte auf, nicht unten in der Spalte.
-function pdfDocHtml(set, prefs){
+function pdfFamily(p){
+  if (p.font === 'custom' && p.custom) return `"${p.custom.name}", sans-serif`;
+  return PDF_FONTS[p.font][1];
+}
+function pdfFontFaceCss(p){
+  if (!(p.font === 'custom' && p.custom)) return '';
+  return `@font-face{font-family:"${p.custom.name}";src:url(${p.custom.data});}`;
+}
+function pdfInner(set, prefs){
   const rows = exportRows(set);
   const cols = prefs.order.filter(k => prefs.on[k]);
-  const fam = PDF_FONTS[prefs.font][1];
   const th = cols.map(k => `<th class="c-${k}">${PDF_COLS[k]}</th>`).join('');
   const tr = rows.map(r => `<tr>${cols.map(k => `<td class="c-${k}">${esc(r[k])}</td>`).join('')}</tr>`).join('');
+  return `<h1>${esc(set.name)}</h1><div class="meta">Gesamtdauer ${totalOf(set)} · ${rows.length} Songs</div><table><thead><tr>${th}</tr></thead><tbody>${tr}</tbody></table>`;
+}
+function pdfDocHtml(set, prefs){
   return `<!DOCTYPE html><html lang="de"><head><meta charset="UTF-8"><title>${esc(set.name)}</title><style>
+${pdfFontFaceCss(prefs)}
 @page{size:A4 ${prefs.orient};margin:14mm}
-body{font-family:${fam};color:#1b1c22;font-size:${prefs.size}pt;margin:0}
+body{font-family:${pdfFamily(prefs)};color:#1b1c22;font-size:${prefs.size}pt;margin:0}
 h1{font-size:1.8em;margin:0 0 1.5mm}
 .meta{color:#6b6e7b;font-size:.9em;margin-bottom:5mm}
 table{width:100%;border-collapse:collapse}
 th,td{border-bottom:0.5pt solid #cfcfd8;padding:2mm 1.5mm;text-align:left;vertical-align:top}
 th{color:#6b6e7b;font-weight:600;border-bottom:1pt solid #6b6e7b}
 .c-nr,.c-start,.c-end,.c-bpm,.c-dur,.c-key{white-space:nowrap}
-</style></head><body><h1>${esc(set.name)}</h1><div class="meta">Gesamtdauer ${totalOf(set)} · ${rows.length} Songs</div><table><thead><tr>${th}</tr></thead><tbody>${tr}</tbody></table></body></html>`;
+</style></head><body>${pdfInner(set, prefs)}</body></html>`;
+}
+// Vorschau: A4-Blatt, passend eingepasst oder mit eigenem Zoom
+function applyPdfZoom(){
+  const frame = document.getElementById('pdfFrame');
+  const sheet = document.getElementById('pdfSheet');
+  if (!frame || !sheet) return;
+  const land = sheet.classList.contains('land');
+  const W = (land ? 297 : 210) * 96 / 25.4, H = (land ? 210 : 297) * 96 / 25.4;
+  const availW = frame.parentElement.clientWidth || W;
+  const fit = Math.min(availW / W, (window.innerHeight * 0.65) / H);
+  const z = Math.max(0.25, Math.min(3, pdfZoom === 'fit' ? fit : pdfZoom));
+  sheet.style.transform = `scale(${z})`;
+  frame.style.width = (W * z) + 'px';
+  frame.style.height = (H * z) + 'px';
+  const lbl = document.getElementById('zoomLbl');
+  if (lbl) lbl.textContent = Math.round(z * 100) + ' %';
+}
+function ensurePdfFontFace(p){
+  let st = document.getElementById('pdfFontFace');
+  if (!st) { st = document.createElement('style'); st.id = 'pdfFontFace'; document.head.appendChild(st); }
+  st.textContent = pdfFontFaceCss(p);
 }
 function pdfEditorHtml(set){
   const p = pdfPrefs();
+  ensurePdfFontFace(p);
   const cols = p.order.map((k, i) => `
         <div class="row" style="gap:6px;padding:4px 0">
           <label style="flex:1;display:flex;align-items:center;gap:8px;cursor:pointer"><input type="checkbox" data-pdf-on="${k}" ${p.on[k] ? 'checked' : ''} style="width:auto"> ${PDF_COLS[k]}</label>
           <button type="button" data-pdf-up="${i}" ${i === 0 ? 'disabled' : ''}>↑</button>
           <button type="button" data-pdf-down="${i}" ${i === p.order.length - 1 ? 'disabled' : ''}>↓</button>
         </div>`).join('');
-  const fonts = Object.entries(PDF_FONTS).map(([k, v]) => `<option value="${k}" ${p.font === k ? 'selected' : ''}>${v[0]}</option>`).join('');
+  const fontOpts = Object.entries(PDF_FONTS).map(([k, v]) => `<option value="${k}" ${p.font === k ? 'selected' : ''}>${v[0]}</option>`);
+  if (p.custom) fontOpts.push(`<option value="custom" ${p.font === 'custom' ? 'selected' : ''}>${esc(p.custom.name)} (hochgeladen)</option>`);
+  const land = p.orient === 'landscape';
   return `
   <section class="card" id="pdfPage">
       <div class="row" style="margin-bottom:12px">
@@ -416,17 +461,28 @@ function pdfEditorHtml(set){
       <div class="pdf-grid">
         <div>
           <div class="row" style="margin-bottom:10px">
-            <button type="button" data-pdf-orient="portrait" class="${p.orient === 'portrait' ? 'primary' : ''}">Hochformat</button>
-            <button type="button" data-pdf-orient="landscape" class="${p.orient === 'landscape' ? 'primary' : ''}">Querformat</button>
+            <button type="button" data-pdf-orient="portrait" class="${!land ? 'primary' : ''}">Hochformat</button>
+            <button type="button" data-pdf-orient="landscape" class="${land ? 'primary' : ''}">Querformat</button>
           </div>
-          <label class="muted" style="display:block;margin-bottom:8px">Schrift<select data-pdf-font>${fonts}</select></label>
+          <label class="muted" style="display:block;margin-bottom:8px">Schrift<select data-pdf-font>${fontOpts.join('')}</select></label>
           <label class="muted" style="display:block;margin-bottom:8px">Grösse (pt)<input type="number" data-pdf-size min="7" max="14" step="0.5" value="${p.size}"></label>
+          <label class="muted" style="display:block;margin-bottom:8px">Eigene Schrift hochladen (.ttf, .otf, max. 400 KB)<input type="file" accept=".ttf,.otf" data-pdf-fontfile></label>
           <p class="muted" style="margin:12px 0 4px">Spalten: Haken = sichtbar, Pfeile = Reihenfolge</p>
           ${cols}
         </div>
         <div>
-          <p class="muted" style="margin:0 0 6px">Vorschau</p>
-          <iframe title="PDF-Vorschau" srcdoc="${esc(pdfDocHtml(set, p))}" style="width:100%;height:60vh;min-height:320px;border:1px solid var(--line);border-radius:8px;background:#fff"></iframe>
+          <div class="row" style="margin-bottom:6px;gap:6px">
+            <span class="muted" style="flex:1">Vorschau</span>
+            <button type="button" data-zoom="out">−</button>
+            <span id="zoomLbl" class="muted" style="min-width:52px;text-align:center">100 %</span>
+            <button type="button" data-zoom="in">+</button>
+            <button type="button" data-zoom="fit">Einpassen</button>
+          </div>
+          <div style="overflow:auto;padding:4px 0">
+            <div class="pdf-frame" id="pdfFrame">
+              <div class="pdf-sheet ${land ? 'land' : ''}" id="pdfSheet" style="width:${land ? 297 : 210}mm;height:${land ? 210 : 297}mm;font-family:${pdfFamily(p)};font-size:${p.size}pt">${pdfInner(set, p)}</div>
+            </div>
+          </div>
         </div>
       </div>
       <div class="row" style="justify-content:flex-end;margin-top:14px">
@@ -548,6 +604,7 @@ function render(){
   const pdfSet = pdfEditId && state.setlists.find(x => x.id === pdfEditId);
   if (pdfSet) {
     $('#app').innerHTML = pdfEditorHtml(pdfSet);
+    applyPdfZoom();
     window.scrollTo(0, 0);
     return;
   }
@@ -816,6 +873,7 @@ function handleChrome(e){
   if (t.classList && t.classList.contains('modal-bg')) { t.classList.add('hidden'); return true; }
   return false;
 }
+window.addEventListener('resize', () => { if (pdfEditId) applyPdfZoom(); });
 document.addEventListener('keydown', e => {
   if (e.key === 'Escape') { document.querySelectorAll('.modal-bg').forEach(m => m.classList.add('hidden')); if (pdfEditId) { pdfEditId = null; render(); } }
 });
@@ -909,6 +967,13 @@ document.addEventListener('click', e => {
     state.setlists.push(copy);
     activeSetId = copy.id; save(); render(); return;
   }
+  if (b.dataset.zoom) {
+    const frame = document.getElementById('pdfFrame');
+    const cur = pdfZoom === 'fit' ? (frame ? frame.offsetWidth / (frame.firstElementChild.classList.contains('land') ? 1122.5 : 793.7) : 1) : pdfZoom;
+    if (b.dataset.zoom === 'fit') pdfZoom = 'fit';
+    else pdfZoom = Math.max(0.25, Math.min(3, +(cur + (b.dataset.zoom === 'in' ? 0.1 : -0.1)).toFixed(2)));
+    applyPdfZoom(); return;
+  }
   if (b.dataset.pdfOpen) { pdfEditId = b.dataset.pdfOpen; render(); return; }
   if (b.dataset.pdfOrient) { pdfPrefs().orient = b.dataset.pdfOrient; save(); render(); return; }
   if (b.dataset.pdfUp !== undefined || b.dataset.pdfDown !== undefined) {
@@ -944,6 +1009,21 @@ document.addEventListener('input', e => {
 
 document.addEventListener('change', e => {
   const t = e.target;
+  if (t.matches && t.matches('[data-pdf-fontfile]')) {
+    const file = t.files && t.files[0];
+    if (!file || !user || !ready) return;
+    if (file.size > 400 * 1024) { topNote('Schrift ist zu gross (max. 400 KB)'); t.value = ''; return; }
+    const reader = new FileReader();
+    reader.onload = () => {
+      const name = file.name.replace(/\.(ttf|otf)$/i, '').replace(/["\\]/g, '');
+      const p = pdfPrefs();
+      p.custom = { name, data: reader.result };
+      p.font = 'custom';
+      save(); render();
+    };
+    reader.readAsDataURL(file);
+    return;
+  }
   if (t.matches && (t.matches('[data-pdf-on]') || t.matches('[data-pdf-font]') || t.matches('[data-pdf-size]'))) {
     if (!user || !ready) return;
     const p = pdfPrefs();
