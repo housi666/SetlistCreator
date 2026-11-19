@@ -1,9 +1,12 @@
-SetlistCreator · v0.4.21 · Build 30 · 19.11.2026 · Phase Alpha
+SetlistCreator · v0.4.22 · Build 31 · 19.11.2026 · Phase Alpha
 
 Changelog · SetlistCreator
 Neueste Version zuerst. Zeiten = Schweizer Zeit
 
 ** ALPHA **
+
+v0.4.22 · Build 31 · 19.11.2026 12:50
+- PDF-Vorschau lässt sich bei Zoom mit der Maus oder dem Finger verschieben
 
 v0.4.21 · Build 30 · 19.11.2026 12:45
 - Schrift Razor Ephinea eingebaut (Datei fonts/RazorEphinea.ttf), in der Schriftauswahl und im PDF

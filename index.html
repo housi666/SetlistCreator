@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>SetlistCreator · v0.4.21</title>
+<title>SetlistCreator · v0.4.22</title>
 <link rel="icon" type="image/svg+xml" href="icon.svg">
 <link rel="icon" type="image/png" sizes="32x32" href="icon-32.png">
 <link rel="apple-touch-icon" href="icon-180.png">
@@ -102,6 +102,8 @@ footer{padding:14px 20px;color:var(--muted);font-size:12px;text-align:center}
 .pdf-sheet th,.pdf-sheet td{border-bottom:0.5pt solid #cfcfd8;padding:2mm 1.5mm;text-align:left;vertical-align:top}
 .pdf-sheet th{color:#6b6e7b;font-weight:600;border-bottom:1pt solid #6b6e7b}
 .pdf-sheet .c-nr,.pdf-sheet .c-start,.pdf-sheet .c-end,.pdf-sheet .c-bpm,.pdf-sheet .c-dur,.pdf-sheet .c-key{white-space:nowrap}
+.pdf-scroll{overflow:auto;padding:4px 0;max-height:72vh;cursor:grab;touch-action:none}
+.pdf-scroll.grabbing{cursor:grabbing;user-select:none}
 .legal-ver{color:var(--muted);font-size:12px;margin-top:12px}
 .support-links{display:flex;flex-direction:column;gap:8px;margin:8px 0}
 .support-links a{color:var(--text);text-decoration:none;border:1px solid var(--line);border-radius:10px;padding:10px 12px}
@@ -121,7 +123,7 @@ footer{padding:14px 20px;color:var(--muted);font-size:12px;text-align:center}
   <div class="row" style="gap:8px"><span id="userInfo" class="muted" style="color:var(--panel-text)"></span><button id="tipsBtn" type="button" class="hdr-btn">💡 Tipps</button><button id="supportBtn" type="button" class="hdr-btn">💬 Support</button><button id="logoutBtn" type="button" style="display:none">Abmelden</button><button id="reloadBtn" type="button" title="Neueste Version laden (ohne Zwischenspeicher)">Aktualisieren</button></div>
 </header>
 <main id="app"></main>
-<footer>SetlistCreator v0.4.21 · Build 30 · 19.11.2026 · Alpha · Login über Firebase (eigenes Projekt setlistcreator-54d5d), Daten pro Konto · <span id="status"></span><br><button type="button" class="legal-link" data-legal="terms">Nutzungsbedingungen</button> · <button type="button" class="legal-link" data-legal="privacy">Datenschutz</button></footer>
+<footer>SetlistCreator v0.4.22 · Build 31 · 19.11.2026 · Alpha · Login über Firebase (eigenes Projekt setlistcreator-54d5d), Daten pro Konto · <span id="status"></span><br><button type="button" class="legal-link" data-legal="terms">Nutzungsbedingungen</button> · <button type="button" class="legal-link" data-legal="privacy">Datenschutz</button></footer>
 
 <div class="modal-bg hidden" id="tipsModal">
   <div class="modal" role="dialog" aria-modal="true" aria-labelledby="tipsTitle">
@@ -221,6 +223,7 @@ const isAndroid = /Android/i.test(navigator.userAgent);
 let view = null;
 let searchQ = { songs: '', sets: '' };
 let pdfEditId = null;
+let panDrag = null;
 const on = k => !isAndroid || view === k;
 
 function setStatus(text){
@@ -535,7 +538,7 @@ function pdfEditorHtml(set){
             <button type="button" data-zoom="in">+</button>
             <button type="button" data-zoom="fit">Einpassen</button>
           </div>
-          <div style="overflow:auto;padding:4px 0">
+          <div id="pdfScroll" class="pdf-scroll">
             <div class="pdf-frame" id="pdfFrame">
               <div class="pdf-sheet ${land ? 'land' : ''}" id="pdfSheet" style="width:${land ? 297 : 210}mm;height:${land ? 210 : 297}mm;font-family:${pdfFamily(p)};font-size:${p.size}pt">${pdfInner(set, p)}</div>
             </div>
@@ -934,6 +937,22 @@ function handleChrome(e){
   return false;
 }
 window.addEventListener('resize', () => { if (pdfEditId) applyPdfZoom(); });
+// Vorschau verschieben: mit gedrückter Maustaste oder dem Finger ziehen
+document.addEventListener('pointerdown', e => {
+  const sc = e.target.closest && e.target.closest('#pdfScroll');
+  if (!sc) return;
+  panDrag = { sc, x: e.clientX, y: e.clientY, l: sc.scrollLeft, t: sc.scrollTop };
+  sc.classList.add('grabbing');
+  e.preventDefault();
+});
+document.addEventListener('pointermove', e => {
+  if (!panDrag) return;
+  panDrag.sc.scrollLeft = panDrag.l - (e.clientX - panDrag.x);
+  panDrag.sc.scrollTop = panDrag.t - (e.clientY - panDrag.y);
+});
+const endPan = () => { if (panDrag) { panDrag.sc.classList.remove('grabbing'); panDrag = null; } };
+document.addEventListener('pointerup', endPan);
+document.addEventListener('pointercancel', endPan);
 document.addEventListener('keydown', e => {
   if (e.key === 'Escape') { document.querySelectorAll('.modal-bg').forEach(m => m.classList.add('hidden')); if (pdfEditId) { pdfEditId = null; render(); } }
 });
