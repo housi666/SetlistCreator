@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>SetlistCreator · v0.4.26</title>
+<title>SetlistCreator · v0.4.27</title>
 <link rel="icon" type="image/svg+xml" href="icon.svg">
 <link rel="icon" type="image/png" sizes="32x32" href="icon-32.png">
 <link rel="apple-touch-icon" href="icon-180.png">
@@ -47,6 +47,7 @@ ol{padding-left:0;list-style:none;margin:0}
 ol li{padding:10px 0;border-bottom:1px solid var(--line)}
 ol li:last-child{border-bottom:0}
 .time-cell{font-size:13px;color:var(--muted);min-width:120px}
+.tsel{display:flex;gap:4px;align-items:center}.tsel select{width:auto;padding:6px 8px}.tsel span{color:var(--muted)}
 footer{padding:14px 20px;color:var(--muted);font-size:12px;text-align:center}
 #bpmField{cursor:pointer}
 .ghost{background:none}
@@ -126,7 +127,7 @@ footer{padding:14px 20px;color:var(--muted);font-size:12px;text-align:center}
   <div class="row" style="gap:8px"><span id="userInfo" class="muted" style="color:var(--panel-text)"></span><button id="tipsBtn" type="button" class="hdr-btn">💡 Tipps</button><button id="supportBtn" type="button" class="hdr-btn">💬 Support</button><button id="logoutBtn" type="button" style="display:none">Abmelden</button><button id="reloadBtn" type="button" title="Neueste Version laden (ohne Zwischenspeicher)">Aktualisieren</button></div>
 </header>
 <main id="app"></main>
-<footer>SetlistCreator v0.4.26 · Build 35 · 19.11.2026 · Alpha · Login über Firebase (eigenes Projekt setlistcreator-54d5d), Daten pro Konto · <span id="status"></span><br><button type="button" class="legal-link" data-legal="terms">Nutzungsbedingungen</button> · <button type="button" class="legal-link" data-legal="privacy">Datenschutz</button></footer>
+<footer>SetlistCreator v0.4.27 · Build 36 · 19.11.2026 · Alpha · Login über Firebase (eigenes Projekt setlistcreator-54d5d), Daten pro Konto · <span id="status"></span><br><button type="button" class="legal-link" data-legal="terms">Nutzungsbedingungen</button> · <button type="button" class="legal-link" data-legal="privacy">Datenschutz</button></footer>
 
 <div class="modal-bg hidden" id="tipsModal">
   <div class="modal" role="dialog" aria-modal="true" aria-labelledby="tipsTitle">
@@ -276,36 +277,42 @@ function toSeconds(t){
   return m ? parseInt(m[1]) * 60 + parseInt(m[2]) : 0;
 }
 function fmt(sec){ return Math.floor(sec / 60) + ':' + String(sec % 60).padStart(2, '0'); }
-function toMin(t){
-  const m = /^(\d{1,2}):(\d{2})$/.exec(String(t || ''));
-  return m ? (+m[1]) * 60 + (+m[2]) : null;
+// Startzeit als Sekunden: "HH:MM" oder "HH:MM:SS"; sonst null
+function toSec(t){
+  const m = /^(\d{1,2}):([0-5]\d)(?::([0-5]\d))?$/.exec(String(t || '').trim());
+  return m ? (+m[1]) * 3600 + (+m[2]) * 60 + (+(m[3] || 0)) : null;
 }
-function hhmm(n){
-  n = ((n % 1440) + 1440) % 1440;
-  return String(Math.floor(n / 60)).padStart(2, '0') + ':' + String(n % 60).padStart(2, '0');
+function hms(n){
+  n = ((n % 86400) + 86400) % 86400;
+  return [Math.floor(n / 3600), Math.floor(n % 3600 / 60), n % 60].map(x => String(x).padStart(2, '0')).join(':');
 }
-function totalOf(set){
-  return fmt(set.entries.reduce((acc, e) => {
+function setSeconds(set){
+  return set.entries.reduce((acc, e) => {
     const s = state.songs.find(x => x.id === e.id);
     return acc + (s ? toSeconds(s.duration) : 0);
-  }, 0));
+  }, 0);
+}
+function totalOf(set){ return fmt(setSeconds(set)); }
+// Prüft: Endzeit des letzten Songs = Startzeit des ersten + Gesamtdauer
+function timeCheck(set){
+  const rows = schedule(set);
+  if (!rows.length) return null;
+  const sum = setSeconds(set);
+  const startS = rows[0].startS, endS = rows[rows.length - 1].endS;
+  return { sum, startS, endS, ok: endS - startS === sum };
 }
 // Startzeit: manuell gesetzt = gilt; leer = automatisch aus Vorgänger (Start + Dauer)
+// Der erste Song startet standardmässig um 00:00:00.
 function schedule(set){
-  let cur = null;
+  let cur = 0;
   return set.entries.map(e => {
     const song = state.songs.find(s => s.id === e.id) || null;
-    const sm = toMin(e.start);
-    let start = sm === null ? null : sm * 60;
-    let auto = false;
-    if (start === null && cur !== null) { start = cur; auto = true; }
-    let end = null;
-    if (start !== null) {
-      end = start + (song ? toSeconds(song.duration) : 0);
-      cur = end;
-    }
-    const hm = s => hhmm(Math.floor(s / 60));
-    return { entry: e, song, start: start === null ? '' : hm(start), end: end === null ? '' : hm(end), auto };
+    const manual = toSec(e.start);
+    const auto = manual === null;
+    const start = auto ? cur : manual;
+    const end = start + (song ? toSeconds(song.duration) : 0);
+    cur = end;
+    return { entry: e, song, startS: start, endS: end, start: hms(start), end: hms(end), auto };
   });
 }
 
@@ -417,7 +424,12 @@ function pdfInner(set, prefs, edit = false){
   const cols = prefs.order.filter(k => prefs.on[k]);
   const th = cols.map(k => `<th class="c-${k}">${PDF_COLS[k]}</th>`).join('');
   const tr = rows.map(r => `<tr>${cols.map(k => `<td class="c-${k}">${esc(r[k])}</td>`).join('')}</tr>`).join('');
-  return `<div class="pdf-content" style="position:relative"><h1>${esc(set.name)}</h1><div class="meta">Gesamtdauer ${totalOf(set)} · ${rows.length} Songs</div><table><thead><tr>${th}</tr></thead><tbody>${tr}</tbody></table>${pdfSvgHtml(prefs, edit)}</div>`;
+  return `<div class="pdf-content" style="position:relative"><h1>${esc(set.name)}</h1><div class="meta">Gesamtdauer ${totalOf(set)} · ${rows.length} Songs</div><table><thead><tr>${th}</tr></thead><tbody>${tr}</tbody></table>${sumLine(set)}${pdfSvgHtml(prefs, edit)}</div>`;
+}
+function sumLine(set){
+  const c = timeCheck(set);
+  if (!c) return '';
+  return `<div style="margin-top:10px;font-weight:700;display:flex;gap:24px"><span>Total ${fmt(c.sum)}</span><span>Endzeit ${hms(c.endS)}</span></div>`;
 }
 // SVG: Skripte und Ereignisattribute entfernen, nur Dateien mit viewBox
 function sanitizeSvg(text){
@@ -606,6 +618,17 @@ function pdfEditorHtml(set){
       </div>
   </section>`;
 }
+function numOpts(max, sel){
+  let o = '';
+  for (let i = 0; i <= max; i++) o += `<option value="${i}" ${i === sel ? 'selected' : ''}>${String(i).padStart(2, '0')}</option>`;
+  return o;
+}
+function timeSelects(idx, sec){
+  const h = Math.floor(sec / 3600), m = Math.floor(sec % 3600 / 60), s = sec % 60;
+  return `<select data-tpart="h" data-idx="${idx}" aria-label="Stunden">${numOpts(23, h)}</select>
+    <span>:</span><select data-tpart="m" data-idx="${idx}" aria-label="Minuten">${numOpts(59, m)}</select>
+    <span>:</span><select data-tpart="s" data-idx="${idx}" aria-label="Sekunden">${numOpts(59, s)}</select>`;
+}
 function setDetail(cur){
   const rows = schedule(cur);
   const items = rows.map((r, i) => {
@@ -619,8 +642,8 @@ function setDetail(cur){
           ${s && s.tempo ? `<div class="song-meta">Tempo: ${esc(s.tempo)}</div>` : ''}
         </div>
         <div class="row" style="gap:6px">
-          <input type="time" data-start="${i}" value="${esc(r.entry.start)}" title="Startzeit (leer = automatisch)">
-          <span class="time-cell">${r.auto ? 'auto ' : ''}${r.start || '–'} → ${r.end || '–'}</span>
+          <div class="tsel" title="Startzeit (Std : Min : Sek)">${timeSelects(i, r.startS)}</div>
+          <span class="time-cell">${r.auto ? 'auto ' : ''}${r.start} → ${r.end}</span>
         </div>
         <button data-up="${i}" ${i === 0 ? 'disabled' : ''}>↑</button>
         <button data-down="${i}" ${i === rows.length - 1 ? 'disabled' : ''}>↓</button>
@@ -649,7 +672,7 @@ function setDetail(cur){
           </select>
           <button class="primary" id="addBtn">Hinzufügen</button>
         </div>
-        <p class="muted" style="margin:10px 0 0">Startzeit leer lassen: sie ergibt sich aus dem Vorgänger. Ein Wert überschreibt die Berechnung ab dieser Stelle.</p>
+        <p class="muted" style="margin:10px 0 0">Startzeit mit Std : Min : Sek wählen. Der erste Song startet standardmässig um 00:00:00. Jede Startzeit gilt ab dieser Stelle, die folgenden Songs ergeben sich daraus.</p>
         <div class="row" style="margin-top:14px;justify-content:flex-end">
           <button class="danger" data-delset="${cur.id}">Setlist löschen</button>
         </div>
@@ -711,8 +734,21 @@ function renderToolbar(){
   return `<div class="toolbar home">${b('songs', 'Songbibliothek')}${b('newSong', 'Song erstellen')}${b('sets', 'Setlistbibliothek')}${b('newSet', 'Setlist erstellen')}</div>`;
 }
 
+// Roter Hinweis oben: bleibt, bis die Zeiten aller Setlisten stimmen
+function updateTimeWarn(){
+  let n = $('timeWarn');
+  if (!n) { n = document.createElement('div'); n.id = 'timeWarn'; n.className = 'topnote'; document.body.appendChild(n); }
+  const bad = state.setlists.find(x => { const c = timeCheck(x); return c && !c.ok; });
+  if (bad) {
+    const c = timeCheck(bad);
+    n.textContent = `Zeitfehler in „${bad.name}“: Endzeit ${hms(c.endS)} passt nicht zur Gesamtdauer ${fmt(c.sum)}. Bitte die Startzeiten prüfen.`;
+    n.style.background = '#c0392b'; n.style.color = '#fff';
+  }
+  n.classList.toggle('show', !!bad);
+}
 function render(){
   const loggedIn = !!user;
+  updateTimeWarn();
   $('#logoutBtn').style.display = loggedIn ? '' : 'none';
   $('#userInfo').textContent = loggedIn ? user.email : '';
   if (!loggedIn) { $('#app').innerHTML = renderLogin(); return; }
@@ -1242,11 +1278,15 @@ document.addEventListener('change', e => {
     else p.size = Math.min(14, Math.max(7, parseFloat(t.value) || 10));
     save(); render(); return;
   }
-  if (!t.matches || !t.matches('[data-start]')) return;
+  if (!t.matches || !t.matches('[data-tpart]')) return;
   const cur = state.setlists.find(s => s.id === activeSetId);
   if (!cur) return;
-  const entry = cur.entries[+t.dataset.start];
-  if (entry) { entry.start = t.value || ''; save(); render(); }
+  const entry = cur.entries[+t.dataset.idx];
+  if (!entry) return;
+  const box = t.closest('.tsel');
+  const v = k => box.querySelector(`[data-tpart="${k}"]`).value;
+  entry.start = `${String(v('h')).padStart(2, '0')}:${String(v('m')).padStart(2, '0')}:${String(v('s')).padStart(2, '0')}`;
+  save(); render();
 });
 
 document.addEventListener('submit', e => {
