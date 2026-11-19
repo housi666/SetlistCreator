@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>SetlistCreator · v0.4.31</title>
+<title>SetlistCreator · v0.4.32</title>
 <link rel="icon" type="image/svg+xml" href="icon.svg">
 <link rel="icon" type="image/png" sizes="32x32" href="icon-32.png">
 <link rel="apple-touch-icon" href="icon-180.png">
@@ -127,7 +127,7 @@ footer{padding:14px 20px;color:var(--muted);font-size:12px;text-align:center}
   <div class="row" style="gap:8px"><span id="userInfo" class="muted" style="color:var(--panel-text)"></span><button id="tipsBtn" type="button" class="hdr-btn">💡 Tipps</button><button id="supportBtn" type="button" class="hdr-btn">💬 Support</button><button id="logoutBtn" type="button" style="display:none">Abmelden</button><button id="reloadBtn" type="button" title="Neueste Version laden (ohne Zwischenspeicher)">Aktualisieren</button></div>
 </header>
 <main id="app"></main>
-<footer>SetlistCreator v0.4.31 · Build 40 · 19.11.2026 · Alpha · Login über Firebase (eigenes Projekt setlistcreator-54d5d), Daten pro Konto · <span id="status"></span><br><button type="button" class="legal-link" data-legal="terms">Nutzungsbedingungen</button> · <button type="button" class="legal-link" data-legal="privacy">Datenschutz</button></footer>
+<footer>SetlistCreator v0.4.32 · Build 41 · 19.11.2026 · Alpha · Login über Firebase (eigenes Projekt setlistcreator-54d5d), Daten pro Konto · <span id="status"></span><br><button type="button" class="legal-link" data-legal="terms">Nutzungsbedingungen</button> · <button type="button" class="legal-link" data-legal="privacy">Datenschutz</button></footer>
 
 <div class="modal-bg hidden" id="tipsModal">
   <div class="modal" role="dialog" aria-modal="true" aria-labelledby="tipsTitle">
@@ -427,6 +427,20 @@ function dmy(iso){
   const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(iso || ''));
   return m ? `${m[3]}.${m[2]}.${m[1]}` : String(iso || '');
 }
+const MONTHS = ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'];
+function dateParts(e){
+  if (e.dp) return e.dp;
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(e.date || ''));
+  return m ? { d: +m[3], m: +m[2], y: +m[1] } : {};
+}
+function dateSelects(dp){
+  const yr = new Date().getFullYear();
+  const opt = (arr, sel, ph) => `<option value="">${ph}</option>` + arr.map(([v, l]) => `<option value="${v}" ${sel === v ? 'selected' : ''}>${l}</option>`).join('');
+  const days = Array.from({ length: 31 }, (_, i) => [i + 1, String(i + 1).padStart(2, '0')]);
+  const months = MONTHS.map((n, i) => [i + 1, n]);
+  const years = Array.from({ length: 10 }, (_, i) => [yr - 2 + i, String(yr - 2 + i)]);
+  return `<div class="row" style="gap:4px;flex:1"><select data-ev-date="d" style="flex:1">${opt(days, dp.d, 'Tag')}</select><select data-ev-date="m" style="flex:2">${opt(months, dp.m, 'Monat')}</select><select data-ev-date="y" style="flex:1">${opt(years, dp.y, 'Jahr')}</select></div>`;
+}
 function eventHtml(set, p){
   const e = set.event || {}, v = p.ev || {};
   const lines = [];
@@ -586,10 +600,9 @@ function pdfEditorHtml(set){
   const p = pdfPrefs();
   ensurePdfFontFace(p);
   const cols = p.order.map((k, i) => `
-        <div class="row" style="gap:6px;padding:4px 0">
+        <div class="row" style="gap:6px;padding:4px 0" data-col-row="${i}">
+          <span data-pdf-grip="${i}" title="Zum Verschieben greifen und ziehen" style="cursor:grab;touch-action:none;user-select:none;font-size:18px;line-height:1;padding:0 6px;color:var(--muted)">⠿</span>
           <label style="flex:1;display:flex;align-items:center;gap:8px;cursor:pointer"><input type="checkbox" data-pdf-on="${k}" ${p.on[k] ? 'checked' : ''} style="width:auto"> ${PDF_COLS[k]}</label>
-          <button type="button" data-pdf-up="${i}" ${i === 0 ? 'disabled' : ''}>↑</button>
-          <button type="button" data-pdf-down="${i}" ${i === p.order.length - 1 ? 'disabled' : ''}>↓</button>
         </div>`).join('');
   const fontOpts = Object.entries(PDF_FONTS).map(([k, v]) => `<option value="${k}" ${p.font === k ? 'selected' : ''}>${v[0]}</option>`);
   if (p.custom) fontOpts.push(`<option value="custom" ${p.font === 'custom' ? 'selected' : ''}>${esc(p.custom.name)} (hochgeladen)</option>`);
@@ -630,10 +643,10 @@ function pdfEditorHtml(set){
           ${[['name', 'Eventname', 'text'], ['location', 'Location', 'text'], ['ort', 'Ort', 'text'], ['date', 'Datum', 'date']].map(([k, l, ty]) => `
           <div class="row" style="gap:6px;padding:4px 0">
             <span class="muted" style="width:84px">${l}</span>
-            <input type="${ty}" data-ev="${k}" value="${esc((set.event || {})[k] || '')}" style="flex:1">
+            ${k === 'date' ? dateSelects(dateParts(set.event || {})) : `<input type="${ty}" data-ev="${k}" value="${esc((set.event || {})[k] || '')}" style="flex:1">`}
             <label class="muted" style="display:flex;align-items:center;gap:4px;white-space:nowrap"><input type="checkbox" data-ev-on="${k}" ${p.ev[k] ? 'checked' : ''} style="width:auto"> im PDF</label>
           </div>`).join('')}
-          <p class="muted" style="margin:12px 0 4px">Spalten: Haken = sichtbar, Pfeile = Reihenfolge</p>
+          <p class="muted" style="margin:12px 0 4px">Spalten: Haken = sichtbar, ⠿ greifen = verschieben</p>
           ${cols}
         </div>
         <div>
@@ -1083,6 +1096,35 @@ document.addEventListener('pointermove', e => {
 const endPan = () => { if (panDrag) { panDrag.sc.classList.remove('grabbing'); panDrag = null; } };
 // Grafik auf dem Blatt: ziehen (verschieben) und an der Ecke ziehen (Grösse)
 let svgDrag = null;
+// Spalten verschieben: am Greifer ziehen, Zielzeile wird markiert
+let colDrag = null;
+document.addEventListener('pointerdown', e => {
+  const g = e.target.closest && e.target.closest('[data-pdf-grip]');
+  if (!g) return;
+  e.preventDefault();
+  colDrag = { from: +g.dataset.pdfGrip, to: +g.dataset.pdfGrip };
+}, true);
+document.addEventListener('pointermove', e => {
+  if (!colDrag) return;
+  const el = document.elementFromPoint(e.clientX, e.clientY);
+  const row = el && el.closest && el.closest('[data-col-row]');
+  if (row) colDrag.to = +row.dataset.colRow;
+  document.querySelectorAll('[data-col-row]').forEach(r => { r.style.background = +r.dataset.colRow === colDrag.to ? 'var(--hover)' : ''; });
+});
+const endCol = () => {
+  if (!colDrag) return;
+  const { from, to } = colDrag;
+  colDrag = null;
+  if (from !== to) {
+    const p = pdfPrefs();
+    const [k] = p.order.splice(from, 1);
+    p.order.splice(to, 0, k);
+    save();
+  }
+  render();
+};
+document.addEventListener('pointerup', endCol);
+document.addEventListener('pointercancel', endCol);
 const pdfSheetScale = () => {
   const sheet = document.getElementById('pdfSheet');
   if (!sheet) return 1;
@@ -1314,6 +1356,14 @@ document.addEventListener('change', e => {
     const es = state.setlists.find(x => x.id === pdfEditId);
     if (!es) return;
     es.event = { ...(es.event || {}), [t.dataset.ev]: t.value };
+    save(); render(); return;
+  }
+  if (t.matches && t.matches('[data-ev-date]')) {
+    const es = state.setlists.find(x => x.id === pdfEditId);
+    if (!es) return;
+    const dp = { ...dateParts(es.event || {}), [t.dataset.evDate]: t.value ? +t.value : '' };
+    const iso = dp.d && dp.m && dp.y ? `${dp.y}-${String(dp.m).padStart(2, '0')}-${String(dp.d).padStart(2, '0')}` : '';
+    es.event = { ...(es.event || {}), dp, date: iso };
     save(); render(); return;
   }
   if (t.matches && t.matches('[data-ev-on]')) {

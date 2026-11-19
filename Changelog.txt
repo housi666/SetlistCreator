@@ -1,11 +1,14 @@
-SetlistCreator · v0.4.31 · Build 40 · 19.11.2026 · Phase Alpha
+SetlistCreator · v0.4.32 · Build 41 · 19.11.2026 · Phase Alpha
 
 Changelog · SetlistCreator
 Neueste Version zuerst. Zeiten = Schweizer Zeit
 
 ** ALPHA **
 
-v0.4.31 · Build 40 · 19.11.2026 20:50
+v0.4.32 · Build 41 · 19.11.2026 21:00
+- PDF-Designer: Spalten per Greifer ⠿ verschieben statt Pfeile
+- Event-Datum per Auswahl (Tag, Monat, Jahr)
+
 - PDF-Designer: Eventname, Location, Ort und Datum pro Setlist; oben rechts im A4 gedruckt, jedes Feld einzeln ein- und ausblendbar
 
 - PDF: Spalte „Tempowechsel“ heisst jetzt „Temp. Change“ und bricht nicht mehr um
