@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>SetlistCreator · v0.4.5</title>
+<title>SetlistCreator · v0.4.6</title>
 <link rel="icon" type="image/svg+xml" href="icon.svg">
 <link rel="icon" type="image/png" sizes="32x32" href="icon-32.png">
 <link rel="apple-touch-icon" href="icon-180.png">
@@ -71,7 +71,7 @@ footer{padding:14px 20px;color:var(--muted);font-size:12px;text-align:center}
   <div class="row" style="gap:8px"><span id="userInfo" class="muted" style="color:var(--panel-text)"></span><button id="logoutBtn" type="button" style="display:none">Abmelden</button><button id="reloadBtn" type="button" title="Neueste Version laden (ohne Zwischenspeicher)">Aktualisieren</button></div>
 </header>
 <main id="app"></main>
-<footer>SetlistCreator v0.4.5 · Build 14 · 19.11.2026 · Alpha · Login über Firebase (eigenes Projekt setlistcreator-54d5d), Daten pro Konto · <span id="status"></span></footer>
+<footer>SetlistCreator v0.4.6 · Build 15 · 19.11.2026 · Alpha · Login über Firebase (eigenes Projekt setlistcreator-54d5d), Daten pro Konto · <span id="status"></span></footer>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
@@ -121,7 +121,8 @@ let saveTimer = null;
 let editSongId = null;
 let activeSetId = null;
 let pendingScroll = null;
-let ui = { songs: true, newSong: true, sets: true, newSet: true };
+let ui = { songs: false, newSong: false, sets: false, newSet: false };
+let searchQ = { songs: '', sets: '' };
 
 function setStatus(text){
   const el = document.getElementById('status');
@@ -243,11 +244,18 @@ function songForm(v){
         </div>
       </form>`;
 }
-function renderSongs(){
-  const list = state.songs.length
-    ? state.songs.map(s => {
-        if (s.id === editSongId) {
-          return `
+function matchSong(s, q){
+  if (!q) return true;
+  return [s.title, s.artist, s.key].some(v => String(v || '').toLowerCase().includes(q));
+}
+function songsList(){
+  const q = searchQ.songs.trim().toLowerCase();
+  if (!state.songs.length) return '<p class="muted">Noch keine Songs.</p>';
+  const songs = state.songs.filter(s => s.id === editSongId || matchSong(s, q));
+  if (!songs.length) return '<p class="muted">Keine Treffer.</p>';
+  return songs.map(s => {
+    if (s.id === editSongId) {
+      return `
       <section class="card" data-editing="${s.id}">
         <div class="row" style="margin-bottom:10px">
           <h2 style="flex:1;margin:0">Song bearbeiten</h2>
@@ -255,8 +263,8 @@ function renderSongs(){
         </div>
         ${songForm(s)}
       </section>`;
-        }
-        return `
+    }
+    return `
       <div class="card row" data-edit="${s.id}" role="button" tabindex="0" title="Song bearbeiten">
         <div style="flex:1;min-width:140px">
           <strong>${esc(s.title)}</strong>
@@ -265,8 +273,12 @@ function renderSongs(){
         <button class="icon" data-edit="${s.id}" title="Bearbeiten" aria-label="Bearbeiten">${ICON_PENCIL}</button>
         <button class="icon danger" data-del="${s.id}" title="Löschen" aria-label="Löschen">${ICON_TRASH}</button>
       </div>`;
-      }).join('')
-    : '<p class="muted">Noch keine Songs.</p>';
+  }).join('');
+}
+function searchBox(kind, placeholder){
+  return `<input type="search" data-search="${kind}" placeholder="${placeholder}" value="${esc(searchQ[kind])}" style="margin-bottom:10px">`;
+}
+function renderSongs(){
   const newCard = (editSongId || !ui.newSong) ? '' : `
     <section class="card">
       <div class="row" style="margin-bottom:10px">
@@ -277,7 +289,8 @@ function renderSongs(){
     </section>`;
   return `${newCard}${ui.songs ? `
     <h2>Songbibliothek (${state.songs.length})</h2>
-    ${list}` : ''}`;
+    ${searchBox('songs', 'Suchen: Titel, Interpret, Tonart')}
+    <div data-listfor="songs">${songsList()}</div>` : ''}`;
 }
 
 // ---- Setlisten (rechte Spalte) ----
@@ -332,27 +345,33 @@ function setDetail(cur){
         </div>
       </section>`;
 }
-function renderSetlists(){
-  const list = state.setlists.length
-    ? state.setlists.map(s => {
-        const open = s.id === activeSetId;
-        return `
+function setsList(){
+  const q = searchQ.sets.trim().toLowerCase();
+  if (!state.setlists.length) return '<p class="muted">Noch keine Setlist.</p>';
+  const sets = state.setlists.filter(s => s.id === activeSetId || !q || s.name.toLowerCase().includes(q));
+  if (!sets.length) return '<p class="muted">Keine Treffer.</p>';
+  return sets.map(s => {
+    const open = s.id === activeSetId;
+    return `
       <div class="card set-card ${open ? 'sel' : ''}" data-open="${s.id}" role="button" tabindex="0">
         <strong>${esc(s.name)}</strong>
         <div class="song-meta">${s.entries.length} Songs · ${totalOf(s)}</div>
       </div>${open ? setDetail(s) : ''}`;
-      }).join('')
-    : '<p class="muted">Noch keine Setlist.</p>';
-  return `${ui.newSet ? `
+  }).join('');
+}
+function renderSetlists(){
+  const newForm = ui.newSet ? `
     <section class="card">
       <h2>Neue Setlist</h2>
       <form id="setForm" class="row">
         <input name="name" placeholder="Name der Setlist *" required style="flex:1;min-width:180px">
         <button class="primary" type="submit">Erstellen</button>
       </form>
-    </section>` : ''}${ui.sets ? `
+    </section>` : '';
+  return `${newForm}${ui.sets ? `
     <h2>Setlisten (${state.setlists.length})</h2>
-    ${list}` : ''}`;
+    ${searchBox('sets', 'Suchen: Name der Setlist')}
+    <div data-listfor="sets">${setsList()}</div>` : ''}`;
 }
 
 function renderLogin(msg = ''){
@@ -622,6 +641,14 @@ document.addEventListener('click', e => {
   if (b.dataset.rm !== undefined) {
     cur.entries.splice(+b.dataset.rm, 1); save(); render(); return;
   }
+});
+
+document.addEventListener('input', e => {
+  const k = e.target.dataset && e.target.dataset.search;
+  if (!k) return;
+  searchQ[k] = e.target.value;
+  const box = document.querySelector(`[data-listfor="${k}"]`);
+  if (box) box.innerHTML = k === 'songs' ? songsList() : setsList();
 });
 
 document.addEventListener('change', e => {

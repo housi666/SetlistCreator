@@ -1,9 +1,13 @@
-SetlistCreator · v0.4.5 · Build 14 · 19.11.2026 · Phase Alpha
+SetlistCreator · v0.4.6 · Build 15 · 19.11.2026 · Phase Alpha
 
 Changelog · SetlistCreator
 Neueste Version zuerst. Zeiten = Schweizer Zeit
 
 ** ALPHA **
+
+v0.4.6 · Build 15 · 19.11.2026 09:40
+- Hauptbildschirm zeigt nur die vier Knöpfe, keine Eingabefelder; Bereiche öffnen sich per Knopf
+- Suche in Songbibliothek (Titel, Interpret, Tonart) und Setlistbibliothek (Name), filtert live
 
 v0.4.5 · Build 14 · 19.11.2026 09:30
 - Knöpfe oben: Songbibliothek, Song erstellen, Setlistbibliothek, Setlist erstellen; ein-/ausblendbar, aktive Knöpfe hervorgehoben
