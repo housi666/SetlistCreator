@@ -202,6 +202,7 @@ const isAndroid = /Android/i.test(navigator.userAgent);
 // Android: jede Bibliothek / jeder Ersteller öffnet auf einer eigenen Seite (nur eine gleichzeitig).
 // Desktop: alle Bereiche sichtbar wie bisher.
 let view = null;
+let searchQ = { songs: '', sets: '' };
 const on = k => !isAndroid || view === k;
 
 function setStatus(text){

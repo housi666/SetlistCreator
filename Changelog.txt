@@ -1,9 +1,12 @@
-SetlistCreator · v0.4.13 · Build 22 · 19.11.2026 · Phase Alpha
+SetlistCreator · v0.4.14 · Build 23 · 19.11.2026 · Phase Alpha
 
 Changelog · SetlistCreator
 Neueste Version zuerst. Zeiten = Schweizer Zeit
 
 ** ALPHA **
+
+v0.4.14 · Build 23 · 19.11.2026 12:40
+- Fehlerbehebung: Nach der Anmeldung blieb die Desktop-Version auf dem Anmeldebildschirm (fehlende Suchvariable)
 
 v0.4.13 · Build 22 · 19.11.2026 12:30
 - PDF-Designer je Setlist: Vorschau, Spalten ein- und ausblenden und verschieben, Schrift, Grösse (7 bis 14 pt), Hoch- oder Querformat
