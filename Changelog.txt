@@ -1,9 +1,12 @@
-SetlistCreator · v0.4.11 · Build 20 · 19.11.2026 · Phase Alpha
+SetlistCreator · v0.4.12 · Build 21 · 19.11.2026 · Phase Alpha
 
 Changelog · SetlistCreator
 Neueste Version zuerst. Zeiten = Schweizer Zeit
 
 ** ALPHA **
+
+v0.4.12 · Build 21 · 19.11.2026 11:55
+- Nutzungsbedingungen und Datenschutz zeigen vorerst den roten Hinweis „Funktion wird noch implementiert“
 
 v0.4.11 · Build 20 · 19.11.2026 11:50
 - Tipps und Support zeigen vorerst einen roten Hinweis am oberen Rand: „Funktion wird noch implementiert“
