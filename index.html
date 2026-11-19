@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>SetlistCreator · v0.4.2</title>
+<title>SetlistCreator · v0.4.3</title>
 <style>
 :root{--bg:#f5f5f7;--surface:#ffffff;--panel:#15161c;--panel-hover:#22242d;--panel-text:#c9cbd6;--text:#1b1c22;--muted:#6b6e7b;--line:#e4e4ea;--line-strong:#cfcfd8;--hover:#ebebf0;--accent:#e8a33d;--accent-text:#1b1c22;--danger:#c0392b;--radius:12px}
 @media (prefers-color-scheme: dark){:root{--bg:#0f1014;--surface:#1a1b22;--panel:#0b0c10;--panel-hover:#1a1b22;--panel-text:#c9cbd6;--text:#e8e9ee;--muted:#9a9daa;--line:#2c2e38;--line-strong:#3a3d4a;--hover:#262833;--accent:#e8a33d;--accent-text:#1b1c22;--danger:#ff7a6b}}
@@ -35,7 +35,6 @@ button:disabled{opacity:.4;cursor:default}
 #reloadBtn:hover,#logoutBtn:hover{background:var(--panel-hover)}
 button.primary{background:var(--accent);color:var(--accent-text);border-color:var(--accent);font-weight:600;border-radius:10px;padding:10px 16px}
 button.danger{color:var(--danger)}
-button.sel{border-color:var(--accent);color:var(--accent)}
 .muted{color:var(--muted);font-size:13px}
 .song-meta{color:var(--muted);font-size:13px;margin-top:2px}
 ol{padding-left:0;list-style:none;margin:0}
@@ -53,7 +52,7 @@ footer{padding:14px 20px;color:var(--muted);font-size:12px;text-align:center}
 .bpm-box{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:16px;width:min(320px,100%)}
 .bpm-head{display:flex;gap:8px;align-items:center;margin-bottom:10px}
 .bpm-head input{font-size:22px;font-weight:600;text-align:center;width:120px}
-.bpm-wheel{height:200px;overflow-y:auto;scroll-snap-type:y mandatory;border:1px solid var(--line);border-radius:10px;background:var(--surface-2,var(--surface))}
+.bpm-wheel{height:200px;overflow-y:auto;scroll-snap-type:y mandatory;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
 .bpm-item{height:40px;line-height:40px;text-align:center;scroll-snap-align:center;font-size:18px;color:var(--muted);font-variant-numeric:tabular-nums}
 .bpm-item.on{color:var(--text);font-weight:700;font-size:22px}
 .bpm-pad{height:80px}
@@ -65,7 +64,7 @@ footer{padding:14px 20px;color:var(--muted);font-size:12px;text-align:center}
   <div class="row" style="gap:8px"><span id="userInfo" class="muted" style="color:var(--panel-text)"></span><button id="logoutBtn" type="button" style="display:none">Abmelden</button><button id="reloadBtn" type="button" title="Neueste Version laden (ohne Zwischenspeicher)">Aktualisieren</button></div>
 </header>
 <main id="app"></main>
-<footer>SetlistCreator v0.4.2 · Build 11 · 19.11.2026 · Alpha · Login über Firebase (eigenes Projekt setlistcreator-54d5d), Daten pro Konto · <span id="status"></span></footer>
+<footer>SetlistCreator v0.4.3 · Build 12 · 19.11.2026 · Alpha · Login über Firebase (eigenes Projekt setlistcreator-54d5d), Daten pro Konto · <span id="status"></span></footer>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
@@ -114,6 +113,7 @@ let ready = false;
 let saveTimer = null;
 let editSongId = null;
 let activeSetId = null;
+let pendingScroll = null;
 
 function setStatus(text){
   const el = document.getElementById('status');
@@ -208,28 +208,11 @@ function splitDur(t){
 }
 
 // ---- Songs (linke Spalte) ----
-function renderSongs(){
-  const e = editSongId ? state.songs.find(s => s.id === editSongId) : null;
-  const v = e || {};
+// Das Formular erscheint dort, wo man geklickt hat: direkt in der Karte des Songs.
+function songForm(v){
   const [dm, ds] = splitDur(v.duration);
-  const hasExtra = e && (e.key || e.bpm || e.tempo || e.notes);
-  const list = state.songs.length
-    ? state.songs.map(s => `
-      <div class="card row" data-edit="${s.id}" role="button" tabindex="0" title="Song bearbeiten">
-        <div style="flex:1;min-width:140px">
-          <strong>${esc(s.title)}</strong>
-          <div class="song-meta">${esc([s.artist, s.key, s.bpm ? s.bpm + ' BPM' : '', s.duration].filter(Boolean).join(' · ')) || '–'}</div>
-        </div>
-        <button class="icon" data-edit="${s.id}" title="Bearbeiten" aria-label="Bearbeiten">${ICON_PENCIL}</button>
-        <button class="icon danger" data-del="${s.id}" title="Löschen" aria-label="Löschen">${ICON_TRASH}</button>
-      </div>`).join('')
-    : '<p class="muted">Noch keine Songs.</p>';
+  const hasExtra = v.id && (v.key || v.bpm || v.tempo || v.notes);
   return `
-    <section class="card">
-      <div class="row" style="margin-bottom:10px">
-        <h2 style="flex:1;margin:0">${e ? 'Song bearbeiten' : 'Neuer Song'}</h2>
-        ${e ? '' : '<button type="button" id="testBtn" class="ghost">Testdaten einfügen</button>'}
-      </div>
       <form id="songForm" class="grid2">
         <input class="full" name="title" placeholder="Titel *" required value="${esc(v.title)}">
         <input name="artist" placeholder="Interpret" value="${esc(v.artist)}">
@@ -248,42 +231,55 @@ function renderSongs(){
           </div>
         </details>
         <div class="row full">
-          <button class="primary" type="submit">${e ? 'Speichern' : 'Hinzufügen'}</button>
-          ${e ? '<button type="button" id="cancelEdit">Abbrechen</button>' : ''}
+          <button class="primary" type="submit">${v.id ? 'Speichern' : 'Hinzufügen'}</button>
         </div>
-      </form>
-    </section>
+      </form>`;
+}
+function renderSongs(){
+  const list = state.songs.length
+    ? state.songs.map(s => {
+        if (s.id === editSongId) {
+          return `
+      <section class="card" data-editing="${s.id}">
+        <div class="row" style="margin-bottom:10px">
+          <h2 style="flex:1;margin:0">Song bearbeiten</h2>
+          <button type="button" class="ghost" id="cancelEdit">Schliessen</button>
+        </div>
+        ${songForm(s)}
+      </section>`;
+        }
+        return `
+      <div class="card row" data-edit="${s.id}" role="button" tabindex="0" title="Song bearbeiten">
+        <div style="flex:1;min-width:140px">
+          <strong>${esc(s.title)}</strong>
+          <div class="song-meta">${esc([s.artist, s.key, s.bpm ? s.bpm + ' BPM' : '', s.duration].filter(Boolean).join(' · ')) || '–'}</div>
+        </div>
+        <button class="icon" data-edit="${s.id}" title="Bearbeiten" aria-label="Bearbeiten">${ICON_PENCIL}</button>
+        <button class="icon danger" data-del="${s.id}" title="Löschen" aria-label="Löschen">${ICON_TRASH}</button>
+      </div>`;
+      }).join('')
+    : '<p class="muted">Noch keine Songs.</p>';
+  const newCard = editSongId ? '' : `
+    <section class="card">
+      <div class="row" style="margin-bottom:10px">
+        <h2 style="flex:1;margin:0">Neuer Song</h2>
+        <button type="button" id="testBtn" class="ghost">Testdaten einfügen</button>
+      </div>
+      ${songForm({})}
+    </section>`;
+  return `${newCard}
     <h2>Songbibliothek (${state.songs.length})</h2>
     ${list}`;
 }
 
 // ---- Setlisten (rechte Spalte) ----
-function renderSetlists(){
-  const cur = state.setlists.find(s => s.id === activeSetId);
-  const tabs = state.setlists.length
-    ? state.setlists.map(s => `
-      <div class="card set-card ${s.id === activeSetId ? 'sel' : ''}" data-open="${s.id}" role="button" tabindex="0">
-        <strong>${esc(s.name)}</strong>
-        <div class="song-meta">${s.entries.length} Songs · ${totalOf(s)}</div>
-      </div>`).join('')
-    : '<p class="muted">Noch keine Setlist.</p>';
-  let html = `
-    <section class="card">
-      <h2>Neue Setlist</h2>
-      <form id="setForm" class="row">
-        <input name="name" placeholder="Name der Setlist *" required style="flex:1;min-width:180px">
-        <button class="primary" type="submit">Erstellen</button>
-      </form>
-    </section>
-    <h2>Setlisten (${state.setlists.length})</h2>
-    <div style="margin-bottom:12px">${tabs}</div>`;
-
-  if (cur) {
-    const rows = schedule(cur);
-    const items = rows.map((r, i) => {
-      const s = r.song;
-      const meta = s ? [s.artist, s.key, s.bpm ? s.bpm + ' BPM' : '', s.duration].filter(Boolean).join(' · ') : '';
-      return `<li class="row">
+// Eine Setlist klappt unter ihrer Karte auf, nicht unten in der Spalte.
+function setDetail(cur){
+  const rows = schedule(cur);
+  const items = rows.map((r, i) => {
+    const s = r.song;
+    const meta = s ? [s.artist, s.key, s.bpm ? s.bpm + ' BPM' : '', s.duration].filter(Boolean).join(' · ') : '';
+    return `<li class="row">
         <span class="muted" style="width:22px">${i + 1}</span>
         <div style="flex:1;min-width:140px">
           <strong>${s ? esc(s.title) : '(gelöschter Song)'}</strong>
@@ -298,11 +294,11 @@ function renderSetlists(){
         <button data-down="${i}" ${i === rows.length - 1 ? 'disabled' : ''}>↓</button>
         <button class="danger" data-rm="${i}">Entfernen</button>
       </li>`;
-    }).join('') || '<li class="muted">Noch keine Songs in dieser Setlist.</li>';
+  }).join('') || '<li class="muted">Noch keine Songs in dieser Setlist.</li>';
 
-    const available = state.songs.filter(s => !cur.entries.some(e => e.id === s.id));
-    html += `
-      <section class="card">
+  const available = state.songs.filter(s => !cur.entries.some(e => e.id === s.id));
+  return `
+      <section class="card" data-setdetail="${cur.id}" style="margin-top:-6px">
         <div class="row" style="margin-bottom:10px">
           <h2 style="flex:1;margin:0">${esc(cur.name)}</h2>
           <span class="muted">Gesamtdauer ${totalOf(cur)}</span>
@@ -327,8 +323,28 @@ function renderSetlists(){
           <button class="danger" data-delset="${cur.id}">Setlist löschen</button>
         </div>
       </section>`;
-  }
-  return html;
+}
+function renderSetlists(){
+  const list = state.setlists.length
+    ? state.setlists.map(s => {
+        const open = s.id === activeSetId;
+        return `
+      <div class="card set-card ${open ? 'sel' : ''}" data-open="${s.id}" role="button" tabindex="0">
+        <strong>${esc(s.name)}</strong>
+        <div class="song-meta">${s.entries.length} Songs · ${totalOf(s)}</div>
+      </div>${open ? setDetail(s) : ''}`;
+      }).join('')
+    : '<p class="muted">Noch keine Setlist.</p>';
+  return `
+    <section class="card">
+      <h2>Neue Setlist</h2>
+      <form id="setForm" class="row">
+        <input name="name" placeholder="Name der Setlist *" required style="flex:1;min-width:180px">
+        <button class="primary" type="submit">Erstellen</button>
+      </form>
+    </section>
+    <h2>Setlisten (${state.setlists.length})</h2>
+    ${list}`;
 }
 
 function renderLogin(msg = ''){
@@ -353,6 +369,11 @@ function render(){
   $('#userInfo').textContent = loggedIn ? user.email : '';
   if (!loggedIn) { $('#app').innerHTML = renderLogin(); return; }
   $('#app').innerHTML = `<div class="col">${renderSongs()}</div><div class="col">${renderSetlists()}</div>`;
+  if (pendingScroll) {
+    const el = document.querySelector(pendingScroll);
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    pendingScroll = null;
+  }
 }
 
 const authErrors = {
@@ -495,11 +516,17 @@ document.addEventListener('click', e => {
   if (e.target.id === 'bpmField') { openBpmPicker(e.target); return; }
   const b = e.target.closest('button');
   if (!b) {
-    // Ganze Karte klickbar: Song bearbeiten oder Setlist öffnen
+    // Ganze Karte klickbar: Song bearbeiten oder Setlist öffnen (erneuter Klick schliesst sie)
     const card = e.target.closest('[data-edit],[data-open]');
     if (!card || !user || !ready) return;
-    if (card.dataset.edit) { editSongId = card.dataset.edit; render(); }
-    else { activeSetId = card.dataset.open; render(); }
+    if (card.dataset.edit) {
+      editSongId = card.dataset.edit;
+      pendingScroll = `[data-editing="${editSongId}"]`;
+    } else {
+      activeSetId = activeSetId === card.dataset.open ? null : card.dataset.open;
+      pendingScroll = activeSetId ? `[data-setdetail="${activeSetId}"]` : null;
+    }
+    render();
     return;
   }
   if (b.id === 'testBtn') {
@@ -535,7 +562,11 @@ document.addEventListener('click', e => {
     if (cur && sel && sel.value) { cur.entries.push({ id: sel.value, start: '' }); save(); render(); }
     return;
   }
-  if (b.dataset.edit) { editSongId = b.dataset.edit; render(); return; }
+  if (b.dataset.edit) {
+    editSongId = b.dataset.edit;
+    pendingScroll = `[data-editing="${editSongId}"]`;
+    render(); return;
+  }
   if (b.dataset.del) {
     if (!confirm('Song löschen? Er wird auch aus allen Setlisten entfernt.')) return;
     const id = b.dataset.del;
@@ -544,7 +575,10 @@ document.addEventListener('click', e => {
     if (editSongId === id) editSongId = null;
     save(); render(); return;
   }
-  if (b.dataset.open) { activeSetId = b.dataset.open; render(); return; }
+  if (b.dataset.open) {
+    activeSetId = activeSetId === b.dataset.open ? null : b.dataset.open;
+    render(); return;
+  }
   if (b.dataset.delset) {
     if (!confirm('Setlist löschen?')) return;
     state.setlists = state.setlists.filter(s => s.id !== b.dataset.delset);
@@ -616,6 +650,7 @@ document.addEventListener('submit', e => {
     const s = { id: uid(), name: d.name.trim(), entries: [] };
     state.setlists.push(s);
     activeSetId = s.id;
+    pendingScroll = `[data-setdetail="${s.id}"]`;
     save(); render();
   }
 });
