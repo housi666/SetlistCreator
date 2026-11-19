@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>SetlistCreator · v0.4.6</title>
+<title>SetlistCreator · v0.4.7</title>
 <link rel="icon" type="image/svg+xml" href="icon.svg">
 <link rel="icon" type="image/png" sizes="32x32" href="icon-32.png">
 <link rel="apple-touch-icon" href="icon-180.png">
@@ -71,7 +71,7 @@ footer{padding:14px 20px;color:var(--muted);font-size:12px;text-align:center}
   <div class="row" style="gap:8px"><span id="userInfo" class="muted" style="color:var(--panel-text)"></span><button id="logoutBtn" type="button" style="display:none">Abmelden</button><button id="reloadBtn" type="button" title="Neueste Version laden (ohne Zwischenspeicher)">Aktualisieren</button></div>
 </header>
 <main id="app"></main>
-<footer>SetlistCreator v0.4.6 · Build 15 · 19.11.2026 · Alpha · Login über Firebase (eigenes Projekt setlistcreator-54d5d), Daten pro Konto · <span id="status"></span></footer>
+<footer>SetlistCreator v0.4.7 · Build 16 · 19.11.2026 · Alpha · Login über Firebase (eigenes Projekt setlistcreator-54d5d), Daten pro Konto · <span id="status"></span></footer>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
@@ -121,7 +121,11 @@ let saveTimer = null;
 let editSongId = null;
 let activeSetId = null;
 let pendingScroll = null;
-let ui = { songs: false, newSong: false, sets: false, newSet: false };
+const isAndroid = /Android/i.test(navigator.userAgent);
+// Android: Startbildschirm nur mit Knöpfen. Desktop: alle Bereiche sichtbar wie bisher.
+let ui = isAndroid
+  ? { songs: false, newSong: false, sets: false, newSet: false }
+  : { songs: true, newSong: true, sets: true, newSet: true };
 let searchQ = { songs: '', sets: '' };
 
 function setStatus(text){
@@ -276,6 +280,7 @@ function songsList(){
   }).join('');
 }
 function searchBox(kind, placeholder){
+  if (!isAndroid) return '';
   return `<input type="search" data-search="${kind}" placeholder="${placeholder}" value="${esc(searchQ[kind])}" style="margin-bottom:10px">`;
 }
 function renderSongs(){
@@ -391,6 +396,7 @@ function renderLogin(msg = ''){
 }
 
 function renderToolbar(){
+  if (!isAndroid) return '';
   const b = (k, label) => `<button type="button" data-ui="${k}" class="${ui[k] ? 'on' : ''}" aria-pressed="${ui[k]}">${label}</button>`;
   return `<div class="toolbar">${b('songs', 'Songbibliothek')}${b('newSong', 'Song erstellen')}${b('sets', 'Setlistbibliothek')}${b('newSet', 'Setlist erstellen')}</div>`;
 }
