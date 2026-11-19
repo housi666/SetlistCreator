@@ -1,4 +1,4 @@
-SetlistCreator · v0.4.22 · Build 31 · 19.11.2026 · Phase Alpha
+SetlistCreator · v0.4.32 · Build 41 · 19.11.2026 · Phase Alpha
 
 Legende: [x] erledigt, [ ] offen
 
@@ -96,5 +96,5 @@ Klein
 19.11.2026 – v0.4.28 Build 37: Endzeit unter Startspalte, Total unter Dauerspalte, Vorschau passt sich der Fenstergrösse an
 19.11.2026 – v0.4.29 Build 38: PDF-Tabelle füllt die volle Blattbreite, Spalten passen sich beim Ein- und Ausblenden an
 19.11.2026 – v0.4.30 Build 39: PDF-Spalte „Temp. Change“ (vorher Tempowechsel), Kopfzeile bricht nicht um
-20.11.2026 – v0.4.31 Build 40: Event-Angaben (Eventname, Location, Ort, Datum) oben rechts im PDF, einzeln abschaltbar
-20.11.2026 – v0.4.32 Build 41: Spalten per Greifer verschieben, Event-Datum per Auswahl
+19.11.2026 – v0.4.31 Build 40: Event-Angaben (Eventname, Location, Ort, Datum) oben rechts im PDF, einzeln abschaltbar
+19.11.2026 – v0.4.32 Build 41: Spalten per Greifer verschieben, Event-Datum per Auswahl

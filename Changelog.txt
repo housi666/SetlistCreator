@@ -9,21 +9,28 @@ v0.4.32 · Build 41 · 19.11.2026 21:00
 - PDF-Designer: Spalten per Greifer ⠿ verschieben statt Pfeile
 - Event-Datum per Auswahl (Tag, Monat, Jahr)
 
+v0.4.31 · Build 40 · 19.11.2026 20:50
 - PDF-Designer: Eventname, Location, Ort und Datum pro Setlist; oben rechts im A4 gedruckt, jedes Feld einzeln ein- und ausblendbar
 
+v0.4.30 · Build 39 · 19.11.2026 19:45
 - PDF: Spalte „Tempowechsel“ heisst jetzt „Temp. Change“ und bricht nicht mehr um
 
+v0.4.29 · Build 38 · 19.11.2026 19:40
 - PDF: Die Tabelle nutzt die ganze Blattbreite; beim Ein- und Ausblenden von Spalten passen sich die Breiten neu an
 
+v0.4.28 · Build 37 · 19.11.2026 19:30
 - PDF: Endzeit steht unter der Startspalte, Total unter der Dauerspalte
 - PDF-Vorschau wird bei Fenstergrösse neu eingepasst
 
+v0.4.27 · Build 36 · 19.11.2026 18:55
 - Startzeit pro Song mit Auswahl Std : Min : Sek; der erste Song startet bei 00:00:00
 - PDF: Total und Endzeit unter der Liste
 - Roter Hinweis oben, solange Endzeit und Gesamtdauer nicht übereinstimmen
 
 v0.4.26 · Build 35 · 19.11.2026 18:40
 - Desktop-Ansicht nutzt die ganze Bildschirmbreite und bleibt bei jedem Browser-Zoom zweispaltig
+
+v0.4.25 · Build 34 · 19.11.2026 18:35
 - SVG im PDF-Designer per Ziehen verschieben, an der Ecke in der Grösse ändern
 - Zwei Knöpfe drehen die Grafik in 30°-Schritten (↺ / ↻)
 
