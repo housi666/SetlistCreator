@@ -1,9 +1,12 @@
-SetlistCreator · v0.4.23 · Build 32 · 19.11.2026 · Phase Alpha
+SetlistCreator · v0.4.24 · Build 33 · 19.11.2026 · Phase Alpha
 
 Changelog · SetlistCreator
 Neueste Version zuerst. Zeiten = Schweizer Zeit
 
 ** ALPHA **
+
+v0.4.24 · Build 33 · 19.11.2026 18:15
+- Knopf umbenannt: „PDF in Setlist erstellen“ heisst jetzt „Setlist erstellen“
 
 v0.4.23 · Build 32 · 19.11.2026 16:05
 - SVG-Import im PDF-Designer (max. 200 KB, mit viewBox); Skripte und Ereignisattribute werden entfernt
