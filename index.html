@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>SetlistCreator · v0.4.9</title>
+<title>SetlistCreator · v0.4.10</title>
 <link rel="icon" type="image/svg+xml" href="icon.svg">
 <link rel="icon" type="image/png" sizes="32x32" href="icon-32.png">
 <link rel="apple-touch-icon" href="icon-180.png">
@@ -61,6 +61,34 @@ footer{padding:14px 20px;color:var(--muted);font-size:12px;text-align:center}
 .bpm-item{height:40px;line-height:40px;text-align:center;scroll-snap-align:center;font-size:18px;color:var(--muted);font-variant-numeric:tabular-nums}
 .bpm-item.on{color:var(--text);font-weight:700;font-size:22px}
 .bpm-pad{height:80px}
+.hdr-btn{background:none;color:var(--panel-text);border-color:var(--panel-hover);padding:6px 12px}
+.hdr-btn:hover{background:var(--panel-hover)}
+.legal-link{background:none;border:0;color:var(--muted);padding:0 2px;font-size:12px;text-decoration:underline;border-radius:0}
+.legal-link:hover{background:none;color:var(--text)}
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;z-index:60;padding:16px}
+.modal-bg.hidden{display:none}
+.modal{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:16px;width:min(560px,100%);max-height:85vh;overflow:auto}
+.modal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;gap:10px}
+.modal-head h3{margin:0;font-size:17px}
+.modal-x{border:0;background:none;font-size:22px;padding:0 6px;line-height:1}
+.modal-x:hover{background:none}
+.seg{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap}
+.seg button.on{background:var(--accent);color:var(--accent-text);border-color:var(--accent);font-weight:600}
+.tip{display:flex;gap:10px;padding:8px 0;border-bottom:1px solid var(--line)}
+.tip:last-child{border-bottom:0}
+.tip-ico{width:24px;flex:none}
+.tip-title{font-weight:600;font-size:14px}
+.tip-text{color:var(--muted);font-size:13px;margin-top:2px}
+.tips-cat{border:1px solid var(--line);border-radius:9px;padding:6px 12px;margin-bottom:8px}
+.tips-cat summary{color:var(--text);font-size:14px}
+.legal-body h4{margin:14px 0 4px;font-size:14px}
+.legal-body p,.legal-body li{font-size:13px;line-height:1.5}
+.legal-body ul{padding-left:18px;list-style:disc}
+.legal-body ol li{border:0;padding:0}
+.legal-ver{color:var(--muted);font-size:12px;margin-top:12px}
+.support-links{display:flex;flex-direction:column;gap:8px;margin:8px 0}
+.support-links a{color:var(--text);text-decoration:none;border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+.support-links a:hover{border-color:var(--accent)}
 .toolbar{grid-column:1 / -1;display:flex;flex-wrap:wrap;gap:8px;margin-bottom:-4px}
 .toolbar button{background:var(--accent);color:var(--accent-text);border-color:var(--accent);font-weight:600;opacity:.55}
 .toolbar button.on{opacity:1}
@@ -73,10 +101,39 @@ footer{padding:14px 20px;color:var(--muted);font-size:12px;text-align:center}
 <body>
 <header>
   <h1>SetlistCreator</h1>
-  <div class="row" style="gap:8px"><span id="userInfo" class="muted" style="color:var(--panel-text)"></span><button id="logoutBtn" type="button" style="display:none">Abmelden</button><button id="reloadBtn" type="button" title="Neueste Version laden (ohne Zwischenspeicher)">Aktualisieren</button></div>
+  <div class="row" style="gap:8px"><span id="userInfo" class="muted" style="color:var(--panel-text)"></span><button id="tipsBtn" type="button" class="hdr-btn">💡 Tipps</button><button id="supportBtn" type="button" class="hdr-btn">💬 Support</button><button id="logoutBtn" type="button" style="display:none">Abmelden</button><button id="reloadBtn" type="button" title="Neueste Version laden (ohne Zwischenspeicher)">Aktualisieren</button></div>
 </header>
 <main id="app"></main>
-<footer>SetlistCreator v0.4.9 · Build 18 · 19.11.2026 · Alpha · Login über Firebase (eigenes Projekt setlistcreator-54d5d), Daten pro Konto · <span id="status"></span></footer>
+<footer>SetlistCreator v0.4.10 · Build 19 · 19.11.2026 · Alpha · Login über Firebase (eigenes Projekt setlistcreator-54d5d), Daten pro Konto · <span id="status"></span><br><button type="button" class="legal-link" data-legal="terms">Nutzungsbedingungen</button> · <button type="button" class="legal-link" data-legal="privacy">Datenschutz</button></footer>
+
+<div class="modal-bg hidden" id="tipsModal">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="tipsTitle">
+    <div class="modal-head"><h3 id="tipsTitle">Tipps</h3><button type="button" class="modal-x" data-modal-close aria-label="Schliessen">×</button></div>
+    <div id="tipsBody"></div>
+  </div>
+</div>
+<div class="modal-bg hidden" id="supportModal">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="supportTitle">
+    <div class="modal-head"><h3 id="supportTitle">Support</h3><button type="button" class="modal-x" data-modal-close aria-label="Schliessen">×</button></div>
+    <p>Fragen, Probleme oder Ideen zu SetlistCreator? Schreib mir über einen dieser Kanäle – das ist gleichzeitig der Support-Kontakt.</p>
+    <div class="support-links">
+      <a href="https://www.instagram.com/housi_666/" target="_blank" rel="noopener"><b>Instagram</b> housi_666</a>
+      <a href="https://www.tiktok.com/@housi_666" target="_blank" rel="noopener"><b>TikTok</b> housi_666</a>
+    </div>
+    <p class="legal-ver"><button type="button" class="legal-link" data-legal="terms">Nutzungsbedingungen</button> · <button type="button" class="legal-link" data-legal="privacy">Datenschutzerklärung</button></p>
+  </div>
+</div>
+<div class="modal-bg hidden" id="legalModal">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="legalTitle">
+    <div class="modal-head"><h3 id="legalTitle">Rechtliches</h3><button type="button" class="modal-x" data-modal-close aria-label="Schliessen">×</button></div>
+    <div class="seg">
+      <button type="button" data-legal-tab="terms">Nutzungsbedingungen</button>
+      <button type="button" data-legal-tab="privacy">Datenschutz</button>
+    </div>
+    <div class="legal-body" id="legalBody"></div>
+    <p class="legal-ver" id="legalVer"></p>
+  </div>
+</div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
@@ -396,6 +453,7 @@ function renderLogin(msg = ''){
         </div>
       </form>
       <p class="muted" id="authMsg" style="margin:10px 0 0;min-height:18px">${esc(msg)}</p>
+      <p class="muted" style="margin:8px 0 0;font-size:12px"><button type="button" class="legal-link" data-legal="terms">Nutzungsbedingungen</button> · <button type="button" class="legal-link" data-legal="privacy">Datenschutz</button></p>
     </section>`;
 }
 
@@ -557,8 +615,147 @@ td.dur,th.dur{width:14mm;white-space:nowrap}
   }
 }
 
+// ---- Tipps, Support, Rechtliches ----
+const LEGAL_VERSION = '2026-11-19';
+const LEGAL_TERMS = `
+<h4>1. Anbieter</h4>
+<p>SetlistCreator ist ein privates, nicht-kommerzielles Projekt von Housi Guntern, Schweiz. Kontakt: Instagram oder TikTok <b>housi_666</b>.</p>
+<h4>2. Gegenstand</h4>
+<p>SetlistCreator ist eine kostenlose Web-App zur Verwaltung von Songbibliothek und Setlisten. Sie befindet sich in der <b>Alpha-Phase</b>. Funktionen, Aussehen und gespeicherte Daten können sich jederzeit ändern, eingeschränkt oder ganz eingestellt werden. Es besteht kein Anspruch auf Verfügbarkeit, Fehlerfreiheit oder dauerhafte Speicherung. Sichere wichtige Setlisten zusätzlich selbst, z. B. über den Export.</p>
+<h4>3. Erstellung mit KI</h4>
+<p>Diese Web-App wurde zum grössten Teil mit Hilfe der KI <b>Claude</b> (Anthropic) erstellt. Programmcode, Texte und Gestaltung stammen daher teilweise von einer KI. Ich habe darauf nur begrenzten Einfluss und kann nicht ausschliessen, dass dabei ungewollt Inhalte oder Code entstanden sind, die Rechte Dritter verletzen (z. B. Urheberrechte). Das geschieht nicht absichtlich. Für solche unbeabsichtigten Verstösse übernehme ich, soweit gesetzlich zulässig, keine Verantwortung und keine Gewähr. Hinweise auf mögliche Verstösse nehme ich über die Support-Kanäle entgegen und prüfe sie.</p>
+<h4>4. Konto</h4>
+<p>Du machst wahre Angaben, hältst dein Passwort geheim und bist für alle Aktivitäten in deinem Konto verantwortlich. Die Nutzung ist ab 16 Jahren erlaubt, jüngere Personen brauchen das Einverständnis ihrer Eltern.</p>
+<h4>5. Verhaltensregeln</h4>
+<p>Verboten sind insbesondere:</p>
+<ul>
+<li>Inhalte, die rassistisch, menschenverachtend, diskriminierend, pornografisch oder strafbar sind,</li>
+<li>Verletzung von Rechten Dritter (z. B. Urheber- oder Markenrechte),</li>
+<li>Spam, Schadsoftware, Betrugsversuche und das Ausnutzen von Sicherheitslücken.</li>
+</ul>
+<h4>6. Verantwortung für Inhalte</h4>
+<p>Für alle Inhalte, die du eingibst, bist <b>allein du verantwortlich</b>. Der Anbieter prüft Inhalte nicht. Er darf Inhalte, die gegen diese Bedingungen verstossen, ohne Vorankündigung entfernen und Konten sperren oder löschen.</p>
+<h4>7. Sicherheit und Links</h4>
+<p>Der Anbieter fragt dich <b>nie</b> per Nachricht nach deinem Passwort. Offizielle Hinweise kommen nur aus SetlistCreator selbst oder von den Kanälen <b>housi_666</b>. Klicke keine Links an, die nicht nachweislich vom Anbieter stammen.</p>
+<p>Trotz Schutzmassnahmen lässt sich nicht ausschliessen, dass Daten durch Hackerangriffe, technische Fehler oder Fehler Dritter verloren gehen oder unberechtigt eingesehen werden.</p>
+<h4>8. Haftung und Gewährleistung</h4>
+<p>SetlistCreator wird ohne jede Gewährleistung zur Verfügung gestellt. Soweit gesetzlich zulässig, ist jede Haftung des Anbieters ausgeschlossen, insbesondere für Datenverlust, Ausfälle, Fehlfunktionen, Schäden durch Dienste Dritter (z. B. Google Firebase, GitHub) und Hackerangriffe. Vorbehalten bleibt die zwingende Haftung für rechtswidrige Absicht und grobe Fahrlässigkeit (Art. 100 OR).</p>
+<p>Du stellst den Anbieter von Ansprüchen Dritter frei, die aus deinen Inhalten oder deinem Verhalten entstehen.</p>
+<h4>9. Änderungen</h4>
+<p>Der Anbieter kann diese Bedingungen ändern. Es gilt jeweils die in der App angezeigte Fassung.</p>
+<h4>10. Beendigung</h4>
+<p>Eine Löschung deines Kontos ist in der App derzeit nicht vorgesehen. Melde dich dafür über die Support-Kanäle.</p>
+<h4>11. Recht und Gerichtsstand</h4>
+<p>Es gilt Schweizer Recht. Gerichtsstand ist, soweit gesetzlich zulässig, der Wohnsitz des Anbieters.</p>
+<h4>12. Teilunwirksamkeit</h4>
+<p>Ist eine Bestimmung unwirksam, bleiben die übrigen gültig. An ihre Stelle tritt eine zulässige Regelung, die dem Zweck möglichst nahekommt.</p>
+`;
+const LEGAL_PRIVACY = `
+<h4>1. Verantwortlicher</h4>
+<p>Housi Guntern, Schweiz (privates Projekt). Kontakt: Instagram oder TikTok <b>housi_666</b>.</p>
+<h4>2. Welche Daten</h4>
+<ul>
+<li>Konto: E-Mail-Adresse und Passwort. Das Passwort wird von Google Firebase verschlüsselt gespeichert, der Anbieter kann es nicht sehen.</li>
+<li>Inhalte: Songs (Titel, Interpret, Tonart, Tempo, Dauer, Tempowechsel, Notizen) und Setlisten (Name, Reihenfolge, Startzeiten), dazu ein Zeitstempel der letzten Speicherung.</li>
+<li>Technisch: Beim Aufruf der Seite verarbeiten die Server-Anbieter u. a. deine IP-Adresse.</li>
+</ul>
+<h4>3. Zweck</h4>
+<p>Die Daten werden nur für den Betrieb von SetlistCreator verwendet. Kein Verkauf, keine Werbung, kein Tracking, keine Analyse-Tools.</p>
+<h4>4. Wo die Daten liegen</h4>
+<ul>
+<li><b>Google Firebase</b> (Google): Anmeldung und Datenbank. Jedes Konto hat seinen eigenen Datenbereich. Der Anmeldedienst kann Daten auch ausserhalb der Schweiz verarbeiten, u. a. in den USA.</li>
+<li><b>GitHub Pages</b> (GitHub, USA): liefert die Web-App aus und verarbeitet dabei technische Zugriffsdaten.</li>
+</ul>
+<p>Mit der Nutzung nimmst du zur Kenntnis, dass Daten dabei ins Ausland bekanntgegeben werden können.</p>
+<h4>5. Wer was sieht</h4>
+<p>Nur du siehst deine Songs und Setlisten. Der Betreiber der App (Entwickler) kann zur Wartung und Fehlersuche technisch alle gespeicherten Daten einsehen; er nutzt sie nur dafür.</p>
+<h4>6. Sicherheit</h4>
+<p>Der Zugriff ist nur mit Konto möglich, die Verbindung ist verschlüsselt. Eine absolute Sicherheit gibt es aber nicht. Speichere keine besonders schützenswerten Daten in SetlistCreator.</p>
+<h4>7. Speicher im Browser</h4>
+<p>Firebase speichert deine Anmeldung im Browser, damit du angemeldet bleibst. Die App setzt keine Werbe- oder Tracking-Cookies.</p>
+<h4>8. Speicherdauer</h4>
+<p>Deine Daten bleiben gespeichert, bis du sie löschst oder das Konto entfernt wird.</p>
+<h4>9. Deine Rechte</h4>
+<p>Du kannst Auskunft über deine Daten verlangen, sie berichtigen und löschen lassen. Melde dich dafür über die Support-Kanäle.</p>
+<h4>10. Änderungen</h4>
+<p>Diese Erklärung kann angepasst werden. Es gilt die jeweils in der App angezeigte Fassung.</p>
+`;
+function openModal(id){ $(id).classList.remove('hidden'); }
+function closeModal(id){ $(id).classList.add('hidden'); }
+function renderLegal(tab){
+  document.querySelectorAll('[data-legal-tab]').forEach(b => b.classList.toggle('on', b.dataset.legalTab === tab));
+  $('legalBody').innerHTML = tab === 'privacy' ? LEGAL_PRIVACY : LEGAL_TERMS;
+  $('legalTitle').textContent = tab === 'privacy' ? 'Datenschutzerklärung' : 'Nutzungsbedingungen';
+  $('legalVer').textContent = 'Fassung ' + LEGAL_VERSION;
+}
+const TIPS = {
+  songs: { name: 'Songbibliothek', icon: '🎵', list: [
+    { icon: '👆', title: 'Song bearbeiten', text: 'Tippe auf die ganze Karte oder auf den Stift. Das Formular öffnet sich an derselben Stelle; „Speichern“ übernimmt die Änderung.' },
+    { icon: '🗑️', title: 'Löschen', text: 'Der Papierkorb entfernt den Song auch aus allen Setlisten.' },
+    { icon: '🔍', title: 'Suchen', text: 'Das Suchfeld filtert nach Titel, Interpret und Tonart.', android: true },
+  ]},
+  newSong: { name: 'Song erstellen', icon: '➕', list: [
+    { icon: '✳️', title: 'Pflichtfeld', text: 'Nur der Titel ist Pflicht. Alle anderen Angaben sind optional.' },
+    { icon: '⏱️', title: 'Dauer', text: 'Minuten und Sekunden wählst du in zwei Auswahlfeldern. Sie bestimmen die Zeiten in den Setlisten.' },
+    { icon: '🥁', title: 'Tempo (BPM)', text: 'Ein Klick auf das Tempo-Feld öffnet ein Rad mit 20 bis 300 BPM. Du kannst den Wert auch direkt eintippen.' },
+    { icon: '📂', title: 'Weitere Angaben', text: 'Tonart, Tempo, Tempowechsel und Notizen sind unter „Weitere Angaben“ versteckt.' },
+    { icon: '🧪', title: 'Testdaten', text: 'Der Knopf „Testdaten einfügen“ legt 10 Testsongs und eine Setlist „Testsetlist“ mit 45 Minuten an.' },
+  ]},
+  sets: { name: 'Setlistbibliothek', icon: '📋', list: [
+    { icon: '👆', title: 'Öffnen', text: 'Tippe auf eine Setlist, um sie aufzuklappen. Ein erneuter Tipp schliesst sie.' },
+    { icon: '🕒', title: 'Startzeit', text: 'Leer lassen: Die Startzeit ergibt sich aus dem Vorgänger. Eine eingetragene Zeit gilt ab dieser Stelle.' },
+    { icon: '↕️', title: 'Reihenfolge', text: 'Mit ↑ und ↓ verschiebst du Songs; „Entfernen“ nimmt sie aus der Setlist.' },
+    { icon: '📄', title: 'Duplizieren', text: 'Kopiert eine Setlist inklusive Reihenfolge und Startzeiten.' },
+    { icon: '🔍', title: 'Suchen', text: 'Das Suchfeld filtert nach dem Namen der Setlist.', android: true },
+  ]},
+  newSet: { name: 'Setlist erstellen', icon: '➕', list: [
+    { icon: '✳️', title: 'Name', text: 'Der Name ist Pflicht. Danach fügst du Songs hinzu.' },
+  ]},
+  general: { name: 'Allgemein', icon: '💡', list: [
+    { icon: '📤', title: 'Export', text: 'Eine Setlist exportierst du als TXT, CSV (Semikolon, für Excel) oder PDF (A4, Hoch- oder Querformat).' },
+    { icon: '🖨️', title: 'PDF speichern', text: 'Beim PDF-Export öffnet sich der Druckdialog. Dort wählst du bei „Ziel“ „Als PDF speichern“.' },
+    { icon: '🔐', title: 'Login', text: 'Anmeldung mit E-Mail und Passwort. Deine Songs und Setlisten sind nur in deinem Konto sichtbar.' },
+    { icon: '🚧', title: 'Alpha', text: 'SetlistCreator ist in der Alpha-Phase und verändert sich laufend. Sichere wichtige Setlisten zusätzlich, z. B. per Export.' },
+    { icon: '🔄', title: 'Aktualisieren', text: 'Der Knopf „Aktualisieren“ lädt die neueste Version ohne Zwischenspeicher.' },
+    { icon: '💬', title: 'Support', text: 'Fragen oder Ideen: Instagram oder TikTok housi_666.' },
+  ]},
+};
+function tipsList(list){
+  return list.filter(t => !t.android || isAndroid).map(t => `<div class="tip"><div class="tip-ico">${t.icon}</div><div><div class="tip-title">${t.title}</div><div class="tip-text">${t.text}</div></div></div>`).join('');
+}
+function openTips(){
+  const body = $('tipsBody');
+  const cur = isAndroid ? (view || null) : null;
+  const order = cur ? [cur] : [];
+  Object.keys(TIPS).forEach(k => { if (k !== cur && k !== 'general') order.push(k); });
+  if (cur !== 'general') order.push('general');
+  body.innerHTML = order.map((k, i) => {
+    const t = TIPS[k];
+    const label = k === cur ? 'Diese Seite: ' + t.name : t.name;
+    return `<details class="tips-cat" ${(cur ? k === cur : i === 0) ? 'open' : ''}><summary>${t.icon} ${label}</summary>${tipsList(t.list)}</details>`;
+  }).join('');
+  openModal('tipsModal');
+}
+function handleChrome(e){
+  const t = e.target;
+  if (t.closest('#tipsBtn')) { openTips(); return true; }
+  if (t.closest('#supportBtn')) { openModal('supportModal'); return true; }
+  const lg = t.closest('[data-legal]');
+  if (lg) { renderLegal(lg.dataset.legal); openModal('legalModal'); return true; }
+  const lt = t.closest('[data-legal-tab]');
+  if (lt) { renderLegal(lt.dataset.legalTab); return true; }
+  const cl = t.closest('[data-modal-close]');
+  if (cl) { cl.closest('.modal-bg').classList.add('hidden'); return true; }
+  if (t.classList && t.classList.contains('modal-bg')) { t.classList.add('hidden'); return true; }
+  return false;
+}
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') document.querySelectorAll('.modal-bg').forEach(m => m.classList.add('hidden'));
+});
+
 // ---- Events ----
 document.addEventListener('click', e => {
+  if (handleChrome(e)) return;
   if (e.target.id === 'bpmField') { openBpmPicker(e.target); return; }
   const b = e.target.closest('button');
   if (!b) {

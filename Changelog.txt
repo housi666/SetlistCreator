@@ -1,9 +1,14 @@
-SetlistCreator · v0.4.9 · Build 18 · 19.11.2026 · Phase Alpha
+SetlistCreator · v0.4.10 · Build 19 · 19.11.2026 · Phase Alpha
 
 Changelog · SetlistCreator
 Neueste Version zuerst. Zeiten = Schweizer Zeit
 
 ** ALPHA **
+
+v0.4.10 · Build 19 · 19.11.2026 11:40
+- Knopf „Tipps“ (Android und Desktop) mit Tipps zur Seite und Allgemeines
+- Knopf „Support“ mit Instagram und TikTok (housi_666)
+- Nutzungsbedingungen und Datenschutzerklärung, Links im Footer und auf der Anmeldeseite
 
 v0.4.9 · Build 18 · 19.11.2026 11:25
 - Android: Knöpfe auf volle Breite, vier Zeilen untereinander

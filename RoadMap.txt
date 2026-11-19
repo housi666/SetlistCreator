@@ -1,4 +1,4 @@
-SetlistCreator · v0.4.9 · Build 18 · 19.11.2026 · Phase Alpha
+SetlistCreator · v0.4.10 · Build 19 · 19.11.2026 · Phase Alpha
 
 Legende: [x] erledigt, [ ] offen
 
@@ -88,3 +88,5 @@ Klein
 19.11.2026 – v0.4.6 Build 15: Startbildschirm nur mit Knöpfen, Suche in Song- und Setlistbibliothek
 19.11.2026 – v0.4.7 Build 16: Knöpfe und Suche nur in der Android-Ansicht, Desktop mit allen Bereichen
 19.11.2026 – v0.4.8 Build 17: Android-Knöpfe in Akzentfarbe
+19.11.2026 – v0.4.9 Build 18: Android-Bereiche als eigene Seiten mit Zurück, Knöpfe volle Breite
+19.11.2026 – v0.4.10 Build 19: Tipps, Support, Nutzungsbedingungen und Datenschutz (Entwurf, Prüfung ausstehend)
