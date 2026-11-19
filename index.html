@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>SetlistCreator · v0.4.29</title>
+<title>SetlistCreator · v0.4.30</title>
 <link rel="icon" type="image/svg+xml" href="icon.svg">
 <link rel="icon" type="image/png" sizes="32x32" href="icon-32.png">
 <link rel="apple-touch-icon" href="icon-180.png">
@@ -127,7 +127,7 @@ footer{padding:14px 20px;color:var(--muted);font-size:12px;text-align:center}
   <div class="row" style="gap:8px"><span id="userInfo" class="muted" style="color:var(--panel-text)"></span><button id="tipsBtn" type="button" class="hdr-btn">💡 Tipps</button><button id="supportBtn" type="button" class="hdr-btn">💬 Support</button><button id="logoutBtn" type="button" style="display:none">Abmelden</button><button id="reloadBtn" type="button" title="Neueste Version laden (ohne Zwischenspeicher)">Aktualisieren</button></div>
 </header>
 <main id="app"></main>
-<footer>SetlistCreator v0.4.29 · Build 38 · 19.11.2026 · Alpha · Login über Firebase (eigenes Projekt setlistcreator-54d5d), Daten pro Konto · <span id="status"></span><br><button type="button" class="legal-link" data-legal="terms">Nutzungsbedingungen</button> · <button type="button" class="legal-link" data-legal="privacy">Datenschutz</button></footer>
+<footer>SetlistCreator v0.4.30 · Build 39 · 19.11.2026 · Alpha · Login über Firebase (eigenes Projekt setlistcreator-54d5d), Daten pro Konto · <span id="status"></span><br><button type="button" class="legal-link" data-legal="terms">Nutzungsbedingungen</button> · <button type="button" class="legal-link" data-legal="privacy">Datenschutz</button></footer>
 
 <div class="modal-bg hidden" id="tipsModal">
   <div class="modal" role="dialog" aria-modal="true" aria-labelledby="tipsTitle">
@@ -181,7 +181,7 @@ const $ = s => document.querySelector(s);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
 
-const PDF_COLS = { nr: 'Nr', start: 'Start', end: 'Ende', title: 'Titel', artist: 'Interpret', key: 'Tonart', bpm: 'BPM', dur: 'Dauer', tempo: 'Tempowechsel', notes: 'Notizen' };
+const PDF_COLS = { nr: 'Nr', start: 'Start', end: 'Ende', title: 'Titel', artist: 'Interpret', key: 'Tonart', bpm: 'BPM', dur: 'Dauer', tempo: 'Temp. Change', notes: 'Notizen' };
 const PDF_FONTS = { arial: ['Arial', 'Arial, Helvetica, sans-serif'], georgia: ['Georgia', 'Georgia, serif'], verdana: ['Verdana', 'Verdana, sans-serif'], courier: ['Courier New', '"Courier New", Courier, monospace'], impact: ['Impact', 'Impact, "Arial Narrow Bold", sans-serif'], razor: ['Razor Ephinea', '"Razor Ephinea", Impact, sans-serif'] };
 let pdfZoom = 'fit';
 function defaultPdf(){
@@ -425,8 +425,12 @@ function pdfInner(set, prefs, edit = false){
   const rows = exportRows(set);
   const cols = prefs.order.filter(k => prefs.on[k]);
   const wsum = cols.reduce((a, k) => a + PDF_W[k], 0) || 1;
-  const cg = `<colgroup>${cols.map(k => `<col style="width:${(PDF_W[k] / wsum * 100).toFixed(2)}%">`).join('')}</colgroup>`;
-  const th = cols.map(k => `<th class="c-${k}">${PDF_COLS[k]}</th>`).join('');
+  // Spalte „Temp. Change“ hat feste Breite, damit der Titel nie umbricht; die übrigen teilen den Rest
+  const oSum = cols.filter(k => k !== 'tempo').reduce((a, k) => a + PDF_W[k], 0) || 1;
+  const cg = `<colgroup>${cols.map(k => k === 'tempo'
+    ? '<col style="width:28mm">'
+    : `<col style="width:calc((100% - ${cols.includes('tempo') ? '28mm' : '0mm'}) * ${(PDF_W[k] / oSum).toFixed(4)})">`).join('')}</colgroup>`;
+  const th = cols.map(k => `<th class="c-${k}"${k === 'tempo' ? ' style="white-space:nowrap"' : ''}>${PDF_COLS[k]}</th>`).join('');
   const tr = rows.map(r => `<tr>${cols.map(k => `<td class="c-${k}">${esc(r[k])}</td>`).join('')}</tr>`).join('');
   const c = timeCheck(set);
   let foot = '', missing = [];

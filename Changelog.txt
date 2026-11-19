@@ -1,11 +1,13 @@
-SetlistCreator · v0.4.29 · Build 38 · 19.11.2026 · Phase Alpha
+SetlistCreator · v0.4.30 · Build 39 · 19.11.2026 · Phase Alpha
 
 Changelog · SetlistCreator
 Neueste Version zuerst. Zeiten = Schweizer Zeit
 
 ** ALPHA **
 
-v0.4.29 · Build 38 · 19.11.2026 19:40
+v0.4.30 · Build 39 · 19.11.2026 19:45
+- PDF: Spalte „Tempowechsel“ heisst jetzt „Temp. Change“ und bricht nicht mehr um
+
 - PDF: Die Tabelle nutzt die ganze Blattbreite; beim Ein- und Ausblenden von Spalten passen sich die Breiten neu an
 
 - PDF: Endzeit steht unter der Startspalte, Total unter der Dauerspalte
