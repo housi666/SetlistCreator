@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>SetlistCreator · v0.4.28</title>
+<title>SetlistCreator · v0.4.29</title>
 <link rel="icon" type="image/svg+xml" href="icon.svg">
 <link rel="icon" type="image/png" sizes="32x32" href="icon-32.png">
 <link rel="apple-touch-icon" href="icon-180.png">
@@ -100,7 +100,7 @@ footer{padding:14px 20px;color:var(--muted);font-size:12px;text-align:center}
 .pdf-sheet h1{font-size:1.8em;margin:0 0 1.5mm}
 .pdf-sheet .meta{color:#6b6e7b;font-size:.9em;margin-bottom:5mm}
 .pdf-sheet table{width:100%;border-collapse:collapse}
-.pdf-sheet th,.pdf-sheet td{border-bottom:0.5pt solid #cfcfd8;padding:2mm 1.5mm;text-align:left;vertical-align:top}
+.pdf-sheet th,.pdf-sheet td{border-bottom:0.5pt solid #cfcfd8;padding:2mm 1.5mm;text-align:left;vertical-align:top;overflow-wrap:anywhere}
 .pdf-sheet th{color:#6b6e7b;font-weight:600;border-bottom:1pt solid #6b6e7b}
 .pdf-sheet .c-nr,.pdf-sheet .c-start,.pdf-sheet .c-end,.pdf-sheet .c-bpm,.pdf-sheet .c-dur,.pdf-sheet .c-key{white-space:nowrap}
 .pdf-scroll{overflow:auto;padding:4px 0;max-height:72vh;cursor:grab;touch-action:none}
@@ -127,7 +127,7 @@ footer{padding:14px 20px;color:var(--muted);font-size:12px;text-align:center}
   <div class="row" style="gap:8px"><span id="userInfo" class="muted" style="color:var(--panel-text)"></span><button id="tipsBtn" type="button" class="hdr-btn">💡 Tipps</button><button id="supportBtn" type="button" class="hdr-btn">💬 Support</button><button id="logoutBtn" type="button" style="display:none">Abmelden</button><button id="reloadBtn" type="button" title="Neueste Version laden (ohne Zwischenspeicher)">Aktualisieren</button></div>
 </header>
 <main id="app"></main>
-<footer>SetlistCreator v0.4.28 · Build 37 · 19.11.2026 · Alpha · Login über Firebase (eigenes Projekt setlistcreator-54d5d), Daten pro Konto · <span id="status"></span><br><button type="button" class="legal-link" data-legal="terms">Nutzungsbedingungen</button> · <button type="button" class="legal-link" data-legal="privacy">Datenschutz</button></footer>
+<footer>SetlistCreator v0.4.29 · Build 38 · 19.11.2026 · Alpha · Login über Firebase (eigenes Projekt setlistcreator-54d5d), Daten pro Konto · <span id="status"></span><br><button type="button" class="legal-link" data-legal="terms">Nutzungsbedingungen</button> · <button type="button" class="legal-link" data-legal="privacy">Datenschutz</button></footer>
 
 <div class="modal-bg hidden" id="tipsModal">
   <div class="modal" role="dialog" aria-modal="true" aria-labelledby="tipsTitle">
@@ -419,9 +419,13 @@ function pdfFontFaceCss(p){
   if (!(p.font === 'custom' && p.custom)) return '';
   return `@font-face{font-family:"${p.custom.name}";src:url(${p.custom.data});}`;
 }
+// Relative Breiten: die sichtbaren Spalten füllen immer die ganze Blattbreite
+const PDF_W = { nr: 4, start: 11, end: 11, title: 22, artist: 16, key: 6, bpm: 6, dur: 8, tempo: 12, notes: 18 };
 function pdfInner(set, prefs, edit = false){
   const rows = exportRows(set);
   const cols = prefs.order.filter(k => prefs.on[k]);
+  const wsum = cols.reduce((a, k) => a + PDF_W[k], 0) || 1;
+  const cg = `<colgroup>${cols.map(k => `<col style="width:${(PDF_W[k] / wsum * 100).toFixed(2)}%">`).join('')}</colgroup>`;
   const th = cols.map(k => `<th class="c-${k}">${PDF_COLS[k]}</th>`).join('');
   const tr = rows.map(r => `<tr>${cols.map(k => `<td class="c-${k}">${esc(r[k])}</td>`).join('')}</tr>`).join('');
   const c = timeCheck(set);
@@ -432,12 +436,12 @@ function pdfInner(set, prefs, edit = false){
       if (k === 'dur') return `Total ${fmt(c.sum)}`;
       return '';
     };
-    foot = `<tfoot><tr>${cols.map(k => `<td class="c-${k}" style="font-weight:700;border-top:1pt solid #6b6e7b;border-bottom:0">${cell(k)}</td>`).join('')}</tr></tfoot>`;
+    foot = `<tfoot><tr>${cols.map(k => `<td class="c-${k}" style="font-weight:700;border-top:1pt solid #6b6e7b;border-bottom:0;white-space:normal">${cell(k)}</td>`).join('')}</tr></tfoot>`;
     if (!cols.includes('start')) missing.push(`Endzeit ${hms(c.endS)}`);
     if (!cols.includes('dur')) missing.push(`Total ${fmt(c.sum)}`);
   }
   const extra = missing.length ? `<div style="margin-top:8px;font-weight:700">${missing.join(' · ')}</div>` : '';
-  return `<div class="pdf-content" style="position:relative"><h1>${esc(set.name)}</h1><div class="meta">Gesamtdauer ${totalOf(set)} · ${rows.length} Songs</div><table><thead><tr>${th}</tr></thead><tbody>${tr}</tbody>${foot}</table>${extra}${pdfSvgHtml(prefs, edit)}</div>`;
+  return `<div class="pdf-content" style="position:relative"><h1>${esc(set.name)}</h1><div class="meta">Gesamtdauer ${totalOf(set)} · ${rows.length} Songs</div><table style="table-layout:fixed">${cg}<thead><tr>${th}</tr></thead><tbody>${tr}</tbody>${foot}</table>${extra}${pdfSvgHtml(prefs, edit)}</div>`;
 }
 // SVG: Skripte und Ereignisattribute entfernen, nur Dateien mit viewBox
 function sanitizeSvg(text){
@@ -480,7 +484,7 @@ body{font-family:${pdfFamily(prefs)};color:#1b1c22;font-size:${prefs.size}pt;mar
 h1{font-size:1.8em;margin:0 0 1.5mm}
 .meta{color:#6b6e7b;font-size:.9em;margin-bottom:5mm}
 table{width:100%;border-collapse:collapse}
-th,td{border-bottom:0.5pt solid #cfcfd8;padding:2mm 1.5mm;text-align:left;vertical-align:top}
+th,td{border-bottom:0.5pt solid #cfcfd8;padding:2mm 1.5mm;text-align:left;vertical-align:top;overflow-wrap:anywhere}
 th{color:#6b6e7b;font-weight:600;border-bottom:1pt solid #6b6e7b}
 .c-nr,.c-start,.c-end,.c-bpm,.c-dur,.c-key{white-space:nowrap}
 </style></head><body>${pdfInner(set, prefs)}</body></html>`;

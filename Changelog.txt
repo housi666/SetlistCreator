@@ -1,11 +1,13 @@
-SetlistCreator · v0.4.28 · Build 37 · 19.11.2026 · Phase Alpha
+SetlistCreator · v0.4.29 · Build 38 · 19.11.2026 · Phase Alpha
 
 Changelog · SetlistCreator
 Neueste Version zuerst. Zeiten = Schweizer Zeit
 
 ** ALPHA **
 
-v0.4.28 · Build 37 · 19.11.2026 19:30
+v0.4.29 · Build 38 · 19.11.2026 19:40
+- PDF: Die Tabelle nutzt die ganze Blattbreite; beim Ein- und Ausblenden von Spalten passen sich die Breiten neu an
+
 - PDF: Endzeit steht unter der Startspalte, Total unter der Dauerspalte
 - PDF-Vorschau wird bei Fenstergrösse neu eingepasst
 
