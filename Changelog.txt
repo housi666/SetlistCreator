@@ -1,9 +1,12 @@
-SetlistCreator · v0.4.19 · Build 28 · 19.11.2026 · Phase Alpha
+SetlistCreator · v0.4.20 · Build 29 · 19.11.2026 · Phase Alpha
 
 Changelog · SetlistCreator
 Neueste Version zuerst. Zeiten = Schweizer Zeit
 
 ** ALPHA **
+
+v0.4.20 · Build 29 · 19.11.2026 13:10
+- PDF-Vorschau als A4-Druckansicht: weisses Blatt mit Schatten, übernimmt Schrift und Abstände wie im Ausdruck, unabhängig von den App-Styles
 
 v0.4.19 · Build 28 · 19.11.2026 13:05
 - „PDF öffnen“ entfernt; stattdessen „PDF Download als Datei“ (PDF-Datei speichern) und „PDF Drucken“ (Browser-Druckdialog)
