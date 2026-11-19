@@ -1,9 +1,13 @@
-SetlistCreator · v0.4.24 · Build 33 · 19.11.2026 · Phase Alpha
+SetlistCreator · v0.4.25 · Build 34 · 19.11.2026 · Phase Alpha
 
 Changelog · SetlistCreator
 Neueste Version zuerst. Zeiten = Schweizer Zeit
 
 ** ALPHA **
+
+v0.4.25 · Build 34 · 19.11.2026 18:35
+- SVG im PDF-Designer per Ziehen verschieben, an der Ecke in der Grösse ändern
+- Zwei Knöpfe drehen die Grafik in 30°-Schritten (↺ / ↻)
 
 v0.4.24 · Build 33 · 19.11.2026 18:15
 - Knopf umbenannt: „PDF in Setlist erstellen“ heisst jetzt „Setlist erstellen“

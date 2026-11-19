@@ -90,3 +90,4 @@ Klein
 19.11.2026 – v0.4.10 Build 19: Tipps, Support, Nutzungsbedingungen und Datenschutz (Entwurf, Prüfung ausstehend)
 19.11.2026 – v0.4.13 Build 22: PDF-Designer mit Vorschau, Spalten ein-, ausblenden und verschieben, Schrift, Grösse und Ausrichtung
 19.11.2026 – v0.4.23 Build 32: SVG-Import im PDF-Designer mit Positionierung, Grösse und Farbwechsel
+19.11.2026 – v0.4.25 Build 34: SVG im PDF-Vorschau verschieben, in der Grösse ändern und in 30°-Schritten drehen

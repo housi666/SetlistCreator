@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>SetlistCreator · v0.4.24</title>
+<title>SetlistCreator · v0.4.25</title>
 <link rel="icon" type="image/svg+xml" href="icon.svg">
 <link rel="icon" type="image/png" sizes="32x32" href="icon-32.png">
 <link rel="apple-touch-icon" href="icon-180.png">
@@ -105,6 +105,8 @@ footer{padding:14px 20px;color:var(--muted);font-size:12px;text-align:center}
 .pdf-scroll{overflow:auto;padding:4px 0;max-height:72vh;cursor:grab;touch-action:none}
 .pdf-scroll.grabbing{cursor:grabbing;user-select:none}
 .pdf-svg svg{display:block;width:100%;height:auto}
+.pdf-svg.edit{outline:1px dashed var(--accent);cursor:move;touch-action:none}
+.pdf-handle{position:absolute;right:-7px;bottom:-7px;width:14px;height:14px;background:var(--accent);border-radius:3px;cursor:nwse-resize;touch-action:none}
 .legal-ver{color:var(--muted);font-size:12px;margin-top:12px}
 .support-links{display:flex;flex-direction:column;gap:8px;margin:8px 0}
 .support-links a{color:var(--text);text-decoration:none;border:1px solid var(--line);border-radius:10px;padding:10px 12px}
@@ -124,7 +126,7 @@ footer{padding:14px 20px;color:var(--muted);font-size:12px;text-align:center}
   <div class="row" style="gap:8px"><span id="userInfo" class="muted" style="color:var(--panel-text)"></span><button id="tipsBtn" type="button" class="hdr-btn">💡 Tipps</button><button id="supportBtn" type="button" class="hdr-btn">💬 Support</button><button id="logoutBtn" type="button" style="display:none">Abmelden</button><button id="reloadBtn" type="button" title="Neueste Version laden (ohne Zwischenspeicher)">Aktualisieren</button></div>
 </header>
 <main id="app"></main>
-<footer>SetlistCreator v0.4.24 · Build 33 · 19.11.2026 · Alpha · Login über Firebase (eigenes Projekt setlistcreator-54d5d), Daten pro Konto · <span id="status"></span><br><button type="button" class="legal-link" data-legal="terms">Nutzungsbedingungen</button> · <button type="button" class="legal-link" data-legal="privacy">Datenschutz</button></footer>
+<footer>SetlistCreator v0.4.25 · Build 34 · 19.11.2026 · Alpha · Login über Firebase (eigenes Projekt setlistcreator-54d5d), Daten pro Konto · <span id="status"></span><br><button type="button" class="legal-link" data-legal="terms">Nutzungsbedingungen</button> · <button type="button" class="legal-link" data-legal="privacy">Datenschutz</button></footer>
 
 <div class="modal-bg hidden" id="tipsModal">
   <div class="modal" role="dialog" aria-modal="true" aria-labelledby="tipsTitle">
@@ -409,12 +411,12 @@ function pdfFontFaceCss(p){
   if (!(p.font === 'custom' && p.custom)) return '';
   return `@font-face{font-family:"${p.custom.name}";src:url(${p.custom.data});}`;
 }
-function pdfInner(set, prefs){
+function pdfInner(set, prefs, edit = false){
   const rows = exportRows(set);
   const cols = prefs.order.filter(k => prefs.on[k]);
   const th = cols.map(k => `<th class="c-${k}">${PDF_COLS[k]}</th>`).join('');
   const tr = rows.map(r => `<tr>${cols.map(k => `<td class="c-${k}">${esc(r[k])}</td>`).join('')}</tr>`).join('');
-  return `<div class="pdf-content" style="position:relative"><h1>${esc(set.name)}</h1><div class="meta">Gesamtdauer ${totalOf(set)} · ${rows.length} Songs</div><table><thead><tr>${th}</tr></thead><tbody>${tr}</tbody></table>${pdfSvgHtml(prefs)}</div>`;
+  return `<div class="pdf-content" style="position:relative"><h1>${esc(set.name)}</h1><div class="meta">Gesamtdauer ${totalOf(set)} · ${rows.length} Songs</div><table><thead><tr>${th}</tr></thead><tbody>${tr}</tbody></table>${pdfSvgHtml(prefs, edit)}</div>`;
 }
 // SVG: Skripte und Ereignisattribute entfernen, nur Dateien mit viewBox
 function sanitizeSvg(text){
@@ -441,12 +443,14 @@ function recolorSvg(markup, color){
   });
   return new XMLSerializer().serializeToString(svg);
 }
-function pdfSvgHtml(prefs){
+function pdfSvgHtml(prefs, edit = false){
   const g = prefs.svg;
   if (!g) return '';
   const markup = g.color ? recolorSvg(g.raw, g.color) : g.raw;
-  return `<div class="pdf-svg" style="position:absolute;left:${g.x}mm;top:${g.y}mm;width:${g.w}mm">${markup}</div>`;
+  const handle = edit ? '<div class="pdf-handle" data-svg-handle></div>' : '';
+  return `<div class="pdf-svg ${edit ? 'edit' : ''}" style="position:absolute;left:${g.x}mm;top:${g.y}mm;width:${g.w}mm;transform:rotate(${g.rot || 0}deg);transform-origin:50% 50%">${markup}${handle}</div>`;
 }
+const svgMaxMm = p => (p.orient === 'landscape' ? [297, 210] : [210, 297]);
 function pdfDocHtml(set, prefs){
   return `<!DOCTYPE html><html lang="de"><head><meta charset="UTF-8"><title>${esc(set.name)}</title><style>
 ${pdfFontFaceCss(prefs)}
@@ -569,6 +573,9 @@ function pdfEditorHtml(set){
           </div>
           <div class="row" style="margin-bottom:8px">
             <span class="muted" style="flex:1">${esc(p.svg.name)}</span>
+            <button type="button" data-svg-rot="-30" title="30° links drehen">↺ 30°</button>
+            <button type="button" data-svg-rot="30" title="30° rechts drehen">↻ 30°</button>
+            <span class="muted">${Math.round(p.svg.rot || 0)}°</span>
             <button type="button" data-svg-keep>Originalfarbe</button>
             <button type="button" class="danger" data-svg-remove>Entfernen</button>
           </div>` : ''}
@@ -586,7 +593,7 @@ function pdfEditorHtml(set){
           </div>
           <div id="pdfScroll" class="pdf-scroll">
             <div class="pdf-frame" id="pdfFrame">
-              <div class="pdf-sheet ${land ? 'land' : ''}" id="pdfSheet" style="width:${land ? 297 : 210}mm;height:${land ? 210 : 297}mm;font-family:${pdfFamily(p)};font-size:${p.size}pt">${pdfInner(set, p)}</div>
+              <div class="pdf-sheet ${land ? 'land' : ''}" id="pdfSheet" style="width:${land ? 297 : 210}mm;height:${land ? 210 : 297}mm;font-family:${pdfFamily(p)};font-size:${p.size}pt">${pdfInner(set, p, true)}</div>
             </div>
           </div>
         </div>
@@ -986,7 +993,7 @@ window.addEventListener('resize', () => { if (pdfEditId) applyPdfZoom(); });
 // Vorschau verschieben: mit gedrückter Maustaste oder dem Finger ziehen
 document.addEventListener('pointerdown', e => {
   const sc = e.target.closest && e.target.closest('#pdfScroll');
-  if (!sc) return;
+  if (!sc || (e.target.closest && e.target.closest('.pdf-svg.edit'))) return;
   panDrag = { sc, x: e.clientX, y: e.clientY, l: sc.scrollLeft, t: sc.scrollTop };
   sc.classList.add('grabbing');
   e.preventDefault();
@@ -997,6 +1004,42 @@ document.addEventListener('pointermove', e => {
   panDrag.sc.scrollTop = panDrag.t - (e.clientY - panDrag.y);
 });
 const endPan = () => { if (panDrag) { panDrag.sc.classList.remove('grabbing'); panDrag = null; } };
+// Grafik auf dem Blatt: ziehen (verschieben) und an der Ecke ziehen (Grösse)
+let svgDrag = null;
+const pdfSheetScale = () => {
+  const sheet = document.getElementById('pdfSheet');
+  if (!sheet) return 1;
+  const W = (sheet.classList.contains('land') ? 297 : 210) * 96 / 25.4;
+  return sheet.getBoundingClientRect().width / W;
+};
+document.addEventListener('pointerdown', e => {
+  const el = e.target.closest && e.target.closest('.pdf-svg.edit');
+  if (!el) return;
+  const pr = pdfPrefs();
+  if (!pr.svg) return;
+  e.preventDefault();
+  e.stopPropagation();
+  svgDrag = { mode: e.target.closest('[data-svg-handle]') ? 'resize' : 'move', sx: e.clientX, sy: e.clientY, x: pr.svg.x, y: pr.svg.y, w: pr.svg.w, el, z: pdfSheetScale() };
+}, true);
+document.addEventListener('pointermove', e => {
+  if (!svgDrag) return;
+  const pr = pdfPrefs();
+  const [maxW, maxH] = svgMaxMm(pr);
+  const k = 25.4 / (96 * svgDrag.z);
+  const dx = (e.clientX - svgDrag.sx) * k, dy = (e.clientY - svgDrag.sy) * k;
+  if (svgDrag.mode === 'move') {
+    pr.svg.x = Math.round(Math.min(Math.max(0, svgDrag.x + dx), maxW - pr.svg.w));
+    pr.svg.y = Math.round(Math.min(Math.max(0, svgDrag.y + dy), maxH));
+  } else {
+    pr.svg.w = Math.round(Math.min(Math.max(5, svgDrag.w + dx), maxW - pr.svg.x));
+  }
+  svgDrag.el.style.left = pr.svg.x + 'mm';
+  svgDrag.el.style.top = pr.svg.y + 'mm';
+  svgDrag.el.style.width = pr.svg.w + 'mm';
+});
+const endSvg = () => { if (svgDrag) { svgDrag = null; save(); render(); } };
+document.addEventListener('pointerup', endSvg);
+document.addEventListener('pointercancel', endSvg);
 document.addEventListener('pointerup', endPan);
 document.addEventListener('pointercancel', endPan);
 document.addEventListener('keydown', e => {
@@ -1091,6 +1134,11 @@ document.addEventListener('click', e => {
     const copy = { id: uid(), name: src.name + ' (Kopie)', entries: src.entries.map(x => ({ ...x })) };
     state.setlists.push(copy);
     activeSetId = copy.id; save(); render(); return;
+  }
+  if (b.dataset.svgRot !== undefined) {
+    const pr = pdfPrefs();
+    if (pr.svg) { pr.svg.rot = (((pr.svg.rot || 0) + +b.dataset.svgRot) % 360 + 360) % 360; save(); render(); }
+    return;
   }
   if (b.dataset.svgKeep !== undefined || b.dataset.svgRemove !== undefined) {
     const pr = pdfPrefs();
