@@ -1,9 +1,12 @@
-SetlistCreator · v0.4.20 · Build 29 · 19.11.2026 · Phase Alpha
+SetlistCreator · v0.4.21 · Build 30 · 19.11.2026 · Phase Alpha
 
 Changelog · SetlistCreator
 Neueste Version zuerst. Zeiten = Schweizer Zeit
 
 ** ALPHA **
+
+v0.4.21 · Build 30 · 19.11.2026 12:45
+- Schrift Razor Ephinea eingebaut (Datei fonts/RazorEphinea.ttf), in der Schriftauswahl und im PDF
 
 v0.4.20 · Build 29 · 19.11.2026 13:10
 - PDF-Vorschau als A4-Druckansicht: weisses Blatt mit Schatten, übernimmt Schrift und Abstände wie im Ausdruck, unabhängig von den App-Styles
