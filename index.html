@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>SetlistCreator · v0.4.8</title>
+<title>SetlistCreator · v0.4.9</title>
 <link rel="icon" type="image/svg+xml" href="icon.svg">
 <link rel="icon" type="image/png" sizes="32x32" href="icon-32.png">
 <link rel="apple-touch-icon" href="icon-180.png">
@@ -64,6 +64,10 @@ footer{padding:14px 20px;color:var(--muted);font-size:12px;text-align:center}
 .toolbar{grid-column:1 / -1;display:flex;flex-wrap:wrap;gap:8px;margin-bottom:-4px}
 .toolbar button{background:var(--accent);color:var(--accent-text);border-color:var(--accent);font-weight:600;opacity:.55}
 .toolbar button.on{opacity:1}
+.toolbar.home{display:grid;grid-template-columns:1fr;gap:12px}
+.toolbar.home button{width:100%;padding:18px 16px;font-size:17px;border-radius:12px;opacity:1}
+.toolbar.page{justify-content:space-between;align-items:center}
+.toolbar.page button{opacity:1;padding:10px 16px}
 </style>
 </head>
 <body>
@@ -72,7 +76,7 @@ footer{padding:14px 20px;color:var(--muted);font-size:12px;text-align:center}
   <div class="row" style="gap:8px"><span id="userInfo" class="muted" style="color:var(--panel-text)"></span><button id="logoutBtn" type="button" style="display:none">Abmelden</button><button id="reloadBtn" type="button" title="Neueste Version laden (ohne Zwischenspeicher)">Aktualisieren</button></div>
 </header>
 <main id="app"></main>
-<footer>SetlistCreator v0.4.8 · Build 17 · 19.11.2026 · Alpha · Login über Firebase (eigenes Projekt setlistcreator-54d5d), Daten pro Konto · <span id="status"></span></footer>
+<footer>SetlistCreator v0.4.9 · Build 18 · 19.11.2026 · Alpha · Login über Firebase (eigenes Projekt setlistcreator-54d5d), Daten pro Konto · <span id="status"></span></footer>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
@@ -123,11 +127,10 @@ let editSongId = null;
 let activeSetId = null;
 let pendingScroll = null;
 const isAndroid = /Android/i.test(navigator.userAgent);
-// Android: Startbildschirm nur mit Knöpfen. Desktop: alle Bereiche sichtbar wie bisher.
-let ui = isAndroid
-  ? { songs: false, newSong: false, sets: false, newSet: false }
-  : { songs: true, newSong: true, sets: true, newSet: true };
-let searchQ = { songs: '', sets: '' };
+// Android: jede Bibliothek / jeder Ersteller öffnet auf einer eigenen Seite (nur eine gleichzeitig).
+// Desktop: alle Bereiche sichtbar wie bisher.
+let view = null;
+const on = k => !isAndroid || view === k;
 
 function setStatus(text){
   const el = document.getElementById('status');
@@ -285,7 +288,7 @@ function searchBox(kind, placeholder){
   return `<input type="search" data-search="${kind}" placeholder="${placeholder}" value="${esc(searchQ[kind])}" style="margin-bottom:10px">`;
 }
 function renderSongs(){
-  const newCard = (editSongId || !ui.newSong) ? '' : `
+  const newCard = (editSongId || !on('newSong')) ? '' : `
     <section class="card">
       <div class="row" style="margin-bottom:10px">
         <h2 style="flex:1;margin:0">Neuer Song</h2>
@@ -293,7 +296,7 @@ function renderSongs(){
       </div>
       ${songForm({})}
     </section>`;
-  return `${newCard}${ui.songs ? `
+  return `${newCard}${on('songs') ? `
     <h2>Songbibliothek (${state.songs.length})</h2>
     ${searchBox('songs', 'Suchen: Titel, Interpret, Tonart')}
     <div data-listfor="songs">${songsList()}</div>` : ''}`;
@@ -366,7 +369,7 @@ function setsList(){
   }).join('');
 }
 function renderSetlists(){
-  const newForm = ui.newSet ? `
+  const newForm = on('newSet') ? `
     <section class="card">
       <h2>Neue Setlist</h2>
       <form id="setForm" class="row">
@@ -374,7 +377,7 @@ function renderSetlists(){
         <button class="primary" type="submit">Erstellen</button>
       </form>
     </section>` : '';
-  return `${newForm}${ui.sets ? `
+  return `${newForm}${on('sets') ? `
     <h2>Setlisten (${state.setlists.length})</h2>
     ${searchBox('sets', 'Suchen: Name der Setlist')}
     <div data-listfor="sets">${setsList()}</div>` : ''}`;
@@ -398,8 +401,12 @@ function renderLogin(msg = ''){
 
 function renderToolbar(){
   if (!isAndroid) return '';
-  const b = (k, label) => `<button type="button" data-ui="${k}" class="${ui[k] ? 'on' : ''}" aria-pressed="${ui[k]}">${label}</button>`;
-  return `<div class="toolbar">${b('songs', 'Songbibliothek')}${b('newSong', 'Song erstellen')}${b('sets', 'Setlistbibliothek')}${b('newSet', 'Setlist erstellen')}</div>`;
+  if (view) {
+    const titles = { songs: 'Songbibliothek', newSong: 'Song erstellen', sets: 'Setlistbibliothek', newSet: 'Setlist erstellen' };
+    return `<div class="toolbar page"><button type="button" id="backBtn" class="on">← Zurück</button><strong>${titles[view]}</strong></div>`;
+  }
+  const b = (k, label) => `<button type="button" data-ui="${k}">${label}</button>`;
+  return `<div class="toolbar home">${b('songs', 'Songbibliothek')}${b('newSong', 'Song erstellen')}${b('sets', 'Setlistbibliothek')}${b('newSet', 'Setlist erstellen')}</div>`;
 }
 
 function render(){
@@ -569,8 +576,12 @@ document.addEventListener('click', e => {
     return;
   }
   if (b.dataset.ui) {
-    ui[b.dataset.ui] = !ui[b.dataset.ui];
-    render(); return;
+    view = b.dataset.ui;
+    render(); window.scrollTo(0, 0); return;
+  }
+  if (b.id === 'backBtn') {
+    view = null; editSongId = null;
+    render(); window.scrollTo(0, 0); return;
   }
   if (b.id === 'testBtn') {
     if (!user || !ready) return;

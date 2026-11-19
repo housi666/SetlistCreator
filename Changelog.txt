@@ -1,9 +1,13 @@
-SetlistCreator · v0.4.8 · Build 17 · 19.11.2026 · Phase Alpha
+SetlistCreator · v0.4.9 · Build 18 · 19.11.2026 · Phase Alpha
 
 Changelog · SetlistCreator
 Neueste Version zuerst. Zeiten = Schweizer Zeit
 
 ** ALPHA **
+
+v0.4.9 · Build 18 · 19.11.2026 11:25
+- Android: Knöpfe auf volle Breite, vier Zeilen untereinander
+- Android: Bibliotheken und Ersteller öffnen auf eigener Seite mit „Zurück“; nur ein Bereich gleichzeitig
 
 v0.4.8 · Build 17 · 19.11.2026 09:40
 - Knöpfe in der Android-Ansicht in Akzentfarbe (Gelb); aktiver Bereich voll sichtbar, inaktiver gedämpft
