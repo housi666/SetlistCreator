@@ -96,3 +96,4 @@ Klein
 19.11.2026 – v0.4.28 Build 37: Endzeit unter Startspalte, Total unter Dauerspalte, Vorschau passt sich der Fenstergrösse an
 19.11.2026 – v0.4.29 Build 38: PDF-Tabelle füllt die volle Blattbreite, Spalten passen sich beim Ein- und Ausblenden an
 19.11.2026 – v0.4.30 Build 39: PDF-Spalte „Temp. Change“ (vorher Tempowechsel), Kopfzeile bricht nicht um
+20.11.2026 – v0.4.31 Build 40: Event-Angaben (Eventname, Location, Ort, Datum) oben rechts im PDF, einzeln abschaltbar

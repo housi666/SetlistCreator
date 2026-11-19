@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>SetlistCreator · v0.4.30</title>
+<title>SetlistCreator · v0.4.31</title>
 <link rel="icon" type="image/svg+xml" href="icon.svg">
 <link rel="icon" type="image/png" sizes="32x32" href="icon-32.png">
 <link rel="apple-touch-icon" href="icon-180.png">
@@ -127,7 +127,7 @@ footer{padding:14px 20px;color:var(--muted);font-size:12px;text-align:center}
   <div class="row" style="gap:8px"><span id="userInfo" class="muted" style="color:var(--panel-text)"></span><button id="tipsBtn" type="button" class="hdr-btn">💡 Tipps</button><button id="supportBtn" type="button" class="hdr-btn">💬 Support</button><button id="logoutBtn" type="button" style="display:none">Abmelden</button><button id="reloadBtn" type="button" title="Neueste Version laden (ohne Zwischenspeicher)">Aktualisieren</button></div>
 </header>
 <main id="app"></main>
-<footer>SetlistCreator v0.4.30 · Build 39 · 19.11.2026 · Alpha · Login über Firebase (eigenes Projekt setlistcreator-54d5d), Daten pro Konto · <span id="status"></span><br><button type="button" class="legal-link" data-legal="terms">Nutzungsbedingungen</button> · <button type="button" class="legal-link" data-legal="privacy">Datenschutz</button></footer>
+<footer>SetlistCreator v0.4.31 · Build 40 · 19.11.2026 · Alpha · Login über Firebase (eigenes Projekt setlistcreator-54d5d), Daten pro Konto · <span id="status"></span><br><button type="button" class="legal-link" data-legal="terms">Nutzungsbedingungen</button> · <button type="button" class="legal-link" data-legal="privacy">Datenschutz</button></footer>
 
 <div class="modal-bg hidden" id="tipsModal">
   <div class="modal" role="dialog" aria-modal="true" aria-labelledby="tipsTitle">
@@ -185,13 +185,14 @@ const PDF_COLS = { nr: 'Nr', start: 'Start', end: 'Ende', title: 'Titel', artist
 const PDF_FONTS = { arial: ['Arial', 'Arial, Helvetica, sans-serif'], georgia: ['Georgia', 'Georgia, serif'], verdana: ['Verdana', 'Verdana, sans-serif'], courier: ['Courier New', '"Courier New", Courier, monospace'], impact: ['Impact', 'Impact, "Arial Narrow Bold", sans-serif'], razor: ['Razor Ephinea', '"Razor Ephinea", Impact, sans-serif'] };
 let pdfZoom = 'fit';
 function defaultPdf(){
-  return { order: Object.keys(PDF_COLS), on: Object.fromEntries(Object.keys(PDF_COLS).map(k => [k, true])), font: 'arial', size: 10, orient: 'portrait' };
+  return { order: Object.keys(PDF_COLS), on: Object.fromEntries(Object.keys(PDF_COLS).map(k => [k, true])), ev: { name: true, location: true, ort: true, date: true }, font: 'arial', size: 10, orient: 'portrait' };
 }
 function pdfPrefs(){
   if (!state.pdf) state.pdf = defaultPdf();
   const d = defaultPdf();
   state.pdf.order = [...state.pdf.order.filter(k => PDF_COLS[k]), ...d.order.filter(k => !state.pdf.order.includes(k))];
   Object.keys(PDF_COLS).forEach(k => { if (typeof state.pdf.on[k] !== 'boolean') state.pdf.on[k] = true; });
+  if (!state.pdf.ev) state.pdf.ev = { name: true, location: true, ort: true, date: true };
   if (!PDF_FONTS[state.pdf.font] && !(state.pdf.font === 'custom' && state.pdf.custom)) state.pdf.font = 'arial';
   return state.pdf;
 }
@@ -421,6 +422,20 @@ function pdfFontFaceCss(p){
 }
 // Relative Breiten: die sichtbaren Spalten füllen immer die ganze Blattbreite
 const PDF_W = { nr: 4, start: 11, end: 11, title: 22, artist: 16, key: 6, bpm: 6, dur: 8, tempo: 12, notes: 18 };
+// Event-Angaben oben rechts im Blatt; jedes Feld einzeln ein- und ausblendbar
+function dmy(iso){
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(iso || ''));
+  return m ? `${m[3]}.${m[2]}.${m[1]}` : String(iso || '');
+}
+function eventHtml(set, p){
+  const e = set.event || {}, v = p.ev || {};
+  const lines = [];
+  if (v.name && e.name) lines.push(`<div style="font-weight:700;font-size:1.1em">${esc(e.name)}</div>`);
+  if (v.location && e.location) lines.push(`<div>${esc(e.location)}</div>`);
+  if (v.ort && e.ort) lines.push(`<div>${esc(e.ort)}</div>`);
+  if (v.date && e.date) lines.push(`<div>${esc(dmy(e.date))}</div>`);
+  return lines.length ? `<div style="position:absolute;top:0;right:0;max-width:70mm;text-align:right">${lines.join('')}</div>` : '';
+}
 function pdfInner(set, prefs, edit = false){
   const rows = exportRows(set);
   const cols = prefs.order.filter(k => prefs.on[k]);
@@ -445,7 +460,8 @@ function pdfInner(set, prefs, edit = false){
     if (!cols.includes('dur')) missing.push(`Total ${fmt(c.sum)}`);
   }
   const extra = missing.length ? `<div style="margin-top:8px;font-weight:700">${missing.join(' · ')}</div>` : '';
-  return `<div class="pdf-content" style="position:relative"><h1>${esc(set.name)}</h1><div class="meta">Gesamtdauer ${totalOf(set)} · ${rows.length} Songs</div><table style="table-layout:fixed">${cg}<thead><tr>${th}</tr></thead><tbody>${tr}</tbody>${foot}</table>${extra}${pdfSvgHtml(prefs, edit)}</div>`;
+  const evHtml = eventHtml(set, prefs);
+  return `<div class="pdf-content" style="position:relative">${evHtml}<h1 style="${evHtml ? 'padding-right:72mm' : ''}">${esc(set.name)}</h1><div class="meta">Gesamtdauer ${totalOf(set)} · ${rows.length} Songs</div><table style="table-layout:fixed">${cg}<thead><tr>${th}</tr></thead><tbody>${tr}</tbody>${foot}</table>${extra}${pdfSvgHtml(prefs, edit)}</div>`;
 }
 // SVG: Skripte und Ereignisattribute entfernen, nur Dateien mit viewBox
 function sanitizeSvg(text){
@@ -610,6 +626,13 @@ function pdfEditorHtml(set){
             <button type="button" class="danger" data-svg-remove>Entfernen</button>
           </div>` : ''}
           <label class="muted" style="display:block;margin-bottom:8px">${p.svg ? 'Andere SVG hochladen' : 'SVG hochladen'} (max. 200 KB)<input type="file" accept=".svg,image/svg+xml" data-svg-file></label>
+          <p class="muted" style="margin:12px 0 4px">Event (oben rechts im PDF)</p>
+          ${[['name', 'Eventname', 'text'], ['location', 'Location', 'text'], ['ort', 'Ort', 'text'], ['date', 'Datum', 'date']].map(([k, l, ty]) => `
+          <div class="row" style="gap:6px;padding:4px 0">
+            <span class="muted" style="width:84px">${l}</span>
+            <input type="${ty}" data-ev="${k}" value="${esc((set.event || {})[k] || '')}" style="flex:1">
+            <label class="muted" style="display:flex;align-items:center;gap:4px;white-space:nowrap"><input type="checkbox" data-ev-on="${k}" ${p.ev[k] ? 'checked' : ''} style="width:auto"> im PDF</label>
+          </div>`).join('')}
           <p class="muted" style="margin:12px 0 4px">Spalten: Haken = sichtbar, Pfeile = Reihenfolge</p>
           ${cols}
         </div>
@@ -1286,6 +1309,16 @@ document.addEventListener('change', e => {
     };
     reader.readAsDataURL(file);
     return;
+  }
+  if (t.matches && t.matches('[data-ev]')) {
+    const es = state.setlists.find(x => x.id === pdfEditId);
+    if (!es) return;
+    es.event = { ...(es.event || {}), [t.dataset.ev]: t.value };
+    save(); render(); return;
+  }
+  if (t.matches && t.matches('[data-ev-on]')) {
+    pdfPrefs().ev[t.dataset.evOn] = t.checked;
+    save(); render(); return;
   }
   if (t.matches && (t.matches('[data-pdf-on]') || t.matches('[data-pdf-font]') || t.matches('[data-pdf-size]'))) {
     if (!user || !ready) return;
