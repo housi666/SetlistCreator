@@ -1,9 +1,13 @@
-SetlistCreator · v0.4.39 · Build 48 · 20.11.2026 · Phase Alpha
+SetlistCreator · v0.4.40 · Build 49 · 20.11.2026 · Phase Alpha
 
 Changelog · SetlistCreator
 Neueste Version zuerst. Zeiten = Schweizer Zeit
 
 ** ALPHA **
+
+v0.4.40 · Build 49 · 20.11.2026 23:55
+- PDF-Designer: Zwei-Finger-Zoom entfernt
+- PDF-Designer: Die Zoom-Knöpfe „−“ und „+“ zoomen das Blatt; mit dem Umschalter „Bild / Grafik“ ändern sie stattdessen die Grösse der Grafik
 
 v0.4.39 · Build 48 · 20.11.2026 23:50
 - PDF-Designer: Zwei-Finger-Zoom und Grafik-Bearbeitung (verschieben, Grösse) stören sich nicht mehr; ein zweiter Finger beendet das Verschieben der Grafik
