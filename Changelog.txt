@@ -5,6 +5,11 @@ Neueste Version zuerst. Zeiten = Schweizer Zeit
 
 ** ALPHA **
 
+v0.4.35 · Build 44 · 20.11.2026 23:00
+- Testdaten: 66 englische Metal-Songs (mit Album) und 7 Setlists zwischen 25 und 60 Minuten
+- Songinformationen: neues Feld „Album“ (optional), wird in der Songbibliothek angezeigt
+- Songbibliothek: Sortierung nach Name, Album oder Setlist (Songs ohne Setlist zuletzt)
+
 v0.4.34 · Build 43 · 20.11.2026 22:30
 - Android: Songbibliothek und Setlistbibliothek: Einträge klappen im selben Feld auf, statt darunter ein zusätzliches Fenster zu öffnen
 - Android: Setlist: Songs sind einzeln aufklappbar (Details, Startzeit)

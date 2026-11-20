@@ -101,4 +101,5 @@ Klein
 19.11.2026 – v0.4.31 Build 40: Event-Angaben (Eventname, Location, Ort, Datum) oben rechts im PDF, einzeln abschaltbar
 19.11.2026 – v0.4.32 Build 41: Spalten per Greifer verschieben, Event-Datum per Auswahl
 20.11.2026 – v0.4.33 Build 42: Android-Layout (Kopfzeile, Songbibliothek, Setlisten), Auswahl zur Setlist, Erstellt-/Änderungsdatum
+20.11.2026 – v0.4.35 Build 44: Testdaten (66 Songs, 7 Setlists), Album-Feld, Sortierung der Songbibliothek
 20.11.2026 – v0.4.34 Build 43: Android: Aufklappen im selben Bereich, Song für Setlist erstellen, Zurück zum letzten Bildschirm (Desktop unverändert)
