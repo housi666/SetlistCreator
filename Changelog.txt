@@ -1,9 +1,12 @@
-SetlistCreator · v0.4.43 · Build 52 · 21.11.2026 · Phase Alpha
+SetlistCreator · v0.4.44 · Build 53 · 21.11.2026 · Phase Alpha
 
 Changelog · SetlistCreator
 Neueste Version zuerst. Zeiten = Schweizer Zeit
 
 ** ALPHA **
+
+v0.4.44 · Build 53 · 21.11.2026 00:10
+- Android: Gelbe Knöpfe haben abgerundete Ecken (Radius 10 px) statt Pillenform; Desktop unverändert
 
 v0.4.43 · Build 52 · 21.11.2026 00:05
 - Android: PDF-Designer: Bereiche Schrift, Grafik (SVG) und Event sind klappbar; Desktop unverändert
