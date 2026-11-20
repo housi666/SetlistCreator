@@ -1,4 +1,4 @@
-SetlistCreator · v0.4.33 · Build 42 · 20.11.2026 · Phase Alpha
+SetlistCreator · v0.4.34 · Build 43 · 20.11.2026 · Phase Alpha
 
 Legende: [x] erledigt, [ ] offen
 
@@ -101,3 +101,4 @@ Klein
 19.11.2026 – v0.4.31 Build 40: Event-Angaben (Eventname, Location, Ort, Datum) oben rechts im PDF, einzeln abschaltbar
 19.11.2026 – v0.4.32 Build 41: Spalten per Greifer verschieben, Event-Datum per Auswahl
 20.11.2026 – v0.4.33 Build 42: Android-Layout (Kopfzeile, Songbibliothek, Setlisten), Auswahl zur Setlist, Erstellt-/Änderungsdatum
+20.11.2026 – v0.4.34 Build 43: Aufklappen im selben Bereich, Song für Setlist erstellen, Zurück zum letzten Bildschirm
