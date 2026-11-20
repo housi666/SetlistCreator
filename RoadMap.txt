@@ -101,6 +101,7 @@ Klein
 19.11.2026 – v0.4.31 Build 40: Event-Angaben (Eventname, Location, Ort, Datum) oben rechts im PDF, einzeln abschaltbar
 19.11.2026 – v0.4.32 Build 41: Spalten per Greifer verschieben, Event-Datum per Auswahl
 20.11.2026 – v0.4.33 Build 42: Android-Layout (Kopfzeile, Songbibliothek, Setlisten), Auswahl zur Setlist, Erstellt-/Änderungsdatum
+20.11.2026 – v0.4.42 Build 51: Vorschau-Neuerungen (Spalten-Fenster, Zoom, Upload) nur Android, Desktop unverändert
 20.11.2026 – v0.4.41 Build 50: Spalten in eigenem Fenster („Spalten ändern“)
 20.11.2026 – v0.4.40 Build 49: Zwei-Finger-Zoom entfernt, Zoom-Knöpfe wahlweise für Bild oder Grafik
 20.11.2026 – v0.4.39 Build 48: Zwei-Finger-Zoom und Grafik-Bearbeitung getrennt

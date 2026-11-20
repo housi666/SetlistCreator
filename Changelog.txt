@@ -5,6 +5,10 @@ Neueste Version zuerst. Zeiten = Schweizer Zeit
 
 ** ALPHA **
 
+v0.4.42 · Build 51 · 20.11.2026 23:59
+- Desktop unverändert: Spalten wie bisher, kein Bild/Grafik-Zoom, nur SVG-Upload, Vorschau ohne Positionserhalt
+- Android-only: Spalten-Fenster, Bild/Grafik-Umschalter für die Zoom-Knöpfe, PNG/JPG-Upload, Vorschau-Position beim Verschieben bleibt erhalten
+
 v0.4.41 · Build 50 · 20.11.2026 23:58
 - PDF-Designer: Button „Spalten ändern“ öffnet die Spaltenauswahl (Haken und Verschieben) in einem eigenen Fenster
 
