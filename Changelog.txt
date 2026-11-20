@@ -1,16 +1,9 @@
-SetlistCreator · v0.4.34 · Build 43 · 20.11.2026 · Phase Alpha
+SetlistCreator · v0.4.33 · Build 42 · 20.11.2026 · Phase Alpha
 
 Changelog · SetlistCreator
 Neueste Version zuerst. Zeiten = Schweizer Zeit
 
 ** ALPHA **
-
-v0.4.34 · Build 43 · 20.11.2026 22:30
-- Songbibliothek und Setlistbibliothek: Einträge klappen im selben Feld auf, statt darunter ein zusätzliches Fenster zu öffnen
-- Setlist: Songs sind einzeln aufklappbar (Details, Startzeit)
-- Setlistbibliothek: gelbe Knöpfe „Zu Songbibliothek“ und „Song für diese Setlist erstellen“
-- Song für eine Setlist erstellen: „In Bibliothek speichern“ und „Zu Setlist hinzufügen“, danach zurück zur Setlist
-- Android: Zurück führt zum zuletzt besuchten Bildschirm, nicht mehr direkt ins Hauptmenü
 
 v0.4.33 · Build 42 · 20.11.2026 22:00
 - Android: Tipps, Support und Aktualisieren stehen zentriert unter Profil und Abmelden; Aktualisieren mit Symbol
