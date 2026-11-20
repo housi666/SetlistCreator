@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>SetlistCreator · v0.4.38</title>
+<title>SetlistCreator · v0.4.39</title>
 <link rel="icon" type="image/svg+xml" href="icon.svg">
 <link rel="icon" type="image/png" sizes="32x32" href="icon-32.png">
 <link rel="apple-touch-icon" href="icon-180.png">
@@ -144,7 +144,7 @@ html:not(.desk) .hdr-btns{justify-content:center}
   </div>
 </header>
 <main id="app"></main>
-<footer>SetlistCreator v0.4.38 · Build 47 · 20.11.2026 · Alpha · Login über Firebase (eigenes Projekt setlistcreator-54d5d), Daten pro Konto · <span id="status"></span><br><button type="button" class="legal-link" data-legal="terms">Nutzungsbedingungen</button> · <button type="button" class="legal-link" data-legal="privacy">Datenschutz</button></footer>
+<footer>SetlistCreator v0.4.39 · Build 48 · 20.11.2026 · Alpha · Login über Firebase (eigenes Projekt setlistcreator-54d5d), Daten pro Konto · <span id="status"></span><br><button type="button" class="legal-link" data-legal="terms">Nutzungsbedingungen</button> · <button type="button" class="legal-link" data-legal="privacy">Datenschutz</button></footer>
 
 <div class="modal-bg hidden" id="tipsModal">
   <div class="modal" role="dialog" aria-modal="true" aria-labelledby="tipsTitle">
@@ -1392,6 +1392,33 @@ document.addEventListener('pointermove', e => {
   panDrag.sc.scrollTop = panDrag.t - (e.clientY - panDrag.y);
 });
 const endPan = () => { if (panDrag) { panDrag.sc.classList.remove('grabbing'); panDrag = null; } };
+// Zwei Finger auf der Vorschau: auseinander = vergrössern, zusammen = verkleinern.
+// Steht vor der Grafik-Bearbeitung, damit ein zweiter Finger nie eine Grafik verschiebt.
+const pdfPtrs = new Map();
+let pdfPinch = null;
+const pdfDist = () => { const [a, b] = [...pdfPtrs.values()]; return Math.hypot(a.x - b.x, a.y - b.y) || 1; };
+document.addEventListener('pointerdown', e => {
+  if (!(e.target.closest && e.target.closest('#pdfScroll'))) return;
+  pdfPtrs.set(e.pointerId, { x: e.clientX, y: e.clientY });
+  if (pdfPtrs.size === 2) {
+    panDrag = null;
+    svgDrag = null;
+    document.querySelectorAll('#pdfScroll.grabbing').forEach(x => x.classList.remove('grabbing'));
+    pdfPinch = { d0: pdfDist(), z0: pdfCurZ };
+  }
+}, true);
+document.addEventListener('pointermove', e => {
+  if (!pdfPtrs.has(e.pointerId)) return;
+  pdfPtrs.set(e.pointerId, { x: e.clientX, y: e.clientY });
+  if (pdfPinch && pdfPtrs.size >= 2) {
+    const z = Math.max(0.25, Math.min(3, pdfPinch.z0 * pdfDist() / pdfPinch.d0));
+    pdfZoom = +z.toFixed(2);
+    applyPdfZoom();
+  }
+});
+const endPdfPtr = e => { pdfPtrs.delete(e.pointerId); if (pdfPtrs.size < 2) pdfPinch = null; };
+document.addEventListener('pointerup', endPdfPtr);
+document.addEventListener('pointercancel', endPdfPtr);
 // Grafik auf dem Blatt: ziehen (verschieben) und an der Ecke ziehen (Grösse)
 let svgDrag = null;
 // Spalten verschieben: am Greifer ziehen, Zielzeile wird markiert
@@ -1431,7 +1458,7 @@ const pdfSheetScale = () => {
 };
 document.addEventListener('pointerdown', e => {
   const el = e.target.closest && e.target.closest('.pdf-svg.edit');
-  if (!el) return;
+  if (!el || pdfPtrs.size > 1) return;
   const pr = pdfPrefs();
   if (!pr.svg) return;
   e.preventDefault();
@@ -1439,7 +1466,7 @@ document.addEventListener('pointerdown', e => {
   svgDrag = { mode: e.target.closest('[data-svg-handle]') ? 'resize' : 'move', sx: e.clientX, sy: e.clientY, x: pr.svg.x, y: pr.svg.y, w: pr.svg.w, el, z: pdfSheetScale() };
 }, true);
 document.addEventListener('pointermove', e => {
-  if (!svgDrag) return;
+  if (!svgDrag || pdfPinch) return;
   const pr = pdfPrefs();
   const [maxW, maxH] = svgMaxMm(pr);
   const k = 25.4 / (96 * svgDrag.z);
@@ -1458,28 +1485,7 @@ const endSvg = () => { if (svgDrag) { svgDrag = null; save(); render(); } };
 document.addEventListener('pointerup', endSvg);
 document.addEventListener('pointercancel', endSvg);
 document.addEventListener('pointerup', endPan);
-// Zwei Finger auf der Vorschau: auseinander = vergrössern, zusammen = verkleinern
-const pdfPtrs = new Map();
-let pdfPinch = null;
-const pdfDist = () => { const [a, b] = [...pdfPtrs.values()]; return Math.hypot(a.x - b.x, a.y - b.y) || 1; };
-document.addEventListener('pointerdown', e => {
-  const sc = e.target.closest && e.target.closest('#pdfScroll');
-  if (!sc) return;
-  pdfPtrs.set(e.pointerId, { x: e.clientX, y: e.clientY });
-  if (pdfPtrs.size === 2) { panDrag = null; sc.classList.remove('grabbing'); pdfPinch = { d0: pdfDist(), z0: pdfCurZ }; }
-});
-document.addEventListener('pointermove', e => {
-  if (!pdfPtrs.has(e.pointerId)) return;
-  pdfPtrs.set(e.pointerId, { x: e.clientX, y: e.clientY });
-  if (pdfPinch && pdfPtrs.size >= 2) {
-    const z = Math.max(0.25, Math.min(3, pdfPinch.z0 * pdfDist() / pdfPinch.d0));
-    pdfZoom = +z.toFixed(2);
-    applyPdfZoom();
-  }
-});
-const endPdfPtr = e => { pdfPtrs.delete(e.pointerId); if (pdfPtrs.size < 2) pdfPinch = null; };
-document.addEventListener('pointerup', endPdfPtr);
-document.addEventListener('pointercancel', endPdfPtr);
+
 document.addEventListener('pointercancel', endPan);
 document.addEventListener('keydown', e => {
   if (e.key === 'Escape') { document.querySelectorAll('.modal-bg').forEach(m => m.classList.add('hidden')); if (pdfEditId) { pdfEditId = null; render(); } }
