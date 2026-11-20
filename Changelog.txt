@@ -1,4 +1,4 @@
-SetlistCreator · v0.4.37 · Build 46 · 20.11.2026 · Phase Alpha
+SetlistCreator · v0.4.38 · Build 47 · 20.11.2026 · Phase Alpha
 
 Changelog · SetlistCreator
 Neueste Version zuerst. Zeiten = Schweizer Zeit
