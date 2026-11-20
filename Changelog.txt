@@ -1,9 +1,12 @@
-SetlistCreator · v0.4.40 · Build 49 · 20.11.2026 · Phase Alpha
+SetlistCreator · v0.4.41 · Build 50 · 20.11.2026 · Phase Alpha
 
 Changelog · SetlistCreator
 Neueste Version zuerst. Zeiten = Schweizer Zeit
 
 ** ALPHA **
+
+v0.4.41 · Build 50 · 20.11.2026 23:58
+- PDF-Designer: Button „Spalten ändern“ öffnet die Spaltenauswahl (Haken und Verschieben) in einem eigenen Fenster
 
 v0.4.40 · Build 49 · 20.11.2026 23:55
 - PDF-Designer: Zwei-Finger-Zoom entfernt

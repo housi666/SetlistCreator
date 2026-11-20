@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>SetlistCreator · v0.4.40</title>
+<title>SetlistCreator · v0.4.41</title>
 <link rel="icon" type="image/svg+xml" href="icon.svg">
 <link rel="icon" type="image/png" sizes="32x32" href="icon-32.png">
 <link rel="apple-touch-icon" href="icon-180.png">
@@ -144,7 +144,7 @@ html:not(.desk) .hdr-btns{justify-content:center}
   </div>
 </header>
 <main id="app"></main>
-<footer>SetlistCreator v0.4.40 · Build 49 · 20.11.2026 · Alpha · Login über Firebase (eigenes Projekt setlistcreator-54d5d), Daten pro Konto · <span id="status"></span><br><button type="button" class="legal-link" data-legal="terms">Nutzungsbedingungen</button> · <button type="button" class="legal-link" data-legal="privacy">Datenschutz</button></footer>
+<footer>SetlistCreator v0.4.41 · Build 50 · 20.11.2026 · Alpha · Login über Firebase (eigenes Projekt setlistcreator-54d5d), Daten pro Konto · <span id="status"></span><br><button type="button" class="legal-link" data-legal="terms">Nutzungsbedingungen</button> · <button type="button" class="legal-link" data-legal="privacy">Datenschutz</button></footer>
 
 <div class="modal-bg hidden" id="tipsModal">
   <div class="modal" role="dialog" aria-modal="true" aria-labelledby="tipsTitle">
@@ -202,6 +202,7 @@ const PDF_COLS = { nr: 'Nr', start: 'Start', end: 'Ende', title: 'Titel', artist
 const PDF_FONTS = { arial: ['Arial', 'Arial, Helvetica, sans-serif'], georgia: ['Georgia', 'Georgia, serif'], verdana: ['Verdana', 'Verdana, sans-serif'], courier: ['Courier New', '"Courier New", Courier, monospace'], impact: ['Impact', 'Impact, "Arial Narrow Bold", sans-serif'], razor: ['Razor Ephinea', '"Razor Ephinea", Impact, sans-serif'] };
 let pdfZoom = 'fit';
 let pdfCurZ = 1;
+let pdfColsOpen = false;
 let pdfZoomMode = 'page'; // 'page' = Bildzoom, 'svg' = Grösse der Grafik
 function defaultPdf(){
   return { order: Object.keys(PDF_COLS), on: Object.fromEntries(Object.keys(PDF_COLS).map(k => [k, true])), ev: { name: true, location: true, ort: true, date: true }, font: 'arial', size: 10, orient: 'portrait' };
@@ -722,6 +723,7 @@ function pdfEditorHtml(set){
           <span data-pdf-grip="${i}" title="Zum Verschieben greifen und ziehen" style="cursor:grab;touch-action:none;user-select:none;font-size:18px;line-height:1;padding:0 6px;color:var(--muted)">⠿</span>
           <label style="flex:1;display:flex;align-items:center;gap:8px;cursor:pointer"><input type="checkbox" data-pdf-on="${k}" ${p.on[k] ? 'checked' : ''} style="width:auto"> ${PDF_COLS[k]}</label>
         </div>`).join('');
+  const colsWin = pdfColsOpen ? `<div class="modal-bg" data-cols-bg><div class="modal" role="dialog" aria-modal="true" aria-labelledby="colsTitle"><div class="modal-head"><h3 id="colsTitle">Spalten</h3><button type="button" class="modal-x" data-cols-close aria-label="Schliessen">×</button></div><p class="muted" style="margin:0 0 8px">Haken = sichtbar, ⠿ greifen = verschieben</p>${cols}</div></div>` : '';
   const fontOpts = Object.entries(PDF_FONTS).map(([k, v]) => `<option value="${k}" ${p.font === k ? 'selected' : ''}>${v[0]}</option>`);
   if (p.custom) fontOpts.push(`<option value="custom" ${p.font === 'custom' ? 'selected' : ''}>${esc(p.custom.name)} (hochgeladen)</option>`);
   const land = p.orient === 'landscape';
@@ -764,8 +766,7 @@ function pdfEditorHtml(set){
             ${k === 'date' ? dateSelects(dateParts(set.event || {})) : `<input type="${ty}" data-ev="${k}" value="${esc((set.event || {})[k] || '')}" style="flex:1">`}
             <label class="muted" style="display:flex;align-items:center;gap:4px;white-space:nowrap"><input type="checkbox" data-ev-on="${k}" ${p.ev[k] ? 'checked' : ''} style="width:auto"> im PDF</label>
           </div>`).join('')}
-          <p class="muted" style="margin:12px 0 4px">Spalten: Haken = sichtbar, ⠿ greifen = verschieben</p>
-          ${cols}
+          <button type="button" data-cols-open style="margin-top:12px">Spalten ändern</button>
         </div>
         <div>
           <div class="row" style="margin-bottom:6px;gap:6px;flex-wrap:wrap">
@@ -788,7 +789,7 @@ function pdfEditorHtml(set){
         <button type="button" class="primary" data-pdf-download="1">PDF Download als Datei</button>
         <button type="button" data-pdf-print="1">PDF Drucken</button>
       </div>
-  </section>`;
+  </section>${colsWin}`;
 }
 function numOpts(max, sel){
   let o = '';
@@ -1112,6 +1113,7 @@ function render(){
     return;
   }
   pdfSheetId = null;
+  pdfColsOpen = false;
   pdfEditId = null;
   $('#app').innerHTML = `${renderToolbar()}<div class="col">${renderSongs()}</div><div class="col">${renderSetlists()}</div>`;
   if (pendingScroll) {
@@ -1471,6 +1473,7 @@ document.addEventListener('keydown', e => {
 document.addEventListener('click', e => {
   if (handleChrome(e)) return;
   if (e.target.id === 'bpmField') { openBpmPicker(e.target); return; }
+  if (e.target.matches && e.target.matches('[data-cols-bg]')) { pdfColsOpen = false; render(); return; }
   const b = e.target.closest('button');
   if (!b) {
     // Ganze Karte klickbar: Song bearbeiten oder Setlist öffnen (erneuter Klick schliesst sie)
@@ -1623,6 +1626,8 @@ document.addEventListener('click', e => {
     if (b.dataset.svgRemove !== undefined) pr.svg = null; else pr.svg.color = null;
     save(); render(); return;
   }
+  if (b.dataset.colsOpen !== undefined) { pdfColsOpen = true; render(); return; }
+  if (b.dataset.colsClose !== undefined) { pdfColsOpen = false; render(); return; }
   if (b.dataset.zoomMode) {
     pdfZoomMode = pdfZoomMode === 'svg' ? 'page' : 'svg';
     if (pdfZoomMode === 'svg' && !pdfPrefs().svg) { pdfZoomMode = 'page'; topNote('Zuerst eine Grafik hochladen'); }
