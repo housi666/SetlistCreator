@@ -63,6 +63,8 @@ F6  Ordnername: auf Wunsch „SetlistCreator“ ohne „Housi-“-Präfix. Abwei
 F7  Akzentfarbe: übernommen von StageMate (#e8a33d). Regelwerk angepasst: StageMate und SetlistCreator teilen ein Design. Erledigt.
 F8  Darstellung Android: fertigstellen (Ansicht auf dem Handy, Samsung XCover7). Offen.
 F9  Darstellung Desktop: fertigstellen (Layout, Zoom, PDF-Designer). Offen.
+F10 Android Dunkelmodus: nach Abschluss der Korrekturen Ansicht im Dunkelmodus prüfen und fertigstellen. Offen.
+F11 Android Hellmodus: helle Ansicht überarbeiten. Offen.
 
 
 ZUKUNFT
