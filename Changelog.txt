@@ -1,9 +1,20 @@
-SetlistCreator · v0.4.32 · Build 41 · 19.11.2026 · Phase Alpha
+SetlistCreator · v0.4.33 · Build 42 · 19.11.2026 · Phase Alpha
 
 Changelog · SetlistCreator
 Neueste Version zuerst. Zeiten = Schweizer Zeit
 
 ** ALPHA **
+
+v0.4.33 · Build 42 · 21.11.2026 10:00
+- Android: Tipps, Support und Aktualisieren stehen zentriert unter Profil und Abmelden; Aktualisieren mit Symbol
+- Android: Anmeldefenster ohne Datenschutz- und Nutzungslinks oben (unten bleiben)
+- Android: Songbibliothek mit gelben Knöpfen „Song hinzufügen“, „Zu Setlist hinzufügen“ und „Zu Setlisten springen“
+- Android: Auswahl der Songs in Reihenfolge, „Setlist erstellen“ mit grünem Hinweis „in Bibliothek hinzugefügt“
+- Android: Song erstellen speichert als „In Songbibliothek speichern“; „In Setlist hinzufügen“ öffnet die Setlistbibliothek
+- Android: nach dem Hinzufügen Fenster mit „Zur Setlist“ und „Nächsten Song erstellen“
+- Android: „Neue Setlist“ öffnet das Setlist-erstellen-Fenster; nach dem Erstellen öffnet sich die Setlistbibliothek mit der Setlist aufgeklappt
+- Android: Seitentitel links oben unter SetlistCreator, Zurück rechts
+- Erstellt- und Zuletzt-geändert-Datum bei Songs und Setlists, sichtbar im aufgeklappten Eintrag
 
 v0.4.32 · Build 41 · 19.11.2026 21:00
 - PDF-Designer: Spalten per Greifer ⠿ verschieben statt Pfeile
