@@ -61,6 +61,8 @@ F4  Export (entschieden 18.11.2026): Text, CSV, PDF (Alpha).
 F5  Teilen: gestrichen (entschieden 19.11.2026). Setlisten werden nicht zwischen Logins geteilt.
 F6  Ordnername: auf Wunsch „SetlistCreator“ ohne „Housi-“-Präfix. Abweichung vom Regelwerk, begründet mit Wunsch von Housi.
 F7  Akzentfarbe: übernommen von StageMate (#e8a33d). Regelwerk angepasst: StageMate und SetlistCreator teilen ein Design. Erledigt.
+F8  Darstellung Android: fertigstellen (Ansicht auf dem Handy, Samsung XCover7). Offen.
+F9  Darstellung Desktop: fertigstellen (Layout, Zoom, PDF-Designer). Offen.
 
 
 ZUKUNFT
