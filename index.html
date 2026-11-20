@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>SetlistCreator · v0.4.42</title>
+<title>SetlistCreator · v0.4.43</title>
 <link rel="icon" type="image/svg+xml" href="icon.svg">
 <link rel="icon" type="image/png" sizes="32x32" href="icon-32.png">
 <link rel="apple-touch-icon" href="icon-180.png">
@@ -144,7 +144,7 @@ html:not(.desk) .hdr-btns{justify-content:center}
   </div>
 </header>
 <main id="app"></main>
-<footer>SetlistCreator v0.4.42 · Build 51 · 20.11.2026 · Alpha · Login über Firebase (eigenes Projekt setlistcreator-54d5d), Daten pro Konto · <span id="status"></span><br><button type="button" class="legal-link" data-legal="terms">Nutzungsbedingungen</button> · <button type="button" class="legal-link" data-legal="privacy">Datenschutz</button></footer>
+<footer>SetlistCreator v0.4.43 · Build 52 · 21.11.2026 · Alpha · Login über Firebase (eigenes Projekt setlistcreator-54d5d), Daten pro Konto · <span id="status"></span><br><button type="button" class="legal-link" data-legal="terms">Nutzungsbedingungen</button> · <button type="button" class="legal-link" data-legal="privacy">Datenschutz</button></footer>
 
 <div class="modal-bg hidden" id="tipsModal">
   <div class="modal" role="dialog" aria-modal="true" aria-labelledby="tipsTitle">
@@ -203,6 +203,7 @@ const PDF_FONTS = { arial: ['Arial', 'Arial, Helvetica, sans-serif'], georgia: [
 let pdfZoom = 'fit';
 let pdfCurZ = 1;
 let pdfColsOpen = false;
+let pdfOpenSec = new Set(); // Android: welche aufklappbaren Bereiche offen sind
 let pdfZoomMode = 'page'; // 'page' = Bildzoom, 'svg' = Grösse der Grafik
 function defaultPdf(){
   return { order: Object.keys(PDF_COLS), on: Object.fromEntries(Object.keys(PDF_COLS).map(k => [k, true])), ev: { name: true, location: true, ort: true, date: true }, font: 'arial', size: 10, orient: 'portrait' };
@@ -715,6 +716,9 @@ function ensurePdfFontFace(p){
   if (!st) { st = document.createElement('style'); st.id = 'pdfFontFace'; document.head.appendChild(st); }
   st.textContent = pdfFontFaceCss(p);
 }
+// Android: Bereiche des PDF-Designers klappbar, Desktop unverändert
+function secOpen(key, title){ return isAndroid ? `<details class="pdf-sec" data-sec="${key}" ${pdfOpenSec.has(key) ? 'open' : ''} style="margin-bottom:8px"><summary class="muted" style="cursor:pointer;padding:6px 0;font-weight:600">${title}</summary>` : ''; }
+function secClose(){ return isAndroid ? '</details>' : ''; }
 function pdfEditorHtml(set){
   const p = pdfPrefs();
   ensurePdfFontFace(p);
@@ -739,10 +743,13 @@ function pdfEditorHtml(set){
             <button type="button" data-pdf-orient="portrait" class="${!land ? 'primary' : ''}">Hochformat</button>
             <button type="button" data-pdf-orient="landscape" class="${land ? 'primary' : ''}">Querformat</button>
           </div>
+          ${secOpen('font', 'Schrift')}
           <label class="muted" style="display:block;margin-bottom:8px">Schrift<select data-pdf-font>${fontOpts.join('')}</select></label>
           <label class="muted" style="display:block;margin-bottom:8px">Grösse (pt)<input type="number" data-pdf-size min="7" max="14" step="0.5" value="${p.size}"></label>
           <label class="muted" style="display:block;margin-bottom:8px">Eigene Schrift hochladen (.ttf, .otf, max. 400 KB)<input type="file" accept=".ttf,.otf" data-pdf-fontfile></label>
-          <p class="muted" style="margin:12px 0 4px">Grafik (SVG)</p>
+          ${secClose()}
+          ${secOpen('svg', 'Grafik (SVG)')}
+          ${isAndroid ? '' : '<p class="muted" style="margin:12px 0 4px">Grafik (SVG)</p>'}
           ${p.svg ? `
           <div class="grid2" style="margin-bottom:8px">
             <label class="muted">X (mm)<input type="number" data-svg-x min="0" max="297" step="1" value="${p.svg.x}"></label>
@@ -759,13 +766,16 @@ function pdfEditorHtml(set){
             <button type="button" class="danger" data-svg-remove>Entfernen</button>
           </div>` : ''}
           <label class="muted" style="display:block;margin-bottom:8px">${p.svg ? (isAndroid ? 'Anderes Bild hochladen' : 'Andere SVG hochladen') : (isAndroid ? 'Bild hochladen' : 'SVG hochladen')}${isAndroid ? ': SVG, PNG oder JPG (max. 200 KB; PNG/JPG werden verkleinert)' : ' (max. 200 KB)'}<input type="file" accept="${isAndroid ? '.svg,image/svg+xml,.png,.jpg,.jpeg,image/png,image/jpeg' : '.svg,image/svg+xml'}" data-svg-file></label>
-          <p class="muted" style="margin:12px 0 4px">Event (oben rechts im PDF)</p>
+          ${secClose()}
+          ${secOpen('event', 'Event (oben rechts im PDF)')}
+          ${isAndroid ? '' : '<p class="muted" style="margin:12px 0 4px">Event (oben rechts im PDF)</p>'}
           ${[['name', 'Eventname', 'text'], ['location', 'Location', 'text'], ['ort', 'Ort', 'text'], ['date', 'Datum', 'date']].map(([k, l, ty]) => `
           <div class="row" style="gap:6px;padding:4px 0">
             <span class="muted" style="width:84px">${l}</span>
             ${k === 'date' ? dateSelects(dateParts(set.event || {})) : `<input type="${ty}" data-ev="${k}" value="${esc((set.event || {})[k] || '')}" style="flex:1">`}
             <label class="muted" style="display:flex;align-items:center;gap:4px;white-space:nowrap"><input type="checkbox" data-ev-on="${k}" ${p.ev[k] ? 'checked' : ''} style="width:auto"> im PDF</label>
           </div>`).join('')}
+          ${secClose()}
           ${isAndroid ? '<button type="button" data-cols-open style="margin-top:12px">Spalten ändern</button>' : `<p class="muted" style="margin:12px 0 4px">Spalten: Haken = sichtbar, ⠿ greifen = verschieben</p>${cols}`}
         </div>
         <div>
@@ -1470,6 +1480,10 @@ document.addEventListener('keydown', e => {
 });
 
 // ---- Events ----
+document.addEventListener('toggle', e => {
+  const d = e.target;
+  if (d && d.matches && d.matches('details.pdf-sec')) { if (d.open) pdfOpenSec.add(d.dataset.sec); else pdfOpenSec.delete(d.dataset.sec); }
+}, true);
 document.addEventListener('click', e => {
   if (handleChrome(e)) return;
   if (e.target.id === 'bpmField') { openBpmPicker(e.target); return; }
