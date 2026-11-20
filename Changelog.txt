@@ -5,6 +5,10 @@ Neueste Version zuerst. Zeiten = Schweizer Zeit
 
 ** ALPHA **
 
+v0.4.36 · Build 45 · 20.11.2026 23:40
+- Android: PDF-Vorschau passt sich der Bildschirmbreite an (Skalierung ab oben links), Zoom-Knöpfe umbrechen statt abzuschneiden
+- Vorschau: Zoom mit Zwei-Finger-Geste (auseinander = grösser, zusammen = kleiner)
+
 v0.4.35 · Build 44 · 20.11.2026 23:00
 - Testdaten: 66 englische Metal-Songs (mit Album) und 7 Setlists zwischen 25 und 60 Minuten
 - Songinformationen: neues Feld „Album“ (optional), wird in der Songbibliothek angezeigt
