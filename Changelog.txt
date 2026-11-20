@@ -5,6 +5,10 @@ Neueste Version zuerst. Zeiten = Schweizer Zeit
 
 ** ALPHA **
 
+v0.4.38 · Build 47 · 20.11.2026 23:55
+- PDF-Designer: Bild hochladen akzeptiert jetzt auch PNG und JPG (werden verkleinert und als SVG eingebettet)
+- PDF-Designer: Vorschau bleibt beim Verschieben einer Grafik an Ort und Stelle (kein Hochscrollen mehr)
+
 v0.4.37 · Build 46 · 20.11.2026 23:50
 - Android: PDF-Vorschau: Seitenbreite korrigiert, das Blatt sitzt nicht mehr über den Bildschirmrand hinaus
 - Android: Knöpfe unter der Vorschau brechen um statt abgeschnitten zu werden
