@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>SetlistCreator · v0.4.35</title>
+<title>SetlistCreator · v0.4.36</title>
 <link rel="icon" type="image/svg+xml" href="icon.svg">
 <link rel="icon" type="image/png" sizes="32x32" href="icon-32.png">
 <link rel="apple-touch-icon" href="icon-180.png">
@@ -144,7 +144,7 @@ html:not(.desk) .hdr-btns{justify-content:center}
   </div>
 </header>
 <main id="app"></main>
-<footer>SetlistCreator v0.4.35 · Build 44 · 20.11.2026 · Alpha · Login über Firebase (eigenes Projekt setlistcreator-54d5d), Daten pro Konto · <span id="status"></span><br><button type="button" class="legal-link" data-legal="terms">Nutzungsbedingungen</button> · <button type="button" class="legal-link" data-legal="privacy">Datenschutz</button></footer>
+<footer>SetlistCreator v0.4.36 · Build 45 · 20.11.2026 · Alpha · Login über Firebase (eigenes Projekt setlistcreator-54d5d), Daten pro Konto · <span id="status"></span><br><button type="button" class="legal-link" data-legal="terms">Nutzungsbedingungen</button> · <button type="button" class="legal-link" data-legal="privacy">Datenschutz</button></footer>
 
 <div class="modal-bg hidden" id="tipsModal">
   <div class="modal" role="dialog" aria-modal="true" aria-labelledby="tipsTitle">
@@ -201,6 +201,7 @@ const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 
 const PDF_COLS = { nr: 'Nr', start: 'Start', end: 'Ende', title: 'Titel', artist: 'Interpret', key: 'Tonart', bpm: 'BPM', dur: 'Dauer', tempo: 'Temp. Change', notes: 'Notizen' };
 const PDF_FONTS = { arial: ['Arial', 'Arial, Helvetica, sans-serif'], georgia: ['Georgia', 'Georgia, serif'], verdana: ['Verdana', 'Verdana, sans-serif'], courier: ['Courier New', '"Courier New", Courier, monospace'], impact: ['Impact', 'Impact, "Arial Narrow Bold", sans-serif'], razor: ['Razor Ephinea', '"Razor Ephinea", Impact, sans-serif'] };
 let pdfZoom = 'fit';
+let pdfCurZ = 1;
 function defaultPdf(){
   return { order: Object.keys(PDF_COLS), on: Object.fromEntries(Object.keys(PDF_COLS).map(k => [k, true])), ev: { name: true, location: true, ort: true, date: true }, font: 'arial', size: 10, orient: 'portrait' };
 }
@@ -620,7 +621,9 @@ function applyPdfZoom(){
   const availW = Math.max(120, (frame.parentElement.clientWidth || W) - 8);
   const fit = Math.min(availW / W, (window.innerHeight * 0.65) / H);
   const z = Math.max(0.25, Math.min(3, pdfZoom === 'fit' ? fit : pdfZoom));
+  sheet.style.transformOrigin = '0 0';
   sheet.style.transform = `scale(${z})`;
+  pdfCurZ = z;
   frame.style.width = (W * z) + 'px';
   frame.style.height = (H * z) + 'px';
   const lbl = document.getElementById('zoomLbl');
@@ -736,7 +739,7 @@ function pdfEditorHtml(set){
           ${cols}
         </div>
         <div>
-          <div class="row" style="margin-bottom:6px;gap:6px">
+          <div class="row" style="margin-bottom:6px;gap:6px;flex-wrap:wrap">
             <span class="muted" style="flex:1">Vorschau</span>
             <button type="button" data-zoom="out">−</button>
             <span id="zoomLbl" class="muted" style="min-width:52px;text-align:center">100 %</span>
@@ -1346,7 +1349,7 @@ document.addEventListener('pointerdown', e => {
   e.preventDefault();
 });
 document.addEventListener('pointermove', e => {
-  if (!panDrag) return;
+  if (!panDrag || pdfPinch) return;
   panDrag.sc.scrollLeft = panDrag.l - (e.clientX - panDrag.x);
   panDrag.sc.scrollTop = panDrag.t - (e.clientY - panDrag.y);
 });
@@ -1417,6 +1420,28 @@ const endSvg = () => { if (svgDrag) { svgDrag = null; save(); render(); } };
 document.addEventListener('pointerup', endSvg);
 document.addEventListener('pointercancel', endSvg);
 document.addEventListener('pointerup', endPan);
+// Zwei Finger auf der Vorschau: auseinander = vergrössern, zusammen = verkleinern
+const pdfPtrs = new Map();
+let pdfPinch = null;
+const pdfDist = () => { const [a, b] = [...pdfPtrs.values()]; return Math.hypot(a.x - b.x, a.y - b.y) || 1; };
+document.addEventListener('pointerdown', e => {
+  const sc = e.target.closest && e.target.closest('#pdfScroll');
+  if (!sc) return;
+  pdfPtrs.set(e.pointerId, { x: e.clientX, y: e.clientY });
+  if (pdfPtrs.size === 2) { panDrag = null; sc.classList.remove('grabbing'); pdfPinch = { d0: pdfDist(), z0: pdfCurZ }; }
+});
+document.addEventListener('pointermove', e => {
+  if (!pdfPtrs.has(e.pointerId)) return;
+  pdfPtrs.set(e.pointerId, { x: e.clientX, y: e.clientY });
+  if (pdfPinch && pdfPtrs.size >= 2) {
+    const z = Math.max(0.25, Math.min(3, pdfPinch.z0 * pdfDist() / pdfPinch.d0));
+    pdfZoom = +z.toFixed(2);
+    applyPdfZoom();
+  }
+});
+const endPdfPtr = e => { pdfPtrs.delete(e.pointerId); if (pdfPtrs.size < 2) pdfPinch = null; };
+document.addEventListener('pointerup', endPdfPtr);
+document.addEventListener('pointercancel', endPdfPtr);
 document.addEventListener('pointercancel', endPan);
 document.addEventListener('keydown', e => {
   if (e.key === 'Escape') { document.querySelectorAll('.modal-bg').forEach(m => m.classList.add('hidden')); if (pdfEditId) { pdfEditId = null; render(); } }
