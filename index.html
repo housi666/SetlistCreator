@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>SetlistCreator · v0.4.34</title>
+<title>SetlistCreator · v0.4.35</title>
 <link rel="icon" type="image/svg+xml" href="icon.svg">
 <link rel="icon" type="image/png" sizes="32x32" href="icon-32.png">
 <link rel="apple-touch-icon" href="icon-180.png">
@@ -144,7 +144,7 @@ html:not(.desk) .hdr-btns{justify-content:center}
   </div>
 </header>
 <main id="app"></main>
-<footer>SetlistCreator v0.4.34 · Build 43 · 20.11.2026 · Alpha · Login über Firebase (eigenes Projekt setlistcreator-54d5d), Daten pro Konto · <span id="status"></span><br><button type="button" class="legal-link" data-legal="terms">Nutzungsbedingungen</button> · <button type="button" class="legal-link" data-legal="privacy">Datenschutz</button></footer>
+<footer>SetlistCreator v0.4.35 · Build 44 · 20.11.2026 · Alpha · Login über Firebase (eigenes Projekt setlistcreator-54d5d), Daten pro Konto · <span id="status"></span><br><button type="button" class="legal-link" data-legal="terms">Nutzungsbedingungen</button> · <button type="button" class="legal-link" data-legal="privacy">Datenschutz</button></footer>
 
 <div class="modal-bg hidden" id="tipsModal">
   <div class="modal" role="dialog" aria-modal="true" aria-labelledby="tipsTitle">
@@ -244,6 +244,7 @@ let snaps = {};
 let forSet = null;
 let navStack = [];
 let openDet = new Set();
+let songSort = 'name';
 // Android: Zurück geht zum letzten Bildschirm, nicht direkt ins Hauptmenü
 function nav(v){ if (v !== view) navStack.push(view); view = v; }
 document.addEventListener('toggle', e => {
@@ -378,6 +379,7 @@ function songForm(v){
         <details class="full" ${hasExtra ? 'open' : ''}>
           <summary>Weitere Angaben (optional)</summary>
           <div class="grid2" style="margin-top:10px">
+            <input class="full" name="album" placeholder="Album (optional)" value="${esc(v.album)}">
             <input name="key" placeholder="Tonart" value="${esc(v.key)}">
             <input name="bpm" id="bpmField" inputmode="numeric" maxlength="3" autocomplete="off" placeholder="Tempo (BPM) – klicken oder tippen" value="${esc(v.bpm)}">
             <textarea class="full" name="tempo" placeholder="Tempowechsel, z. B. ab 2:10 auf 140 BPM">${esc(v.tempo)}</textarea>
@@ -389,6 +391,28 @@ function songForm(v){
         </div>`}
       </form>`;
 }
+// Sortierung der Songbibliothek: Name, Album oder Setlist (Songs ohne Setlist zuletzt)
+function sortSongs(list){
+  const firstSet = s => {
+    const names = state.setlists.filter(x => x.entries.some(e => e.id === s.id)).map(x => x.name).sort((a, b) => a.localeCompare(b, 'de'));
+    return names[0] || '';
+  };
+  const byName = (a, b) => a.title.localeCompare(b.title, 'de');
+  if (songSort === 'album') return [...list].sort((a, b) => {
+    if (!a.album !== !b.album) return a.album ? -1 : 1;
+    return (a.album || '').localeCompare(b.album || '', 'de') || byName(a, b);
+  });
+  if (songSort === 'setlist') return [...list].sort((a, b) => {
+    const x = firstSet(a), y = firstSet(b);
+    if (!x !== !y) return x ? -1 : 1;
+    return x.localeCompare(y, 'de') || byName(a, b);
+  });
+  return [...list].sort(byName);
+}
+function sortBox(){
+  const o = [['name', 'Name'], ['album', 'Album'], ['setlist', 'Setlist']];
+  return `<select data-songsort aria-label="Sortieren" style="margin-bottom:10px;margin-left:8px">${o.map(([v, l]) => `<option value="${v}" ${songSort === v ? 'selected' : ''}>Sortieren: ${l}</option>`).join('')}</select>`;
+}
 function matchSong(s, q){
   if (!q) return true;
   return [s.title, s.artist, s.key].some(v => String(v || '').toLowerCase().includes(q));
@@ -397,7 +421,7 @@ function songsList(){ return isAndroid ? songsListAndroid() : songsListDesk(); }
 function songsListAndroid(){
   const q = searchQ.songs.trim().toLowerCase();
   if (!state.songs.length) return '<p class="muted">Noch keine Songs.</p>';
-  const songs = state.songs.filter(s => s.id === editSongId || matchSong(s, q));
+  const songs = sortSongs(state.songs.filter(s => s.id === editSongId || matchSong(s, q)));
   if (!songs.length) return '<p class="muted">Keine Treffer.</p>';
   return songs.map(s => {
     if (pickSel !== null && s.id !== editSongId) return pickCard(s);
@@ -407,7 +431,7 @@ function songsListAndroid(){
         <div class="row" data-edit="${s.id}" role="button" tabindex="0" title="Aufklappen / zuklappen" style="cursor:pointer">
           <div style="flex:1;min-width:140px">
             <strong>${esc(s.title)}</strong>
-            <div class="song-meta">${esc([s.artist, s.key, s.bpm ? s.bpm + ' BPM' : '', s.duration].filter(Boolean).join(' · ')) || '–'}</div>
+            <div class="song-meta">${esc([s.artist, s.album, s.key, s.bpm ? s.bpm + ' BPM' : '', s.duration].filter(Boolean).join(' · ')) || '–'}</div>
           </div>
           <button class="icon" data-edit="${s.id}" title="Bearbeiten" aria-label="Bearbeiten">${ICON_PENCIL}</button>
           <button class="icon danger" data-del="${s.id}" title="Löschen" aria-label="Löschen">${ICON_TRASH}</button>
@@ -419,7 +443,7 @@ function songsListAndroid(){
 function songsListDesk(){
   const q = searchQ.songs.trim().toLowerCase();
   if (!state.songs.length) return '<p class="muted">Noch keine Songs.</p>';
-  const songs = state.songs.filter(s => s.id === editSongId || matchSong(s, q));
+  const songs = sortSongs(state.songs.filter(s => s.id === editSongId || matchSong(s, q)));
   if (!songs.length) return '<p class="muted">Keine Treffer.</p>';
   return songs.map(s => {
     if (pickSel !== null && s.id !== editSongId) return pickCard(s);
@@ -438,7 +462,7 @@ function songsListDesk(){
       <div class="card row" data-edit="${s.id}" role="button" tabindex="0" title="Song bearbeiten">
         <div style="flex:1;min-width:140px">
           <strong>${esc(s.title)}</strong>
-          <div class="song-meta">${esc([s.artist, s.key, s.bpm ? s.bpm + ' BPM' : '', s.duration].filter(Boolean).join(' · ')) || '–'}</div>
+          <div class="song-meta">${esc([s.artist, s.album, s.key, s.bpm ? s.bpm + ' BPM' : '', s.duration].filter(Boolean).join(' · ')) || '–'}</div>
         </div>
         <button class="icon" data-edit="${s.id}" title="Bearbeiten" aria-label="Bearbeiten">${ICON_PENCIL}</button>
         <button class="icon danger" data-del="${s.id}" title="Löschen" aria-label="Löschen">${ICON_TRASH}</button>
@@ -466,7 +490,7 @@ function renderSongs(){
   return `${newCard}${on('songs') ? `
     ${songActions()}
     <h2>Songbibliothek (${state.songs.length})</h2>
-    ${searchBox('songs', 'Suchen: Titel, Interpret, Tonart')}
+    ${searchBox('songs', 'Suchen: Titel, Interpret, Tonart')}${sortBox()}
     <div data-listfor="songs">${songsList()}</div>
     ${pickSel !== null ? pickBar() : ''}` : ''}`;
 }
@@ -750,7 +774,7 @@ function setDetailAndroid(cur){
   const items = rows.map((r, i) => {
     const s = r.song;
     const id = r.entry.id;
-    const meta = s ? [s.artist, s.key, s.bpm ? s.bpm + ' BPM' : '', s.duration].filter(Boolean).join(' · ') : '';
+    const meta = s ? [s.artist, s.album, s.key, s.bpm ? s.bpm + ' BPM' : '', s.duration].filter(Boolean).join(' · ') : '';
     return `<li class="row" style="align-items:flex-start;gap:6px">
         <span class="muted" style="width:22px;padding-top:4px">${i + 1}</span>
         <details class="sdet" data-det="${id}" ${openDet.has(id) ? 'open' : ''} style="flex:1;min-width:120px">
@@ -799,7 +823,7 @@ function setDetailDesk(cur){
   const rows = schedule(cur);
   const items = rows.map((r, i) => {
     const s = r.song;
-    const meta = s ? [s.artist, s.key, s.bpm ? s.bpm + ' BPM' : '', s.duration].filter(Boolean).join(' · ') : '';
+    const meta = s ? [s.artist, s.album, s.key, s.bpm ? s.bpm + ' BPM' : '', s.duration].filter(Boolean).join(' · ') : '';
     return `<li class="row">
         <span class="muted" style="width:22px">${i + 1}</span>
         <div style="flex:1;min-width:140px">
@@ -932,7 +956,7 @@ function pickCard(s){
         <span class="pick-no ${idx >= 0 ? 'on' : ''}">${idx >= 0 ? idx + 1 : ''}</span>
         <div style="flex:1;min-width:140px">
           <strong>${esc(s.title)}</strong>
-          <div class="song-meta">${esc([s.artist, s.key, s.bpm ? s.bpm + ' BPM' : '', s.duration].filter(Boolean).join(' · ')) || '–'}</div>
+          <div class="song-meta">${esc([s.artist, s.album, s.key, s.bpm ? s.bpm + ' BPM' : '', s.duration].filter(Boolean).join(' · ')) || '–'}</div>
         </div>
       </div>`;
 }
@@ -960,6 +984,7 @@ function readSongForm(f){
     key: (d.key || '').trim(),
     bpm: d.bpm ? parseInt(d.bpm, 10) : '',
     duration: hasDur ? `${+d.dmin || 0}:${String(+d.dsec || 0).padStart(2, '0')}` : '',
+    album: (d.album || '').trim(),
     tempo: (d.tempo || '').trim(),
     notes: (d.notes || '').trim()
   };
@@ -1250,7 +1275,7 @@ const TIPS = {
     { icon: '⏱️', title: 'Dauer', text: 'Minuten und Sekunden wählst du in zwei Auswahlfeldern. Sie bestimmen die Zeiten in den Setlisten.' },
     { icon: '🥁', title: 'Tempo (BPM)', text: 'Ein Klick auf das Tempo-Feld öffnet ein Rad mit 20 bis 300 BPM. Du kannst den Wert auch direkt eintippen.' },
     { icon: '📂', title: 'Weitere Angaben', text: 'Tonart, Tempo, Tempowechsel und Notizen sind unter „Weitere Angaben“ versteckt.' },
-    { icon: '🧪', title: 'Testdaten', text: 'Der Knopf „Testdaten einfügen“ legt 10 Testsongs und eine Setlist „Testsetlist“ mit 45 Minuten an.' },
+    { icon: '🧪', title: 'Testdaten', text: 'Der Knopf „Testdaten einfügen“ legt 66 Testsongs mit Album und 7 Setlisten (25 bis 60 Minuten) an.' },
   ]},
   sets: { name: 'Setlistbibliothek', icon: '📋', list: [
     { icon: '👆', title: 'Öffnen', text: 'Tippe auf eine Setlist, um sie aufzuklappen. Ein erneuter Tipp schliesst sie.' },
@@ -1470,18 +1495,30 @@ document.addEventListener('click', e => {
   }
   if (b.id === 'testBtn') {
     if (!user || !ready) return;
-    if (state.setlists.some(s => s.name === 'Testsetlist')) { alert('Die Testdaten sind schon vorhanden.'); return; }
-    const durs = ['4:00', '4:30', '5:00', '3:45', '4:15', '5:30', '4:00', '4:45', '3:30', '5:45'];
-    const bpms = [90, 100, 110, 120, 128, 130, 140, 150, 160, 170];
-    const keys = ['C', 'G', 'D', 'A', 'E', 'F', 'Bb', 'Am', 'Em', 'Dm'];
-    const ids = durs.map((d, i) => {
+    if (state.setlists.some(x => x.name.startsWith('Testsetlist'))) { alert('Die Testdaten sind schon vorhanden.'); return; }
+    const titles = ['Iron Requiem','Black Horizon','Shattered Crown','Ashes of Eden','Wolves of the Storm','Crimson Tide Rising','Veil of Thorns','Hollow Gods','Blood Covenant','Frozen Abyss','The Last Sermon','Chains of Mercury','Falling Sky','Night Reaper','Endless Winter','Scorched Earth','Silent Thunder','Dead Star Rising','Oblivion Gate','Serpent Throne','Ruins of Empire','Venom Dawn','Iron Lungs','Burning Cathedral','Dark Prophecy','Razorwind','Gravebound','Fractured Mirror','Storm Eater','Eclipse Protocol','Judgement Day Again','Bones of Saints','Abyssal Choir','Nightfall Empire','Obsidian Wings','Plague Mother','Rust and Rain',"Demon's Lullaby",'Titan Descent','Witchfire','Cold Blood Anthem','Storm Front','Hellbound Train','Ghost Legion','Grave Machine','Sulfur Sky','Wrath of Ages','Dying Light','Iron Monarch','Apocalypse Waltz','Thorn Crown','Cursed Harvest','Metal Dawn',"Stormbringer's Oath","Sinner's Requiem",'Void Ascension','Black Sun Rite','Venomous Hymn','Stone Colossus','Deathless Oath','Ritual Fire','Bloodline Serpent','Architects of Doom','Mirror of Ruin','Final Crusade','Endless Abyss'];
+    const bands = ['Ashen Gate','Vorax','Nightjar Choir','Hollow Reign','Crowned Rot'];
+    const keys = ['C','G','D','A','E','F','Bb','Am','Em','Dm','F#m','Gm'];
+    const durOf = n => 180 + ((n * 37) % 210); // Sekunden, 3:00 bis 6:29
+    const songIds = titles.map((t, n) => {
       const id = uid();
-      state.songs.push({ id, title: `Test Song ${String(i + 1).padStart(2, '0')}`, artist: 'Testband', key: keys[i], bpm: bpms[i], duration: d, tempo: '', notes: '' });
+      const sec = durOf(n);
+      state.songs.push({ id, title: t, artist: bands[n % bands.length], album: `Testalbum ${Math.floor(n / 11) + 1}`, key: keys[n % keys.length], bpm: 90 + ((n * 13) % 110), duration: `${Math.floor(sec / 60)}:${String(sec % 60).padStart(2, '0')}`, tempo: '', notes: '' });
       return id;
     });
-    const set = { id: uid(), name: 'Testsetlist', entries: ids.map(id => ({ id, start: '' })) };
-    state.setlists.push(set);
-    activeSetId = set.id;
+    const targets = [25, 30, 35, 40, 45, 52, 60].map(m => m * 60);
+    targets.forEach((target, k) => {
+      const offset = (k * 9) % titles.length;
+      let total = 0;
+      const picked = [];
+      for (let j = 0; j < titles.length; j++) {
+        const n = (offset + j) % titles.length;
+        const d = durOf(n);
+        if (total + d <= target) { picked.push(songIds[n]); total += d; }
+      }
+      state.setlists.push({ id: uid(), name: `Testsetlist ${k + 1}`, entries: picked.map(id => ({ id, start: '' })) });
+    });
+    activeSetId = state.setlists[state.setlists.length - 1].id;
     save(); render(); return;
   }
   if (b.id === 'logoutBtn') { signOut(auth); return; }
@@ -1655,6 +1692,7 @@ document.addEventListener('change', e => {
     save(); render(); return;
   }
   if (t.matches && t.matches('[data-selname]')) { pickName = t.value; return; }
+  if (t.matches && t.matches('[data-songsort]')) { songSort = t.value; render(); return; }
   if (!t.matches || !t.matches('[data-tpart]')) return;
   const cur = state.setlists.find(s => s.id === activeSetId);
   if (!cur) return;
@@ -1683,6 +1721,7 @@ document.addEventListener('submit', e => {
       key: (d.key || '').trim(),
       bpm: d.bpm ? parseInt(d.bpm, 10) : '',
       duration: hasDur ? `${+d.dmin || 0}:${String(+d.dsec || 0).padStart(2, '0')}` : '',
+      album: (d.album || '').trim(),
       tempo: (d.tempo || '').trim(),
       notes: (d.notes || '').trim()
     };
