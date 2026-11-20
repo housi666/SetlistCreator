@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>SetlistCreator · v0.4.41</title>
+<title>SetlistCreator · v0.4.42</title>
 <link rel="icon" type="image/svg+xml" href="icon.svg">
 <link rel="icon" type="image/png" sizes="32x32" href="icon-32.png">
 <link rel="apple-touch-icon" href="icon-180.png">
@@ -144,7 +144,7 @@ html:not(.desk) .hdr-btns{justify-content:center}
   </div>
 </header>
 <main id="app"></main>
-<footer>SetlistCreator v0.4.41 · Build 50 · 20.11.2026 · Alpha · Login über Firebase (eigenes Projekt setlistcreator-54d5d), Daten pro Konto · <span id="status"></span><br><button type="button" class="legal-link" data-legal="terms">Nutzungsbedingungen</button> · <button type="button" class="legal-link" data-legal="privacy">Datenschutz</button></footer>
+<footer>SetlistCreator v0.4.42 · Build 51 · 20.11.2026 · Alpha · Login über Firebase (eigenes Projekt setlistcreator-54d5d), Daten pro Konto · <span id="status"></span><br><button type="button" class="legal-link" data-legal="terms">Nutzungsbedingungen</button> · <button type="button" class="legal-link" data-legal="privacy">Datenschutz</button></footer>
 
 <div class="modal-bg hidden" id="tipsModal">
   <div class="modal" role="dialog" aria-modal="true" aria-labelledby="tipsTitle">
@@ -651,7 +651,7 @@ function applyPdfZoom(){
   const availW = Math.max(120, (frame.parentElement.clientWidth || W) - 8);
   const fit = Math.min(availW / W, (window.innerHeight * 0.65) / H);
   const z = Math.max(0.25, Math.min(3, pdfZoom === 'fit' ? fit : pdfZoom));
-  sheet.style.transformOrigin = '0 0';
+  if (isAndroid) sheet.style.transformOrigin = '0 0';
   sheet.style.transform = `scale(${z})`;
   pdfCurZ = z;
   frame.style.width = (W * z) + 'px';
@@ -723,7 +723,7 @@ function pdfEditorHtml(set){
           <span data-pdf-grip="${i}" title="Zum Verschieben greifen und ziehen" style="cursor:grab;touch-action:none;user-select:none;font-size:18px;line-height:1;padding:0 6px;color:var(--muted)">⠿</span>
           <label style="flex:1;display:flex;align-items:center;gap:8px;cursor:pointer"><input type="checkbox" data-pdf-on="${k}" ${p.on[k] ? 'checked' : ''} style="width:auto"> ${PDF_COLS[k]}</label>
         </div>`).join('');
-  const colsWin = pdfColsOpen ? `<div class="modal-bg" data-cols-bg><div class="modal" role="dialog" aria-modal="true" aria-labelledby="colsTitle"><div class="modal-head"><h3 id="colsTitle">Spalten</h3><button type="button" class="modal-x" data-cols-close aria-label="Schliessen">×</button></div><p class="muted" style="margin:0 0 8px">Haken = sichtbar, ⠿ greifen = verschieben</p>${cols}</div></div>` : '';
+  const colsWin = (isAndroid && pdfColsOpen) ? `<div class="modal-bg" data-cols-bg><div class="modal" role="dialog" aria-modal="true" aria-labelledby="colsTitle"><div class="modal-head"><h3 id="colsTitle">Spalten</h3><button type="button" class="modal-x" data-cols-close aria-label="Schliessen">×</button></div><p class="muted" style="margin:0 0 8px">Haken = sichtbar, ⠿ greifen = verschieben</p>${cols}</div></div>` : '';
   const fontOpts = Object.entries(PDF_FONTS).map(([k, v]) => `<option value="${k}" ${p.font === k ? 'selected' : ''}>${v[0]}</option>`);
   if (p.custom) fontOpts.push(`<option value="custom" ${p.font === 'custom' ? 'selected' : ''}>${esc(p.custom.name)} (hochgeladen)</option>`);
   const land = p.orient === 'landscape';
@@ -758,7 +758,7 @@ function pdfEditorHtml(set){
             <button type="button" data-svg-keep>Originalfarbe</button>
             <button type="button" class="danger" data-svg-remove>Entfernen</button>
           </div>` : ''}
-          <label class="muted" style="display:block;margin-bottom:8px">${p.svg ? 'Anderes Bild hochladen' : 'Bild hochladen'}: SVG, PNG oder JPG (max. 200 KB; PNG/JPG werden verkleinert)<input type="file" accept=".svg,image/svg+xml,.png,.jpg,.jpeg,image/png,image/jpeg" data-svg-file></label>
+          <label class="muted" style="display:block;margin-bottom:8px">${p.svg ? (isAndroid ? 'Anderes Bild hochladen' : 'Andere SVG hochladen') : (isAndroid ? 'Bild hochladen' : 'SVG hochladen')}${isAndroid ? ': SVG, PNG oder JPG (max. 200 KB; PNG/JPG werden verkleinert)' : ' (max. 200 KB)'}<input type="file" accept="${isAndroid ? '.svg,image/svg+xml,.png,.jpg,.jpeg,image/png,image/jpeg' : '.svg,image/svg+xml'}" data-svg-file></label>
           <p class="muted" style="margin:12px 0 4px">Event (oben rechts im PDF)</p>
           ${[['name', 'Eventname', 'text'], ['location', 'Location', 'text'], ['ort', 'Ort', 'text'], ['date', 'Datum', 'date']].map(([k, l, ty]) => `
           <div class="row" style="gap:6px;padding:4px 0">
@@ -766,12 +766,12 @@ function pdfEditorHtml(set){
             ${k === 'date' ? dateSelects(dateParts(set.event || {})) : `<input type="${ty}" data-ev="${k}" value="${esc((set.event || {})[k] || '')}" style="flex:1">`}
             <label class="muted" style="display:flex;align-items:center;gap:4px;white-space:nowrap"><input type="checkbox" data-ev-on="${k}" ${p.ev[k] ? 'checked' : ''} style="width:auto"> im PDF</label>
           </div>`).join('')}
-          <button type="button" data-cols-open style="margin-top:12px">Spalten ändern</button>
+          ${isAndroid ? '<button type="button" data-cols-open style="margin-top:12px">Spalten ändern</button>' : `<p class="muted" style="margin:12px 0 4px">Spalten: Haken = sichtbar, ⠿ greifen = verschieben</p>${cols}`}
         </div>
         <div>
           <div class="row" style="margin-bottom:6px;gap:6px;flex-wrap:wrap">
             <span class="muted" style="flex:1">Vorschau</span>
-            <button type="button" data-zoom-mode="1" class="${pdfZoomMode === 'svg' ? 'primary' : ''}" title="Die Knöpfe ändern die Grösse der Grafik">${pdfZoomMode === 'svg' ? 'Grafik' : 'Bild'}</button>
+            ${isAndroid ? `<button type="button" data-zoom-mode="1" class="${pdfZoomMode === 'svg' ? 'primary' : ''}" title="Die Knöpfe ändern die Grösse der Grafik">${pdfZoomMode === 'svg' ? 'Grafik' : 'Bild'}</button>` : ''}
             <button type="button" data-zoom="out">−</button>
             <span id="zoomLbl" class="muted" style="min-width:52px;text-align:center">100 %</span>
             <button type="button" data-zoom="in">+</button>
@@ -1101,7 +1101,7 @@ function render(){
     // Beim Neuzeichnen derselben Vorschau (z. B. nach dem Verschieben) Position behalten
     const same = pdfSheetId === pdfSet.id;
     const prevSc = document.getElementById('pdfScroll');
-    const keep = same && prevSc ? { y: window.scrollY, l: prevSc.scrollLeft, t: prevSc.scrollTop } : null;
+    const keep = isAndroid && same && prevSc ? { y: window.scrollY, l: prevSc.scrollLeft, t: prevSc.scrollTop } : null;
     $('#app').innerHTML = pdfEditorHtml(pdfSet);
     applyPdfZoom();
     pdfSheetId = pdfSet.id;
@@ -1691,7 +1691,7 @@ document.addEventListener('change', e => {
   if (t.matches && t.matches('[data-svg-file]')) {
     const file = t.files && t.files[0];
     if (!file || !user || !ready) return;
-    const raster = /^image\/(png|jpeg)$/.test(file.type) || /\.(png|jpe?g)$/i.test(file.name);
+    const raster = isAndroid && (/^image\/(png|jpeg)$/.test(file.type) || /\.(png|jpe?g)$/i.test(file.name));
     if (!raster && file.size > 200 * 1024) { topNote('SVG ist zu gross (max. 200 KB)'); t.value = ''; return; }
     const finish = markup => {
       const res = sanitizeSvg(markup);
