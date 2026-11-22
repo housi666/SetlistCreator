@@ -42,6 +42,7 @@ Mittel
 
 
 Optional
+Ferne Zukunft: Integration als Plugin in die DAW, um Setlists direkt im DAW-Projekt zu erstellen (Verbindung zur Songbibliothek offen; Reaper-.rpp-Import als Vorstufe, siehe Zukunft)
 (10 Zeilen frei)
 
 
