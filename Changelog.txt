@@ -1,9 +1,12 @@
-SetlistCreator · v0.4.50 · Build 59 · 2026-11-26 · Phase Alpha
+SetlistCreator · v0.4.51 · Build 60 · 2026-11-26 · Phase Alpha
 
 Changelog · SetlistCreator
 Neueste Version zuerst. Zeiten = Schweizer Zeit
 
 ** ALPHA **
+
+v0.4.51 · Build 60 · 26.11.2026 22:40
+- Desktop: PDF-Designer über die ganze Fensterbreite, Vorschau höher (Einpassen bis 80 % der Fensterhöhe); Android unverändert
 
 v0.4.50 · Build 59 · 26.11.2026 22:45
 - Glänzende Display-Knöpfe nach Regelwerk, übernommen von StageMate v0.6.0 (Glasfläche, Glanz, gemeinsamer Lichtstreifen, Klick-Animation)
