@@ -1,9 +1,19 @@
-SetlistCreator · v0.4.46 · Build 55 · 2026-11-26 · Phase Alpha
+SetlistCreator · v0.4.47 · Build 56 · 2026-11-26 · Phase Alpha
 
 Changelog · SetlistCreator
 Neueste Version zuerst. Zeiten = Schweizer Zeit
 
 ** ALPHA **
+
+v0.4.47 · Build 56 · 26.11.2026 22:15
+- Knopffarben nach Aufgabe: Gelb Hauptaktionen, Blau Tipps/Support/Aktualisieren/Changelog, Violett PDF und Export, Grün Testdaten, Rot Löschen, neutral Abmelden/Zurück/Abbrechen
+- Changelog-Menü „📝 Changelog“ neben Datenschutz (dreifach aufklappbar, Typen neu/besser/fix/intern)
+- Phasen-Abzeichen „Alpha“ in der Fusszeile öffnet den Hinweis
+- Tipps: Hinweis „Dieses Tool wurde mit Claude (KI) erstellt“, Tutorial (gesperrt bis v0.9.0), Alle aufklappen/zuklappen
+- Klick-Animation: Rand und Text in Akzentfarbe, 1 px nach unten
+- Schrift Inter (400 bis 700) eingebunden
+- Fix: Rechtstexte „Fassung vom TT.MM.JJJJ“; Seitentitel zeigt wieder die aktuelle Version; Fenster-Aufruf per ID korrigiert
+- Archiv: Jede Version als Archiv\SetlistCreator_vX.Y.Z.html im Projektordner
 
 v0.4.46 · Build 55 · 26.11.2026 21:58
 - Fußzeile: „Made by Housi · Coded with Claude“
