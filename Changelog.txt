@@ -1,9 +1,15 @@
-SetlistCreator · v0.4.45 · Build 54 · 21.11.2026 · Phase Alpha
+SetlistCreator · v0.4.46 · Build 55 · 2026-11-26 · Phase Alpha
 
 Changelog · SetlistCreator
 Neueste Version zuerst. Zeiten = Schweizer Zeit
 
 ** ALPHA **
+
+v0.4.46 · Build 55 · 26.11.2026 21:58
+- Fußzeile: „Made by Housi · Coded with Claude“
+- Knöpfe einheitlich mit 10 px Radius (vorher Pillenform)
+- Dateikopf mit ISO-Datum (JJJJ-MM-TT)
+- RoadMap übernimmt den Inhalt von Funktionen.txt
 
 v0.4.45 · Build 54 · 21.11.2026 00:15
 - Android: Nicht gelbe, abgerundete Knöpfe sind etwas heller; gelbe Knöpfe bleiben unverändert; Desktop unverändert
