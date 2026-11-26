@@ -1,9 +1,13 @@
-SetlistCreator · v0.4.48 · Build 57 · 2026-11-26 · Phase Alpha
+SetlistCreator · v0.4.49 · Build 58 · 2026-11-26 · Phase Alpha
 
 Changelog · SetlistCreator
 Neueste Version zuerst. Zeiten = Schweizer Zeit
 
 ** ALPHA **
+
+v0.4.49 · Build 58 · 26.11.2026 22:30
+- Schriftzug „SetlistCreator“ in der Schrift Over There (als Pfad) in der Kopfzeile
+- Fix: Abzeichen „Alpha“ auf Android wieder gelb
 
 v0.4.48 · Build 57 · 26.11.2026 22:10
 - Tipps, Support und Rechtstexte freigeschaltet
