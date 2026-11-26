@@ -1,9 +1,13 @@
-SetlistCreator · v0.4.47 · Build 56 · 2026-11-26 · Phase Alpha
+SetlistCreator · v0.4.48 · Build 57 · 2026-11-26 · Phase Alpha
 
 Changelog · SetlistCreator
 Neueste Version zuerst. Zeiten = Schweizer Zeit
 
 ** ALPHA **
+
+v0.4.48 · Build 57 · 26.11.2026 22:10
+- Tipps, Support und Rechtstexte freigeschaltet
+- Schrift Inter im Projekt (fonts/Inter-*.woff2, Lizenz SIL OFL 1.1 in fonts/Inter-LICENSE.txt); kein Google-Fonts-Aufruf mehr
 
 v0.4.47 · Build 56 · 26.11.2026 22:15
 - Knopffarben nach Aufgabe: Gelb Hauptaktionen, Blau Tipps/Support/Aktualisieren/Changelog, Violett PDF und Export, Grün Testdaten, Rot Löschen, neutral Abmelden/Zurück/Abbrechen
