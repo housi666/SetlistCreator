@@ -1,9 +1,12 @@
-SetlistCreator · v0.4.52 · Build 61 · 2026-11-27 · Phase Alpha
+SetlistCreator · v0.4.53 · Build 62 · 2026-11-27 · Phase Alpha
 
 Changelog · SetlistCreator
 Neueste Version zuerst. Zeiten = Schweizer Zeit
 
 ** ALPHA **
+
+v0.4.53 · Build 62 · 27.11.2026 23:40
+- Schriftzug „SetlistCreator“ bunt: Farbverlauf von links nach rechts in den Knopffarben (#e8a33d, #22b04a, #1ba3a8, #2a6bff, #9040f0, #ff2d78)
 
 v0.4.52 · Build 61 · 27.11.2026 21:30
 - Neues App-Icon „SC“ (Schrift Over There, Bernstein auf #15161c, Vorlage Icons.svg): icon.svg, icon-32/180/192/512.png
