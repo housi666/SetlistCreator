@@ -1,9 +1,12 @@
-SetlistCreator · v0.4.51 · Build 60 · 2026-11-26 · Phase Alpha
+SetlistCreator · v0.4.52 · Build 61 · 2026-11-27 · Phase Alpha
 
 Changelog · SetlistCreator
 Neueste Version zuerst. Zeiten = Schweizer Zeit
 
 ** ALPHA **
+
+v0.4.52 · Build 61 · 27.11.2026 21:30
+- Neues App-Icon „SC“ (Schrift Over There, Bernstein auf #15161c, Vorlage Icons.svg): icon.svg, icon-32/180/192/512.png
 
 v0.4.51 · Build 60 · 26.11.2026 22:40
 - Desktop: PDF-Designer über die ganze Fensterbreite, Vorschau höher (Einpassen bis 80 % der Fensterhöhe); Android unverändert
