@@ -1,9 +1,12 @@
-SetlistCreator · v0.4.54 · Build 63 · 2026-11-27 · Phase Alpha
+SetlistCreator · v0.4.55 · Build 64 · 2026-11-27 · Phase Alpha
 
 Changelog · SetlistCreator
 Neueste Version zuerst. Zeiten = Schweizer Zeit
 
 ** ALPHA **
+
+v0.4.55 · Build 64 · 27.11.2026 23:50
+- Android: Beim Anmelden Startbildschirm mit allen Bereichen zugeklappt (vorher blieb die letzte Seite, offene Setlist-Details, Suche und PDF-Bereiche erhalten); Desktop unverändert
 
 v0.4.54 · Build 63 · 27.11.2026 23:42
 - App-Icon „SC“ bunt im Farbverlauf des Schriftzugs, Schein neutral grau (icon.svg, icon-32/180/192/512.png)
